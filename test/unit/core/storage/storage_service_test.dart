@@ -14,7 +14,9 @@ void main() {
       storageService = await StorageService.getInstance();
     });
 
-    tearDown(() {
+    tearDown(() async {
+      // Clear all data from SharedPreferences
+      await storageService.clearAllData();
       TestConfig.resetServiceLocator();
     });
 

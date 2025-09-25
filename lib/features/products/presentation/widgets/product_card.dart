@@ -165,6 +165,15 @@ class _ProductCardState extends State<ProductCard>
                                     fontSize: 12,
                                   ),
                                 ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  widget.product.category,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colorScheme.primary,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 11,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
