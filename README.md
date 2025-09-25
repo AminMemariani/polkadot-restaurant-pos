@@ -3,10 +3,10 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.8.1+-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Dart](https://img.shields.io/badge/Dart-3.8.1+-0175C2?logo=dart&logoColor=white)](https://dart.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![CI/CD Pipeline](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml/badge.svg)](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml)
+[![CI/CD Pipeline](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml)
+[![Code Quality](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/quality.yml)
 [![Test Coverage](https://codecov.io/gh/cyberhonig/restaurant_pos_app/branch/main/graph/badge.svg)](https://codecov.io/gh/cyberhonig/restaurant_pos_app)
-[![Code Quality](https://img.shields.io/badge/Code%20Quality-A-brightgreen)](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/Tests-99%20Passing-brightgreen)](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/Tests-99%20Passing-brightgreen.svg)](https://github.com/cyberhonig/restaurant_pos_app/actions)
 
 A modern restaurant Point of Sale (POS) application built with Flutter, featuring a scalable architecture, blockchain payment integration, comprehensive analytics, and multi-language support.
 
