@@ -5,6 +5,7 @@ import '../../features/products/presentation/providers/products_provider.dart';
 import '../../features/receipts/presentation/providers/receipts_provider.dart';
 import '../../features/payments/presentation/providers/payments_provider.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
+import '../../features/analytics/presentation/providers/analytics_provider.dart';
 import '../../shared/services/theme_service.dart';
 import 'injection_container.dart';
 
@@ -26,6 +27,9 @@ class AppProviders {
     ),
     ChangeNotifierProvider<SettingsProvider>(
       create: (_) => sl<SettingsProvider>(),
+    ),
+    ChangeNotifierProvider<AnalyticsProvider>(
+      create: (_) => sl<AnalyticsProvider>(),
     ),
   ];
 

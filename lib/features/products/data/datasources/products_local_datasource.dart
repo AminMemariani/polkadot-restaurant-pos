@@ -1,6 +1,4 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../../core/storage/storage_service.dart';
 import '../models/product_model.dart';
 
 /// Abstract local data source for products
@@ -17,20 +15,14 @@ abstract class ProductsLocalDataSource {
 
 /// Implementation of local data source for products
 class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
-  final SharedPreferences sharedPreferences;
-  static const String _productsKey = 'cached_products';
+  final StorageService storageService;
 
-  ProductsLocalDataSourceImpl(this.sharedPreferences);
+  ProductsLocalDataSourceImpl(this.storageService);
 
   @override
   Future<List<ProductModel>> getProducts() async {
-    final productsJson = sharedPreferences.getStringList(_productsKey) ?? [];
-    return productsJson
-        .map(
-          (json) =>
-              ProductModel.fromJson(jsonDecode(json) as Map<String, dynamic>),
-        )
-        .toList();
+    final productsData = await storageService.loadProducts();
+    return productsData.map((json) => ProductModel.fromJson(json)).toList();
   }
 
   @override
@@ -46,7 +38,9 @@ class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
   @override
   Future<List<ProductModel>> getProductsByCategory(String category) async {
     final products = await getProducts();
-    return products.where((product) => product.category == category).toList();
+    return products
+        .where((product) => product.name.contains(category))
+        .toList();
   }
 
   @override
@@ -82,16 +76,14 @@ class ProductsLocalDataSourceImpl implements ProductsLocalDataSource {
         .where(
           (product) =>
               product.name.toLowerCase().contains(query.toLowerCase()) ||
-              product.description.toLowerCase().contains(query.toLowerCase()),
+              product.id.toLowerCase().contains(query.toLowerCase()),
         )
         .toList();
   }
 
   @override
   Future<void> cacheProducts(List<ProductModel> products) async {
-    final productsJson = products
-        .map((product) => jsonEncode(product.toJson()))
-        .toList();
-    await sharedPreferences.setStringList(_productsKey, productsJson);
+    final productsData = products.map((product) => product.toJson()).toList();
+    await storageService.saveProducts(productsData);
   }
 }

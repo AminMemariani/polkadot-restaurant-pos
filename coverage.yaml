@@ -1,0 +1,123 @@
+# Coverage configuration for the Restaurant POS App
+
+# Global settings
+coverage:
+  # Minimum coverage percentage required
+  minimum_coverage: 80
+  
+  # Coverage thresholds for different test types
+  thresholds:
+    unit_tests: 85
+    widget_tests: 75
+    integration_tests: 70
+
+# Test configuration
+test:
+  # Test directories to include
+  include:
+    - test/unit/
+    - test/widget/
+    - integration_test/
+  
+  # Test directories to exclude
+  exclude:
+    - test/unit/core/network/
+    - test/unit/core/blockchain/
+    - test/widget/features/analytics/
+  
+  # Test patterns
+  patterns:
+    unit: "test/unit/**/*_test.dart"
+    widget: "test/widget/**/*_test.dart"
+    integration: "integration_test/**/*_test.dart"
+
+# Coverage reporting
+reporting:
+  # Generate HTML report
+  html: true
+  
+  # Generate LCOV report
+  lcov: true
+  
+  # Generate JSON report
+  json: true
+  
+  # Coverage output directory
+  output_directory: "coverage"
+  
+  # HTML report directory
+  html_directory: "coverage/html"
+  
+  # LCOV file path
+  lcov_file: "coverage/lcov.info"
+  
+  # JSON file path
+  json_file: "coverage/coverage.json"
+
+# Coverage exclusions
+exclude:
+  # Generated files
+  - "**/*.g.dart"
+  - "**/*.freezed.dart"
+  - "**/*.mocks.dart"
+  
+  # Test files
+  - "test/**"
+  - "integration_test/**"
+  
+  # Build files
+  - "build/**"
+  - "coverage/**"
+  
+  # Documentation
+  - "doc/**"
+  - "docs/**"
+  
+  # Configuration files
+  - "*.yaml"
+  - "*.yml"
+  - "*.json"
+  - "*.md"
+  
+  # IDE files
+  - ".vscode/**"
+  - ".idea/**"
+  
+  # OS files
+  - ".DS_Store"
+  - "Thumbs.db"
+
+# Coverage goals
+goals:
+  # Overall coverage goal
+  overall: 80
+  
+  # Feature-specific goals
+  features:
+    products: 85
+    receipts: 85
+    payments: 80
+    analytics: 75
+    settings: 80
+  
+  # Core components goals
+  core:
+    storage: 90
+    network: 85
+    business: 85
+    blockchain: 70
+    features: 80
+
+# Quality gates
+quality_gates:
+  # Fail build if coverage is below threshold
+  fail_below_threshold: true
+  
+  # Coverage trend analysis
+  trend_analysis: true
+  
+  # Coverage regression detection
+  regression_detection: true
+  
+  # Minimum coverage improvement
+  minimum_improvement: 1.0

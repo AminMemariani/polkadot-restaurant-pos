@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/custom_button.dart';
 import '../providers/products_provider.dart';
@@ -30,38 +31,149 @@ class _ProductsPageState extends State<ProductsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text(
           'Products',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w700,
             color: colorScheme.onSurface,
+            letterSpacing: -0.5,
           ),
         ),
         backgroundColor: colorScheme.surface,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         actions: [
-          // View Toggle Button
-          IconButton(
-            icon: Icon(
-              _isGridView ? Icons.view_list : Icons.grid_view,
-              color: colorScheme.onSurface,
+          // Go to Receipt Page
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: Material(
+              elevation: 2,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => context.go('/receipt'),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.receipt_long_rounded,
+                    color: colorScheme.onPrimaryContainer,
+                    size: 20,
+                  ),
+                ),
+              ),
             ),
-            onPressed: () {
-              setState(() {
-                _isGridView = !_isGridView;
-              });
-            },
-            tooltip: _isGridView ? 'List View' : 'Grid View',
+          ),
+          // View Toggle Button
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: Material(
+              elevation: 2,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _isGridView = !_isGridView;
+                  });
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    _isGridView
+                        ? Icons.view_list_rounded
+                        : Icons.grid_view_rounded,
+                    color: colorScheme.onSecondaryContainer,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
           // Refresh Button
-          IconButton(
-            icon: Icon(Icons.refresh, color: colorScheme.onSurface),
-            onPressed: () => context.read<ProductsProvider>().loadProducts(),
-            tooltip: 'Refresh',
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: Material(
+              elevation: 2,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => context.read<ProductsProvider>().loadProducts(),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.tertiaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.refresh_rounded,
+                    color: colorScheme.onTertiaryContainer,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Analytics Button
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            child: Material(
+              elevation: 2,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => context.go('/analytics'),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.analytics_rounded,
+                    color: colorScheme.onSecondaryContainer,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Settings Button
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: Material(
+              elevation: 2,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => context.go('/settings'),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.settings_rounded,
+                    color: colorScheme.onSurfaceVariant,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -217,14 +329,13 @@ class _ProductsPageState extends State<ProductsPage> {
                 // Products List/Grid
                 if (_isGridView) {
                   return GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 0.8,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                        ),
+                    padding: EdgeInsets.all(isTablet ? 24 : 16),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: isTablet ? 4 : 2,
+                      childAspectRatio: isTablet ? 0.9 : 0.8,
+                      crossAxisSpacing: isTablet ? 20 : 12,
+                      mainAxisSpacing: isTablet ? 20 : 12,
+                    ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
@@ -239,7 +350,7 @@ class _ProductsPageState extends State<ProductsPage> {
                   );
                 } else {
                   return ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(isTablet ? 24 : 16),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
@@ -261,12 +372,34 @@ class _ProductsPageState extends State<ProductsPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showProductForm(context, null),
-        icon: const Icon(Icons.add),
-        label: const Text('Add Product'),
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
+      floatingActionButton: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: FloatingActionButton.extended(
+          onPressed: () => _showProductForm(context, null),
+          icon: const Icon(Icons.add_rounded),
+          label: Text(
+            'Add Product',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onPrimary,
+            ),
+          ),
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
       ),
     );
   }
@@ -319,6 +452,11 @@ class _ProductsPageState extends State<ProductsPage> {
             content: Text('${product.name} added to order'),
             backgroundColor: Theme.of(context).colorScheme.primary,
             duration: const Duration(seconds: 2),
+            action: SnackBarAction(
+              label: 'View',
+              textColor: Theme.of(context).colorScheme.onPrimary,
+              onPressed: () => context.go('/receipt'),
+            ),
           ),
         );
       }

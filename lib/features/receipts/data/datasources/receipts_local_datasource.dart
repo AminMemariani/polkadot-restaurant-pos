@@ -1,5 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../../../core/storage/storage_service.dart';
 import '../models/receipt_model.dart';
 
 abstract class ReceiptsLocalDataSource {
@@ -12,42 +11,55 @@ abstract class ReceiptsLocalDataSource {
 }
 
 class ReceiptsLocalDataSourceImpl implements ReceiptsLocalDataSource {
-  final SharedPreferences sharedPreferences;
-  static const String _receiptsKey = 'cached_receipts';
+  final StorageService storageService;
 
-  ReceiptsLocalDataSourceImpl(this.sharedPreferences);
+  ReceiptsLocalDataSourceImpl(this.storageService);
 
   @override
   Future<List<ReceiptModel>> getReceipts() async {
-    // Implementation placeholder
-    return [];
+    final receiptsData = await storageService.loadReceipts();
+    return receiptsData.map((json) => ReceiptModel.fromJson(json)).toList();
   }
 
   @override
   Future<ReceiptModel?> getReceiptById(String id) async {
-    // Implementation placeholder
-    return null;
+    final receipts = await getReceipts();
+    try {
+      return receipts.firstWhere((receipt) => receipt.id == id);
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
   Future<ReceiptModel> createReceipt(ReceiptModel receipt) async {
-    // Implementation placeholder
+    final receipts = await getReceipts();
+    receipts.add(receipt);
+    await cacheReceipts(receipts);
     return receipt;
   }
 
   @override
   Future<ReceiptModel> updateReceipt(ReceiptModel receipt) async {
-    // Implementation placeholder
+    final receipts = await getReceipts();
+    final index = receipts.indexWhere((r) => r.id == receipt.id);
+    if (index != -1) {
+      receipts[index] = receipt;
+      await cacheReceipts(receipts);
+    }
     return receipt;
   }
 
   @override
   Future<void> deleteReceipt(String id) async {
-    // Implementation placeholder
+    final receipts = await getReceipts();
+    receipts.removeWhere((receipt) => receipt.id == id);
+    await cacheReceipts(receipts);
   }
 
   @override
   Future<void> cacheReceipts(List<ReceiptModel> receipts) async {
-    // Implementation placeholder
+    final receiptsData = receipts.map((receipt) => receipt.toJson()).toList();
+    await storageService.saveReceipts(receiptsData);
   }
 }

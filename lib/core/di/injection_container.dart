@@ -2,6 +2,12 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
+import '../storage/storage_service.dart';
+import '../blockchain/blockchain_service.dart';
+import '../analytics/analytics_service.dart';
+import '../business/business_logic_service.dart';
+import '../features/feature_manager.dart';
+
 import '../../features/products/data/datasources/products_local_datasource.dart';
 import '../../features/products/data/datasources/products_remote_datasource.dart';
 import '../../features/products/data/repositories/products_repository_impl.dart';
@@ -29,12 +35,8 @@ import '../../features/payments/domain/usecases/process_payment.dart';
 import '../../features/payments/domain/usecases/get_payment_methods.dart';
 import '../../features/payments/presentation/providers/payments_provider.dart';
 
-import '../../features/settings/data/datasources/settings_local_datasource.dart';
-import '../../features/settings/data/repositories/settings_repository_impl.dart';
-import '../../features/settings/domain/repositories/settings_repository.dart';
-import '../../features/settings/domain/usecases/get_settings.dart';
-import '../../features/settings/domain/usecases/update_settings.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
+import '../../features/analytics/presentation/providers/analytics_provider.dart';
 
 import '../network/network_info.dart';
 import '../network/api_client.dart';
@@ -52,6 +54,15 @@ Future<void> init() async {
   // Core
   sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
   sl.registerLazySingleton(() => ApiClient(sl()));
+  sl.registerLazySingletonAsync<StorageService>(
+    () => StorageService.getInstance(),
+  );
+  sl.registerLazySingleton<BlockchainService>(() => MockBlockchainService());
+  sl.registerLazySingleton<AnalyticsService>(() => MockAnalyticsService());
+  sl.registerLazySingleton<BusinessLogicService>(
+    () => MockBusinessLogicService(),
+  );
+  sl.registerLazySingleton<FeatureManager>(() => MockFeatureManager());
 
   // Features - Products
   _initProducts();
@@ -64,12 +75,15 @@ Future<void> init() async {
 
   // Features - Settings
   _initSettings();
+
+  // Features - Analytics
+  _initAnalytics();
 }
 
 void _initProducts() {
   // Data sources
   sl.registerLazySingleton<ProductsLocalDataSource>(
-    () => ProductsLocalDataSourceImpl(sl()),
+    () => ProductsLocalDataSourceImpl(sl<StorageService>()),
   );
   sl.registerLazySingleton<ProductsRemoteDataSource>(
     () => ProductsRemoteDataSourceImpl(sl()),
@@ -104,7 +118,7 @@ void _initProducts() {
 void _initReceipts() {
   // Data sources
   sl.registerLazySingleton<ReceiptsLocalDataSource>(
-    () => ReceiptsLocalDataSourceImpl(sl()),
+    () => ReceiptsLocalDataSourceImpl(sl<StorageService>()),
   );
   sl.registerLazySingleton<ReceiptsRemoteDataSource>(
     () => ReceiptsRemoteDataSourceImpl(sl()),
@@ -130,6 +144,7 @@ void _initReceipts() {
       getReceipts: sl(),
       createReceipt: sl(),
       updateReceipt: sl(),
+      settingsProvider: sl<SettingsProvider>(),
     ),
   );
 }
@@ -163,22 +178,15 @@ void _initPayments() {
 }
 
 void _initSettings() {
-  // Data sources
-  sl.registerLazySingleton<SettingsLocalDataSource>(
-    () => SettingsLocalDataSourceImpl(sl()),
-  );
-
-  // Repository
-  sl.registerLazySingleton<SettingsRepository>(
-    () => SettingsRepositoryImpl(sl()),
-  );
-
-  // Use cases
-  sl.registerLazySingleton(() => GetSettings(sl()));
-  sl.registerLazySingleton(() => UpdateSettings(sl()));
-
   // Provider
   sl.registerFactory(
-    () => SettingsProvider(getSettings: sl(), updateSettings: sl()),
+    () => SettingsProvider(storageService: sl<StorageService>()),
+  );
+}
+
+void _initAnalytics() {
+  // Provider
+  sl.registerFactory(
+    () => AnalyticsProvider(analyticsService: sl<AnalyticsService>()),
   );
 }

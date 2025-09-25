@@ -35,20 +35,14 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
     final colorScheme = theme.colorScheme;
 
     // Define payment steps for method selection
-    final steps = [
-      'Select Payment Method',
-      'Process Payment',
-      'Confirmation',
-    ];
+    final steps = ['Select Payment Method', 'Process Payment', 'Confirmation'];
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-        ),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,11 +56,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
           ),
           const SizedBox(height: 8),
           StepBar(
-            steps: steps.map((step) => StepBarStep(
-              title: step,
-              isCompleted: false,
-              isActive: steps.indexOf(step) == 0,
-            )).toList(),
+            steps: steps,
             currentStep: 0, // Currently on step 1 (Select Payment Method)
             completedColor: colorScheme.primary,
             activeColor: colorScheme.primary.withOpacity(0.3),

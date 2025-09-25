@@ -93,50 +93,73 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text(
-          'Payment',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
+          'Payment Confirmation',
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w700,
             color: colorScheme.onSurface,
+            letterSpacing: -0.5,
           ),
         ),
         backgroundColor: colorScheme.surface,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.close, color: colorScheme.onSurface),
-          onPressed: () {
-            context.read<PaymentsProvider>().cancelPayment();
-            Navigator.of(context).pop();
-          },
+        surfaceTintColor: Colors.transparent,
+        leading: Container(
+          margin: const EdgeInsets.only(left: 8),
+          child: Material(
+            elevation: 2,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () {
+                context.read<PaymentsProvider>().cancelPayment();
+                Navigator.of(context).pop();
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.close_rounded,
+                  color: colorScheme.onErrorContainer,
+                  size: 20,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
       body: Consumer<PaymentsProvider>(
         builder: (context, provider, child) {
           return Padding(
-            padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  // Amount Display
-                  _buildAmountSection(context, provider),
+            padding: EdgeInsets.all(isTablet ? 32 : 24),
+            child: Column(
+              children: [
+                // Amount Display
+                _buildAmountSection(context, provider),
 
-                  const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                  // Payment Progress Steps
-                  _buildPaymentSteps(context, provider),
+                // Payment Progress Steps
+                _buildPaymentSteps(context, provider),
 
-                  const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                  // Payment Status Section
-                  Expanded(child: _buildPaymentStatusSection(context, provider)),
+                // Payment Status Section
+                Expanded(child: _buildPaymentStatusSection(context, provider)),
 
-                  // Action Buttons
-                  _buildActionButtons(context, provider),
-                ],
-              ),
+                // Action Buttons
+                _buildActionButtons(context, provider),
+              ],
+            ),
           );
         },
       ),
@@ -146,15 +169,36 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
   Widget _buildAmountSection(BuildContext context, PaymentsProvider provider) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.primary.withOpacity(0.2)),
-      ),
+    return Hero(
+      tag: 'payment_amount_${widget.amount}',
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(isTablet ? 32 : 24),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              colorScheme.primaryContainer.withOpacity(0.4),
+              colorScheme.primaryContainer.withOpacity(0.2),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: colorScheme.primary.withOpacity(0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
       child: Column(
         children: [
           Text(
@@ -162,15 +206,17 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             style: theme.textTheme.bodyLarge?.copyWith(
               color: colorScheme.onSurface.withOpacity(0.7),
               fontWeight: FontWeight.w500,
+              fontSize: isTablet ? 18 : 16,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             '\$${widget.amount.toStringAsFixed(2)}',
             style: theme.textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w900,
               color: colorScheme.primary,
-              fontSize: 36,
+              fontSize: isTablet ? 48 : 36,
+              letterSpacing: -1.0,
             ),
           ),
           if (widget.network != null) ...[
@@ -231,9 +277,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-        ),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,11 +291,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
           ),
           const SizedBox(height: 16),
           StepBar(
-            steps: steps.map((step) => StepBarStep(
-              title: step,
-              isCompleted: steps.indexOf(step) < currentStep,
-              isActive: steps.indexOf(step) == currentStep,
-            )).toList(),
+            steps: steps,
             currentStep: currentStep,
             completedColor: colorScheme.primary,
             activeColor: colorScheme.primary.withOpacity(0.3),
@@ -291,25 +331,33 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         AnimatedBuilder(
           animation: _pulseAnimation,
           builder: (context, child) {
+            final screenWidth = MediaQuery.of(context).size.width;
+            final isTablet = screenWidth > 768;
+            
             return Transform.scale(
               scale: _pulseAnimation.value,
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: colorScheme.shadow.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                      color: colorScheme.shadow.withOpacity(0.15),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                    BoxShadow(
+                      color: colorScheme.primary.withOpacity(0.1),
+                      blurRadius: 40,
+                      offset: const Offset(0, 16),
                     ),
                   ],
                 ),
                 child: QrImageView(
                   data: provider.paymentId ?? '',
                   version: QrVersions.auto,
-                  size: 200.0,
+                  size: isTablet ? 240.0 : 200.0,
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
                 ),

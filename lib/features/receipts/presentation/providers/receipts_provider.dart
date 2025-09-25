@@ -6,17 +6,20 @@ import '../../domain/usecases/create_receipt.dart';
 import '../../domain/usecases/get_receipts.dart';
 import '../../domain/usecases/update_receipt.dart';
 import '../../../products/domain/entities/product.dart';
+import '../../../settings/presentation/providers/settings_provider.dart';
 
 /// Provider for managing receipts state and current order
 class ReceiptsProvider extends ChangeNotifier {
   final GetReceipts getReceipts;
   final CreateReceipt createReceipt;
   final UpdateReceipt updateReceipt;
+  final SettingsProvider? settingsProvider;
 
   ReceiptsProvider({
     required this.getReceipts,
     required this.createReceipt,
     required this.updateReceipt,
+    this.settingsProvider,
   });
 
   List<Receipt> _receipts = [];
@@ -24,17 +27,13 @@ class ReceiptsProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
-  // Tax and fee rates (configurable)
-  double _taxRate = 0.08; // 8% tax
-  double _serviceFeeRate = 0.05; // 5% service fee
-
   // Getters
   List<Receipt> get receipts => _receipts;
   List<ReceiptItem> get currentOrderItems => _currentOrderItems;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  double get taxRate => _taxRate;
-  double get serviceFeeRate => _serviceFeeRate;
+  double get taxRate => settingsProvider?.taxRate ?? 0.08;
+  double get serviceFeeRate => settingsProvider?.serviceFeeRate ?? 0.05;
 
   // Calculated values
   double get subtotal {
@@ -42,11 +41,11 @@ class ReceiptsProvider extends ChangeNotifier {
   }
 
   double get tax {
-    return subtotal * _taxRate;
+    return subtotal * taxRate;
   }
 
   double get serviceFee {
-    return subtotal * _serviceFeeRate;
+    return subtotal * serviceFeeRate;
   }
 
   double get total {
@@ -118,18 +117,6 @@ class ReceiptsProvider extends ChangeNotifier {
   /// Clear the current order
   void clearCurrentOrder() {
     _currentOrderItems.clear();
-    notifyListeners();
-  }
-
-  /// Set tax rate
-  void setTaxRate(double rate) {
-    _taxRate = rate.clamp(0.0, 1.0); // Clamp between 0% and 100%
-    notifyListeners();
-  }
-
-  /// Set service fee rate
-  void setServiceFeeRate(double rate) {
-    _serviceFeeRate = rate.clamp(0.0, 1.0); // Clamp between 0% and 100%
     notifyListeners();
   }
 

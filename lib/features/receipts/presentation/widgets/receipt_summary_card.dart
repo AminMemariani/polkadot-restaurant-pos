@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 import '../../../payments/presentation/widgets/payment_method_dialog.dart';
 
-class ReceiptSummaryCard extends StatelessWidget {
+class ReceiptSummaryCard extends StatefulWidget {
   final double subtotal;
   final double tax;
   final double serviceFee;
@@ -28,250 +30,447 @@ class ReceiptSummaryCard extends StatelessWidget {
   });
 
   @override
+  State<ReceiptSummaryCard> createState() => _ReceiptSummaryCardState();
+}
+
+class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
 
-    return Container(
-      margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Header
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withOpacity(0.3),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(16),
-                topRight: Radius.circular(16),
+    return AnimatedBuilder(
+      animation: _animationController,
+      builder: (context, child) {
+        return FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: Container(
+              margin: EdgeInsets.symmetric(
+                horizontal: isTablet ? 24 : 16,
+                vertical: 8,
               ),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.receipt_long, color: colorScheme.primary, size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  'Order Summary',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Summary Details
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Subtotal
-                _buildSummaryRow(
-                  context,
-                  'Subtotal',
-                  subtotal,
-                  isSubtotal: true,
-                ),
-                const SizedBox(height: 8),
-
-                // Tax
-                _buildSummaryRow(
-                  context,
-                  'Tax (${(taxRate * 100).toStringAsFixed(1)}%)',
-                  tax,
-                ),
-                const SizedBox(height: 8),
-
-                // Service Fee
-                _buildSummaryRow(
-                  context,
-                  'Service Fee (${(serviceFeeRate * 100).toStringAsFixed(1)}%)',
-                  serviceFee,
-                ),
-                const SizedBox(height: 12),
-
-                // Divider
-                Divider(
-                  color: colorScheme.outline.withOpacity(0.3),
-                  thickness: 1,
-                ),
-                const SizedBox(height: 12),
-
-                // Total
-                _buildSummaryRow(context, 'Total', total, isTotal: true),
-              ],
-            ),
-          ),
-
-          // Action Buttons
-          if (hasItems)
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Row(
-                children: [
-                  // Clear Button
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: isLoading ? null : onClear,
-                      icon: Icon(
-                        Icons.clear_all,
-                        size: 18,
-                        color: colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                      label: Text(
-                        'Clear',
-                        style: TextStyle(
-                          color: colorScheme.onSurface.withOpacity(0.7),
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: colorScheme.outline.withOpacity(0.5),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                      ),
+              child: Material(
+                elevation: 12,
+                shadowColor: colorScheme.shadow.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        colorScheme.surface,
+                        colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: colorScheme.outline.withOpacity(0.1),
+                      width: 1,
                     ),
                   ),
-                  const SizedBox(width: 12),
-
-                  // Checkout Button
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton.icon(
-                      onPressed: isLoading
-                          ? null
-                          : () => _showPaymentDialog(context),
-                      icon: isLoading
-                          ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  colorScheme.onPrimary,
+                  child: Padding(
+                    padding: EdgeInsets.all(isTablet ? 28 : 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    colorScheme.primary,
+                                    colorScheme.primary.withOpacity(0.8),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colorScheme.primary.withOpacity(0.3),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
-                            )
-                          : Icon(
-                              Icons.payment,
-                              size: 18,
-                              color: colorScheme.onPrimary,
+                              child: Icon(
+                                Icons.receipt_long_rounded,
+                                color: colorScheme.onPrimary,
+                                size: isTablet ? 28 : 24,
+                              ),
                             ),
-                      label: Text(
-                        isLoading ? 'Processing...' : 'Checkout',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onPrimary,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Order Summary',
+                                    style: theme.textTheme.headlineSmall
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color: colorScheme.onSurface,
+                                          letterSpacing: -0.5,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Review your order details',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+
+                        const SizedBox(height: 24),
+
+                        // Divider
+                        Container(
+                          height: 1,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                colorScheme.outline.withOpacity(0.3),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        elevation: 2,
-                      ),
+
+                        const SizedBox(height: 24),
+
+                        // Summary Rows
+                        _buildSummaryRow(
+                          context,
+                          'Subtotal',
+                          widget.subtotal,
+                          isTablet: isTablet,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildSummaryRow(
+                          context,
+                          'Tax (${(widget.taxRate * 100).toStringAsFixed(0)}%)',
+                          widget.tax,
+                          isTablet: isTablet,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildSummaryRow(
+                          context,
+                          'Service Fee (${(widget.serviceFeeRate * 100).toStringAsFixed(0)}%)',
+                          widget.serviceFee,
+                          isTablet: isTablet,
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Total Divider
+                        Container(
+                          height: 2,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                colorScheme.primary.withOpacity(0.3),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Total Row
+                        _buildTotalRow(context, widget.total, isTablet),
+
+                        const SizedBox(height: 24),
+
+                        // Action Buttons
+                        if (widget.hasItems)
+                          _buildActionButtons(context, isTablet)
+                        else
+                          _buildEmptyState(context, isTablet),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            )
-          else
-            Container(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.shopping_cart_outlined,
-                      size: 32,
-                      color: colorScheme.onSurface.withOpacity(0.5),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'No items in order',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.7),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Add products to start an order',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.5),
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildSummaryRow(
     BuildContext context,
     String label,
-    double amount, {
-    bool isSubtotal = false,
-    bool isTotal = false,
+    double value, {
+    required bool isTablet,
   }) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final NumberFormat currencyFormat = NumberFormat.currency(symbol: '\$');
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: isTotal ? FontWeight.w600 : FontWeight.w500,
-            color: isTotal
-                ? colorScheme.onSurface
-                : colorScheme.onSurface.withOpacity(0.8),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            color: colorScheme.onSurface.withOpacity(0.8),
+            fontWeight: FontWeight.w500,
+            fontSize: isTablet ? 16 : 14,
           ),
         ),
         Text(
-          '\$${amount.toStringAsFixed(2)}',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontWeight: isTotal ? FontWeight.w700 : FontWeight.w600,
-            color: isTotal ? colorScheme.primary : colorScheme.onSurface,
-            fontSize: isTotal ? 16 : 14,
+          currencyFormat.format(value),
+          style: theme.textTheme.bodyLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+            fontSize: isTablet ? 16 : 14,
           ),
         ),
       ],
     );
   }
 
+  Widget _buildTotalRow(BuildContext context, double total, bool isTablet) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final NumberFormat currencyFormat = NumberFormat.currency(symbol: '\$');
+
+    return Container(
+      padding: EdgeInsets.all(isTablet ? 20 : 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            colorScheme.primaryContainer.withOpacity(0.3),
+            colorScheme.primaryContainer.withOpacity(0.1),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Total',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: colorScheme.onSurface,
+              fontSize: isTablet ? 24 : 20,
+            ),
+          ),
+          Text(
+            currencyFormat.format(total),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.w900,
+              color: colorScheme.primary,
+              fontSize: isTablet ? 28 : 24,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context, bool isTablet) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      children: [
+        // Clear Order Button
+        Expanded(
+          flex: 1,
+          child: Container(
+            height: isTablet ? 56 : 48,
+            child: OutlinedButton.icon(
+              onPressed: widget.isLoading ? null : widget.onClear,
+              icon: Icon(
+                Icons.clear_all_rounded,
+                size: isTablet ? 20 : 18,
+                color: colorScheme.onSurface.withOpacity(0.7),
+              ),
+              label: Text(
+                'Clear',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface.withOpacity(0.7),
+                  fontSize: isTablet ? 16 : 14,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(
+                  color: colorScheme.outline.withOpacity(0.5),
+                  width: 1.5,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: EdgeInsets.symmetric(vertical: isTablet ? 16 : 12),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+
+        // Checkout Button
+        Expanded(
+          flex: 2,
+          child: Container(
+            height: isTablet ? 56 : 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ElevatedButton.icon(
+              onPressed: widget.isLoading
+                  ? null
+                  : () => _showPaymentDialog(context),
+              icon: widget.isLoading
+                  ? SizedBox(
+                      width: isTablet ? 20 : 16,
+                      height: isTablet ? 20 : 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          colorScheme.onPrimary,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      Icons.payment_rounded,
+                      size: isTablet ? 20 : 18,
+                      color: colorScheme.onPrimary,
+                    ),
+              label: Text(
+                widget.isLoading ? 'Processing...' : 'Checkout',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onPrimary,
+                  fontSize: isTablet ? 16 : 14,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: EdgeInsets.symmetric(vertical: isTablet ? 16 : 12),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, bool isTablet) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      alignment: Alignment.center,
+      padding: EdgeInsets.symmetric(vertical: isTablet ? 32 : 24),
+      child: Column(
+        children: [
+          Container(
+            width: isTablet ? 80 : 64,
+            height: isTablet ? 80 : 64,
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(isTablet ? 40 : 32),
+            ),
+            child: Icon(
+              Icons.shopping_cart_outlined,
+              color: colorScheme.onSurface.withOpacity(0.4),
+              size: isTablet ? 40 : 32,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No items in order',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.6),
+              fontSize: isTablet ? 18 : 16,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add products to start a new order',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.5),
+              fontSize: isTablet ? 14 : 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showPaymentDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => PaymentMethodDialog(amount: total),
+      builder: (context) => PaymentMethodDialog(amount: widget.total),
     );
   }
 }

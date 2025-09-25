@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 
 import '../providers/receipts_provider.dart';
 import '../widgets/swipe_to_delete_item.dart';
@@ -17,25 +18,46 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text(
           'Current Order',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.w700,
             color: colorScheme.onSurface,
+            letterSpacing: -0.5,
           ),
         ),
         backgroundColor: colorScheme.surface,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         actions: [
-          // Settings Button for Tax/Fee Rates
-          IconButton(
-            icon: Icon(Icons.settings, color: colorScheme.onSurface),
-            onPressed: () => _showSettingsDialog(context),
-            tooltip: 'Tax & Fee Settings',
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: Material(
+              elevation: 2,
+              borderRadius: BorderRadius.circular(12),
+              child: InkWell(
+                onTap: () => context.go('/'),
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.home_rounded,
+                    color: colorScheme.onPrimaryContainer,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -64,7 +86,10 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                 serviceFeeRate: provider.serviceFeeRate,
                 hasItems: provider.hasItems,
                 isLoading: provider.isLoading,
-                onCheckout: () => _handleCheckout(context, provider),
+                onCheckout: () {
+                  final amount = provider.total.toStringAsFixed(2);
+                  context.go('/payment?amount=$amount');
+                },
                 onClear: () => _handleClearOrder(context, provider),
               ),
             ],
@@ -75,8 +100,14 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
   }
 
   Widget _buildOrderItemsList(BuildContext context, ReceiptsProvider provider) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 24 : 16,
+        vertical: 8,
+      ),
       itemCount: provider.currentOrderItems.length,
       itemBuilder: (context, index) {
         final item = provider.currentOrderItems[index];
@@ -176,7 +207,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
             ElevatedButton.icon(
               onPressed: () {
                 // Navigate to products page
-                // This would be handled by the parent navigation
+                context.go('/');
               },
               icon: Icon(Icons.add_shopping_cart, color: colorScheme.onPrimary),
               label: Text(
@@ -252,29 +283,6 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _handleCheckout(
-    BuildContext context,
-    ReceiptsProvider provider,
-  ) async {
-    final success = await provider.createReceiptFromCurrentOrder();
-
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Order completed successfully!'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ),
-      );
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(provider.error ?? 'Failed to complete order'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
-    }
   }
 
   Future<void> _handleClearOrder(
