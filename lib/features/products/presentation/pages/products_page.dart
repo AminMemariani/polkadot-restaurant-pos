@@ -232,7 +232,8 @@ class _ProductsPageState extends State<ProductsPage> {
                         product: product,
                         onEdit: () => _showProductForm(context, product),
                         onDelete: () => _deleteProduct(context, product),
-                        onAddToOrder: () => _addProductToOrder(context, product),
+                        onAddToOrder: () =>
+                            _addProductToOrder(context, product),
                       );
                     },
                   );
@@ -248,7 +249,8 @@ class _ProductsPageState extends State<ProductsPage> {
                           product: product,
                           onEdit: () => _showProductForm(context, product),
                           onDelete: () => _deleteProduct(context, product),
-                          onAddToOrder: () => _addProductToOrder(context, product),
+                          onAddToOrder: () =>
+                              _addProductToOrder(context, product),
                         ),
                       );
                     },
@@ -310,7 +312,7 @@ class _ProductsPageState extends State<ProductsPage> {
   void _addProductToOrder(BuildContext context, product) {
     try {
       context.read<ReceiptsProvider>().addProductToOrder(product);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

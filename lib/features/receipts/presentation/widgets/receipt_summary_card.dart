@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../payments/presentation/widgets/payment_method_dialog.dart';
 
 class ReceiptSummaryCard extends StatelessWidget {
   final double subtotal;
@@ -36,9 +37,7 @@ class ReceiptSummaryCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withOpacity(0.2),
-        ),
+        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withOpacity(0.1),
@@ -61,11 +60,7 @@ class ReceiptSummaryCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.receipt_long,
-                  color: colorScheme.primary,
-                  size: 24,
-                ),
+                Icon(Icons.receipt_long, color: colorScheme.primary, size: 24),
                 const SizedBox(width: 8),
                 Text(
                   'Order Summary',
@@ -116,12 +111,7 @@ class ReceiptSummaryCard extends StatelessWidget {
                 const SizedBox(height: 12),
 
                 // Total
-                _buildSummaryRow(
-                  context,
-                  'Total',
-                  total,
-                  isTotal: true,
-                ),
+                _buildSummaryRow(context, 'Total', total, isTotal: true),
               ],
             ),
           ),
@@ -164,7 +154,7 @@ class ReceiptSummaryCard extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: ElevatedButton.icon(
-                      onPressed: isLoading ? null : onCheckout,
+                      onPressed: isLoading ? null : () => _showPaymentDialog(context),
                       icon: isLoading
                           ? SizedBox(
                               width: 16,
@@ -273,6 +263,13 @@ class ReceiptSummaryCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _showPaymentDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => PaymentMethodDialog(amount: total),
     );
   }
 }

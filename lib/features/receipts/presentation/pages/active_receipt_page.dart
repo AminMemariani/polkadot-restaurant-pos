@@ -33,10 +33,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
         actions: [
           // Settings Button for Tax/Fee Rates
           IconButton(
-            icon: Icon(
-              Icons.settings,
-              color: colorScheme.onSurface,
-            ),
+            icon: Icon(Icons.settings, color: colorScheme.onSurface),
             onPressed: () => _showSettingsDialog(context),
             tooltip: 'Tax & Fee Settings',
           ),
@@ -110,20 +107,10 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
         children: [
           IconButton(
             onPressed: () {
-              provider.updateProductQuantity(
-                item.productId,
-                item.quantity - 1,
-              );
+              provider.updateProductQuantity(item.productId, item.quantity - 1);
             },
-            icon: Icon(
-              Icons.remove,
-              size: 16,
-              color: colorScheme.primary,
-            ),
-            constraints: const BoxConstraints(
-              minWidth: 32,
-              minHeight: 32,
-            ),
+            icon: Icon(Icons.remove, size: 16, color: colorScheme.primary),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             padding: EdgeInsets.zero,
           ),
           Text(
@@ -135,20 +122,10 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
           ),
           IconButton(
             onPressed: () {
-              provider.updateProductQuantity(
-                item.productId,
-                item.quantity + 1,
-              );
+              provider.updateProductQuantity(item.productId, item.quantity + 1);
             },
-            icon: Icon(
-              Icons.add,
-              size: 16,
-              color: colorScheme.primary,
-            ),
-            constraints: const BoxConstraints(
-              minWidth: 32,
-              minHeight: 32,
-            ),
+            icon: Icon(Icons.add, size: 16, color: colorScheme.primary),
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             padding: EdgeInsets.zero,
           ),
         ],
@@ -201,10 +178,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                 // Navigate to products page
                 // This would be handled by the parent navigation
               },
-              icon: Icon(
-                Icons.add_shopping_cart,
-                color: colorScheme.onPrimary,
-              ),
+              icon: Icon(Icons.add_shopping_cart, color: colorScheme.onPrimary),
               label: Text(
                 'Add Products',
                 style: TextStyle(
@@ -280,9 +254,12 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
     );
   }
 
-  Future<void> _handleCheckout(BuildContext context, ReceiptsProvider provider) async {
+  Future<void> _handleCheckout(
+    BuildContext context,
+    ReceiptsProvider provider,
+  ) async {
     final success = await provider.createReceiptFromCurrentOrder();
-    
+
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -300,12 +277,17 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
     }
   }
 
-  Future<void> _handleClearOrder(BuildContext context, ReceiptsProvider provider) async {
+  Future<void> _handleClearOrder(
+    BuildContext context,
+    ReceiptsProvider provider,
+  ) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear Order'),
-        content: const Text('Are you sure you want to clear all items from the current order?'),
+        content: const Text(
+          'Are you sure you want to clear all items from the current order?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -326,9 +308,9 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
     if (confirmed == true) {
       provider.clearCurrentOrder();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Order cleared')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Order cleared')));
       }
     }
   }
@@ -355,7 +337,9 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                 labelText: 'Tax Rate (%)',
                 suffixText: '%',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -364,7 +348,9 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                 labelText: 'Service Fee Rate (%)',
                 suffixText: '%',
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
           ],
         ),
@@ -376,11 +362,12 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
           ElevatedButton(
             onPressed: () {
               final taxRate = double.tryParse(taxController.text) ?? 0.0;
-              final serviceFeeRate = double.tryParse(serviceFeeController.text) ?? 0.0;
-              
+              final serviceFeeRate =
+                  double.tryParse(serviceFeeController.text) ?? 0.0;
+
               provider.setTaxRate(taxRate / 100);
               provider.setServiceFeeRate(serviceFeeRate / 100);
-              
+
               Navigator.of(context).pop();
             },
             child: const Text('Save'),

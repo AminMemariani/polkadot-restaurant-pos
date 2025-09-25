@@ -94,7 +94,8 @@ class ProductCard extends StatelessWidget {
                         ),
                         tooltip: 'Add to Order',
                         style: IconButton.styleFrom(
-                          backgroundColor: colorScheme.primaryContainer.withOpacity(0.3),
+                          backgroundColor: colorScheme.primaryContainer
+                              .withOpacity(0.3),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -266,7 +267,8 @@ class ProductGridCard extends StatelessWidget {
                         ),
                         tooltip: 'Add to Order',
                         style: IconButton.styleFrom(
-                          backgroundColor: colorScheme.primaryContainer.withOpacity(0.3),
+                          backgroundColor: colorScheme.primaryContainer
+                              .withOpacity(0.3),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
