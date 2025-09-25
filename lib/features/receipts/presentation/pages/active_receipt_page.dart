@@ -18,8 +18,6 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -67,21 +65,23 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
             return _buildErrorState(context, provider);
           }
 
-          return Column(
-            children: [
-              // Order Items List
-              Expanded(
-                child: provider.hasItems
-                    ? _buildOrderItemsList(context, provider)
-                    : _buildEmptyState(context),
-              ),
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                // Order Items List
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: provider.hasItems
+                      ? _buildOrderItemsList(context, provider)
+                      : _buildEmptyState(context),
+                ),
 
-              // Receipt Summary Card
-              ReceiptSummaryCard(
-                subtotal: provider.subtotal,
-                tax: provider.tax,
-                serviceFee: provider.serviceFee,
-                total: provider.total,
+                // Receipt Summary Card
+                ReceiptSummaryCard(
+                  subtotal: provider.subtotal,
+                  tax: provider.tax,
+                  serviceFee: provider.serviceFee,
+                  total: provider.total,
                 taxRate: provider.taxRate,
                 serviceFeeRate: provider.serviceFeeRate,
                 hasItems: provider.hasItems,
@@ -93,6 +93,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                 onClear: () => _handleClearOrder(context, provider),
               ),
             ],
+            ),
           );
         },
       ),
@@ -323,65 +324,4 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
     }
   }
 
-  Future<void> _showSettingsDialog(BuildContext context) async {
-    final provider = context.read<ReceiptsProvider>();
-    final taxController = TextEditingController(
-      text: (provider.taxRate * 100).toStringAsFixed(1),
-    );
-    final serviceFeeController = TextEditingController(
-      text: (provider.serviceFeeRate * 100).toStringAsFixed(1),
-    );
-
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Tax & Fee Settings'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: taxController,
-              decoration: const InputDecoration(
-                labelText: 'Tax Rate (%)',
-                suffixText: '%',
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: serviceFeeController,
-              decoration: const InputDecoration(
-                labelText: 'Service Fee Rate (%)',
-                suffixText: '%',
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final taxRate = double.tryParse(taxController.text) ?? 0.0;
-              final serviceFeeRate =
-                  double.tryParse(serviceFeeController.text) ?? 0.0;
-
-              provider.setTaxRate(taxRate / 100);
-              provider.setServiceFeeRate(serviceFeeRate / 100);
-
-              Navigator.of(context).pop();
-            },
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-  }
 }

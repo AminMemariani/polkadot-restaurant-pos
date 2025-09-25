@@ -58,7 +58,7 @@ class PaymentsProvider extends ChangeNotifier {
   }
 
   /// Start a new payment process
-  Future<String> startPayment(double amount) async {
+  Future<String> startPayment(double amount, {String? receiptId}) async {
     _setLoading(true);
     _clearError();
 
@@ -72,6 +72,9 @@ class PaymentsProvider extends ChangeNotifier {
       id: _paymentId!,
       status: 'pending',
       amount: amount,
+      receiptId: receiptId ?? '',
+      method: 'blockchain',
+      createdAt: DateTime.now(),
     );
 
     notifyListeners();

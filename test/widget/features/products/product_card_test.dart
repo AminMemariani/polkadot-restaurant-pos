@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:restaurant_pos_app/features/products/presentation/widgets/product_card.dart';
 import 'package:restaurant_pos_app/features/products/domain/entities/product.dart';
-import '../../test_config.dart';
+import '../../../test_config.dart';
 
 void main() {
   group('ProductCard Widget Tests', () {
@@ -17,6 +17,8 @@ void main() {
         description: 'A test product for widget testing',
         category: 'Test Category',
         isAvailable: true,
+        createdAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
+        updatedAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
       );
     });
 
@@ -24,7 +26,6 @@ void main() {
       WidgetTester tester,
     ) async {
       // Arrange
-      bool onTapCalled = false;
 
       // Act
       await tester.pumpWidget(
@@ -33,7 +34,6 @@ void main() {
             body: ProductCard(
               product: testProduct,
               onTap: () {
-                onTapCalled = true;
               },
             ),
           ),
@@ -83,6 +83,8 @@ void main() {
         description: 'This product is not available',
         category: 'Test Category',
         isAvailable: false,
+        createdAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
+        updatedAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
       );
 
       // Act
@@ -127,6 +129,8 @@ void main() {
         description: 'A product with a very long name',
         category: 'Test Category',
         isAvailable: true,
+        createdAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
+        updatedAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
       );
 
       // Act
@@ -159,6 +163,8 @@ void main() {
         description: 'A very expensive product',
         category: 'Luxury',
         isAvailable: true,
+        createdAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
+        updatedAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
       );
 
       // Act

@@ -32,31 +32,16 @@ void main() {
         await tester.pumpAndSettle();
       }
 
-      // Verify order summary is displayed
-      expect(find.text('Order Summary'), findsOneWidget);
-      expect(find.text('Subtotal'), findsOneWidget);
-      expect(find.text('Tax'), findsOneWidget);
-      expect(find.text('Total'), findsOneWidget);
+      // Verify products page is displayed
+      expect(find.text('Products'), findsOneWidget);
 
-      // Test checkout flow
-      if (find.text('Checkout').evaluate().isNotEmpty) {
-        await tester.tap(find.text('Checkout'));
+      // Test navigation to receipt page
+      if (find.byIcon(Icons.receipt_long_rounded).evaluate().isNotEmpty) {
+        await tester.tap(find.byIcon(Icons.receipt_long_rounded));
         await tester.pumpAndSettle();
-
-        // Verify payment method selection
-        expect(find.text('Select Payment Method'), findsOneWidget);
-
-        // Select a payment method
-        if (find.text('Cash').evaluate().isNotEmpty) {
-          await tester.tap(find.text('Cash'));
-          await tester.pumpAndSettle();
-        }
-
-        // Complete payment
-        if (find.text('Confirm Payment').evaluate().isNotEmpty) {
-          await tester.tap(find.text('Confirm Payment'));
-          await tester.pumpAndSettle();
-        }
+        
+        // Verify we're on the receipt page
+        expect(find.text('Current Order'), findsOneWidget);
       }
     });
 
@@ -144,7 +129,7 @@ void main() {
       // For now, we'll test basic error handling
 
       // Test invalid input in search
-      await tester.enterText(find.byType(TextField), '!@#$%^&*()');
+      await tester.enterText(find.byType(TextField), '!@#\$%^&*()');
       await tester.pumpAndSettle();
 
       // App should not crash

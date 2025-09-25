@@ -1,12 +1,39 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:restaurant_pos_app/features/products/domain/entities/product.dart';
 
+// Helper function to create test products
+Product createTestProduct({
+  String id = '1',
+  String name = 'Test Product',
+  double price = 10.0,
+  String description = 'Test description',
+  String category = 'Test Category',
+  bool isAvailable = true,
+}) {
+  final now = DateTime.parse('2024-01-01T00:00:00.000Z');
+  return Product(
+    id: id,
+    name: name,
+    price: price,
+    description: description,
+    category: category,
+    isAvailable: isAvailable,
+    createdAt: now,
+    updatedAt: now,
+  );
+}
+
 void main() {
   group('Product', () {
-    const testProduct = Product(
+    final testProduct = Product(
       id: '1',
       name: 'Pizza Margherita',
       price: 12.99,
+      description: 'A delicious pizza',
+      category: 'Pizza',
+      isAvailable: true,
+      createdAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
+      updatedAt: DateTime.parse('2024-01-01T00:00:00.000Z'),
     );
 
     group('constructor', () {
@@ -91,7 +118,12 @@ void main() {
       test('should convert Product to JSON', () {
         final json = testProduct.toJson();
 
-        expect(json, {'id': '1', 'name': 'Pizza Margherita', 'price': 12.99});
+        expect(json['id'], '1');
+        expect(json['name'], 'Pizza Margherita');
+        expect(json['price'], 12.99);
+        expect(json['description'], 'A delicious pizza');
+        expect(json['category'], 'Pizza');
+        expect(json['isAvailable'], true);
       });
 
       test('should produce valid JSON that can be converted back', () {
@@ -104,16 +136,16 @@ void main() {
 
     group('equality', () {
       test('should be equal when all fields are the same', () {
-        const product1 = Product(id: '1', name: 'Pizza', price: 10.0);
-        const product2 = Product(id: '1', name: 'Pizza', price: 10.0);
+        final product1 = createTestProduct(id: '1', name: 'Pizza', price: 10.0);
+        final product2 = createTestProduct(id: '1', name: 'Pizza', price: 10.0);
 
         expect(product1, equals(product2));
         expect(product1.hashCode, equals(product2.hashCode));
       });
 
       test('should not be equal when fields are different', () {
-        const product1 = Product(id: '1', name: 'Pizza', price: 10.0);
-        const product2 = Product(id: '2', name: 'Pizza', price: 10.0);
+        final product1 = createTestProduct(id: '1', name: 'Pizza', price: 10.0);
+        final product2 = createTestProduct(id: '2', name: 'Pizza', price: 10.0);
 
         expect(product1, isNot(equals(product2)));
       });
@@ -137,14 +169,18 @@ void main() {
 
     group('edge cases', () {
       test('should handle zero price', () {
-        const product = Product(id: 'free', name: 'Free Item', price: 0.0);
+        final product = createTestProduct(
+          id: 'free',
+          name: 'Free Item',
+          price: 0.0,
+        );
 
         expect(product.price, 0.0);
         expect(product.toJson()['price'], 0.0);
       });
 
       test('should handle very large prices', () {
-        const product = Product(
+        final product = createTestProduct(
           id: 'expensive',
           name: 'Expensive Item',
           price: 999999.99,
@@ -154,7 +190,7 @@ void main() {
       });
 
       test('should handle empty strings', () {
-        const product = Product(id: '', name: '', price: 0.0);
+        final product = createTestProduct(id: '', name: '', price: 0.0);
 
         expect(product.id, '');
         expect(product.name, '');
@@ -162,7 +198,7 @@ void main() {
       });
 
       test('should handle special characters in name', () {
-        const product = Product(
+        final product = createTestProduct(
           id: 'special',
           name: 'Café & Restaurant™',
           price: 15.50,

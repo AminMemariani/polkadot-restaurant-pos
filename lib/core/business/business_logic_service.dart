@@ -604,7 +604,7 @@ class MockBusinessLogicService implements BusinessLogicService {
           isValid: true,
           discountAmount: 5.0,
           discountPercentage: (5.0 / request.orderAmount) * 100,
-          description: 'Fixed $5 discount',
+          description: 'Fixed \$5 discount',
         );
       default:
         return const DiscountCalculation(

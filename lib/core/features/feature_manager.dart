@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 
 /// Abstract feature manager for handling feature flags and modular architecture
 abstract class FeatureManager {

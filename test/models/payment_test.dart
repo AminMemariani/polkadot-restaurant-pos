@@ -1,16 +1,37 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:restaurant_pos_app/features/payments/domain/entities/payment.dart';
 
+// Helper function to create test payments
+Payment createTestPayment({
+  String id = 'payment-1',
+  String status = 'completed',
+  double amount = 30.00,
+  String? blockchainTxId,
+  String receiptId = 'receipt-1',
+  String method = 'blockchain',
+}) {
+  final now = DateTime.parse('2024-01-01T00:00:00.000Z');
+  return Payment(
+    id: id,
+    status: status,
+    amount: amount,
+    blockchainTxId: blockchainTxId,
+    receiptId: receiptId,
+    method: method,
+    createdAt: now,
+  );
+}
+
 void main() {
   group('Payment', () {
-    const testPayment = Payment(
+    final testPayment = createTestPayment(
       id: 'payment-1',
       status: 'completed',
       amount: 30.00,
       blockchainTxId: '0x1234567890abcdef',
     );
 
-    const testPaymentWithoutBlockchain = Payment(
+    final testPaymentWithoutBlockchain = createTestPayment(
       id: 'payment-2',
       status: 'pending',
       amount: 25.50,
@@ -162,18 +183,22 @@ void main() {
       test('should convert Payment to JSON with blockchainTxId', () {
         final json = testPayment.toJson();
 
-        expect(json, {
-          'id': 'payment-1',
-          'status': 'completed',
-          'amount': 30.00,
-          'blockchainTxId': '0x1234567890abcdef',
-        });
+        expect(json['id'], 'payment-1');
+        expect(json['status'], 'completed');
+        expect(json['amount'], 30.00);
+        expect(json['receiptId'], 'receipt-1');
+        expect(json['method'], 'blockchain');
+        expect(json['blockchainTxId'], '0x1234567890abcdef');
       });
 
       test('should convert Payment to JSON without blockchainTxId', () {
         final json = testPaymentWithoutBlockchain.toJson();
 
-        expect(json, {'id': 'payment-2', 'status': 'pending', 'amount': 25.50});
+        expect(json['id'], 'payment-2');
+        expect(json['status'], 'pending');
+        expect(json['amount'], 25.50);
+        expect(json['receiptId'], 'receipt-1');
+        expect(json['method'], 'blockchain');
         expect(json.containsKey('blockchainTxId'), isFalse);
       });
 
@@ -197,13 +222,13 @@ void main() {
 
     group('equality', () {
       test('should be equal when all fields are the same', () {
-        const payment1 = Payment(
+        final payment1 = createTestPayment(
           id: 'same',
           status: 'completed',
           amount: 30.00,
           blockchainTxId: '0x123',
         );
-        const payment2 = Payment(
+        final payment2 = createTestPayment(
           id: 'same',
           status: 'completed',
           amount: 30.00,
@@ -215,21 +240,29 @@ void main() {
       });
 
       test('should be equal when both have null blockchainTxId', () {
-        const payment1 = Payment(id: 'same', status: 'pending', amount: 25.00);
-        const payment2 = Payment(id: 'same', status: 'pending', amount: 25.00);
+        final payment1 = createTestPayment(
+          id: 'same',
+          status: 'pending',
+          amount: 25.00,
+        );
+        final payment2 = createTestPayment(
+          id: 'same',
+          status: 'pending',
+          amount: 25.00,
+        );
 
         expect(payment1, equals(payment2));
         expect(payment1.hashCode, equals(payment2.hashCode));
       });
 
       test('should not be equal when blockchainTxId differs', () {
-        const payment1 = Payment(
+        final payment1 = createTestPayment(
           id: 'same',
           status: 'completed',
           amount: 30.00,
           blockchainTxId: '0x123',
         );
-        const payment2 = Payment(
+        final payment2 = createTestPayment(
           id: 'same',
           status: 'completed',
           amount: 30.00,
@@ -242,13 +275,13 @@ void main() {
       test(
         'should not be equal when one has blockchainTxId and other does not',
         () {
-          const payment1 = Payment(
+          final payment1 = createTestPayment(
             id: 'same',
             status: 'completed',
             amount: 30.00,
             blockchainTxId: '0x123',
           );
-          const payment2 = Payment(
+          final payment2 = createTestPayment(
             id: 'same',
             status: 'completed',
             amount: 30.00,
@@ -259,8 +292,16 @@ void main() {
       );
 
       test('should not be equal when other fields are different', () {
-        const payment1 = Payment(id: '1', status: 'completed', amount: 30.00);
-        const payment2 = Payment(id: '2', status: 'completed', amount: 30.00);
+        final payment1 = createTestPayment(
+          id: '1',
+          status: 'completed',
+          amount: 30.00,
+        );
+        final payment2 = createTestPayment(
+          id: '2',
+          status: 'completed',
+          amount: 30.00,
+        );
 
         expect(payment1, isNot(equals(payment2)));
       });
@@ -295,14 +336,18 @@ void main() {
 
     group('edge cases', () {
       test('should handle zero amount', () {
-        const payment = Payment(id: 'free', status: 'completed', amount: 0.0);
+        final payment = createTestPayment(
+          id: 'free',
+          status: 'completed',
+          amount: 0.0,
+        );
 
         expect(payment.amount, 0.0);
         expect(payment.toJson()['amount'], 0.0);
       });
 
       test('should handle very large amounts', () {
-        const payment = Payment(
+        final payment = createTestPayment(
           id: 'expensive',
           status: 'completed',
           amount: 999999.99,
@@ -312,7 +357,7 @@ void main() {
       });
 
       test('should handle empty strings', () {
-        const payment = Payment(id: '', status: '', amount: 0.0);
+        final payment = createTestPayment(id: '', status: '', amount: 0.0);
 
         expect(payment.id, '');
         expect(payment.status, '');
@@ -329,7 +374,11 @@ void main() {
         ];
 
         for (final status in statuses) {
-          final payment = Payment(id: 'test', status: status, amount: 10.0);
+          final payment = createTestPayment(
+            id: 'test',
+            status: status,
+            amount: 10.0,
+          );
 
           expect(payment.status, status);
           expect(payment.toJson()['status'], status);
@@ -345,7 +394,7 @@ void main() {
         ];
 
         for (final txId in txIds) {
-          final payment = Payment(
+          final payment = createTestPayment(
             id: 'test',
             status: 'completed',
             amount: 10.0,

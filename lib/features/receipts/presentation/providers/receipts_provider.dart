@@ -54,6 +54,18 @@ class ReceiptsProvider extends ChangeNotifier {
 
   bool get hasItems => _currentOrderItems.isNotEmpty;
 
+  /// Set tax rate
+  void setTaxRate(double rate) {
+    settingsProvider?.setTaxRate(rate);
+    notifyListeners();
+  }
+
+  /// Set service fee rate
+  void setServiceFeeRate(double rate) {
+    settingsProvider?.setServiceFeeRate(rate);
+    notifyListeners();
+  }
+
   /// Add a product to the current order
   void addProductToOrder(Product product, {int quantity = 1}) {
     final existingItemIndex = _currentOrderItems.indexWhere(
@@ -133,6 +145,10 @@ class ReceiptsProvider extends ChangeNotifier {
       total: total,
       tax: tax,
       serviceFee: serviceFee,
+      subtotal: subtotal,
+      status: 'pending',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     final result = await createReceipt(receipt);

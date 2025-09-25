@@ -238,6 +238,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
           ],
         ],
       ),
+      ),
     );
   }
 
@@ -247,11 +248,14 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
 
     // Define payment steps
     final steps = [
-      'Payment Initiated',
-      'QR Code Generated',
-      'Waiting for Payment',
-      'Blockchain Confirmation',
-      'Payment Complete',
+      StepBarStep(label: 'Payment Initiated', status: StepStatus.completed),
+      StepBarStep(label: 'QR Code Generated', status: StepStatus.completed),
+      StepBarStep(label: 'Waiting for Payment', status: StepStatus.active),
+      StepBarStep(
+        label: 'Blockchain Confirmation',
+        status: StepStatus.inactive,
+      ),
+      StepBarStep(label: 'Payment Complete', status: StepStatus.inactive),
     ];
 
     // Determine current step based on payment status

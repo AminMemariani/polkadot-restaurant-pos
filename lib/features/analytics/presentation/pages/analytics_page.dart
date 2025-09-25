@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../../core/analytics/analytics_service.dart';
 import '../providers/analytics_provider.dart';
 
 class AnalyticsPage extends StatefulWidget {
@@ -13,7 +11,6 @@ class AnalyticsPage extends StatefulWidget {
 }
 
 class _AnalyticsPageState extends State<AnalyticsPage> {
-  DateTime _selectedDate = DateTime.now();
   DateTimeRange? _selectedDateRange;
 
   @override

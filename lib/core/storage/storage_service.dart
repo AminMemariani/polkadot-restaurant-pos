@@ -171,4 +171,17 @@ class StorageService {
       return false;
     }
   }
+
+  /// Clear only settings
+  Future<bool> clearSettings() async {
+    try {
+      await _prefs!.remove(_settingsKey);
+      await _prefs!.remove(_taxRateKey);
+      await _prefs!.remove(_serviceFeeRateKey);
+      return true;
+    } catch (e) {
+      print('Error clearing settings: $e');
+      return false;
+    }
+  }
 }

@@ -23,7 +23,6 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _deleteAnimation;
-  bool _isDeleting = false;
 
   @override
   void initState() {

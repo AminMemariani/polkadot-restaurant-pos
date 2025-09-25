@@ -6,12 +6,18 @@ class Payment extends Equatable {
   final String status;
   final double amount;
   final String? blockchainTxId;
+  final String receiptId;
+  final String method;
+  final DateTime createdAt;
 
   const Payment({
     required this.id,
     required this.status,
     required this.amount,
     this.blockchainTxId,
+    required this.receiptId,
+    required this.method,
+    required this.createdAt,
   });
 
   /// Create a copy of this payment with updated fields
@@ -20,6 +26,9 @@ class Payment extends Equatable {
     String? status,
     double? amount,
     String? blockchainTxId,
+    String? receiptId,
+    String? method,
+    DateTime? createdAt,
     bool clearBlockchainTxId = false,
   }) {
     return Payment(
@@ -29,6 +38,9 @@ class Payment extends Equatable {
       blockchainTxId: clearBlockchainTxId
           ? null
           : (blockchainTxId ?? this.blockchainTxId),
+      receiptId: receiptId ?? this.receiptId,
+      method: method ?? this.method,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -39,6 +51,11 @@ class Payment extends Equatable {
       status: json['status'] as String,
       amount: (json['amount'] as num).toDouble(),
       blockchainTxId: json['blockchainTxId'] as String?,
+      receiptId: json['receiptId'] as String? ?? '',
+      method: json['method'] as String? ?? 'blockchain',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
     );
   }
 
@@ -48,15 +65,26 @@ class Payment extends Equatable {
       'id': id,
       'status': status,
       'amount': amount,
+      'receiptId': receiptId,
+      'method': method,
+      'createdAt': createdAt.toIso8601String(),
       if (blockchainTxId != null) 'blockchainTxId': blockchainTxId,
     };
   }
 
   @override
-  List<Object?> get props => [id, status, amount, blockchainTxId];
+  List<Object?> get props => [
+    id,
+    status,
+    amount,
+    blockchainTxId,
+    receiptId,
+    method,
+    createdAt,
+  ];
 
   @override
   String toString() {
-    return 'Payment(id: $id, status: $status, amount: $amount, blockchainTxId: $blockchainTxId)';
+    return 'Payment(id: $id, status: $status, amount: $amount, blockchainTxId: $blockchainTxId, receiptId: $receiptId, method: $method, createdAt: $createdAt)';
   }
 }

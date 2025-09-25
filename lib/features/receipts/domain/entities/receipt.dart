@@ -7,6 +7,12 @@ class Receipt extends Equatable {
   final double total;
   final double tax;
   final double serviceFee;
+  final String? customerName;
+  final double subtotal;
+  final String? paymentMethod;
+  final String status;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   const Receipt({
     required this.id,
@@ -14,6 +20,12 @@ class Receipt extends Equatable {
     required this.total,
     required this.tax,
     required this.serviceFee,
+    this.customerName,
+    required this.subtotal,
+    this.paymentMethod,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   /// Create a copy of this receipt with updated fields
@@ -23,6 +35,12 @@ class Receipt extends Equatable {
     double? total,
     double? tax,
     double? serviceFee,
+    String? customerName,
+    double? subtotal,
+    String? paymentMethod,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return Receipt(
       id: id ?? this.id,
@@ -30,6 +48,12 @@ class Receipt extends Equatable {
       total: total ?? this.total,
       tax: tax ?? this.tax,
       serviceFee: serviceFee ?? this.serviceFee,
+      customerName: customerName ?? this.customerName,
+      subtotal: subtotal ?? this.subtotal,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -43,6 +67,16 @@ class Receipt extends Equatable {
       total: (json['total'] as num).toDouble(),
       tax: (json['tax'] as num).toDouble(),
       serviceFee: (json['serviceFee'] as num).toDouble(),
+      customerName: json['customerName'] as String?,
+      subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
+      paymentMethod: json['paymentMethod'] as String?,
+      status: json['status'] as String? ?? 'pending',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : DateTime.now(),
     );
   }
 
@@ -54,15 +88,33 @@ class Receipt extends Equatable {
       'total': total,
       'tax': tax,
       'serviceFee': serviceFee,
+      'customerName': customerName,
+      'subtotal': subtotal,
+      'paymentMethod': paymentMethod,
+      'status': status,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
   @override
-  List<Object?> get props => [id, items, total, tax, serviceFee];
+  List<Object?> get props => [
+    id,
+    items,
+    total,
+    tax,
+    serviceFee,
+    customerName,
+    subtotal,
+    paymentMethod,
+    status,
+    createdAt,
+    updatedAt,
+  ];
 
   @override
   String toString() {
-    return 'Receipt(id: $id, items: $items, total: $total, tax: $tax, serviceFee: $serviceFee)';
+    return 'Receipt(id: $id, items: $items, total: $total, tax: $tax, serviceFee: $serviceFee, customerName: $customerName, subtotal: $subtotal, paymentMethod: $paymentMethod, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 

@@ -18,6 +18,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   final _idController = TextEditingController();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _categoryController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -28,6 +30,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       _idController.text = widget.product!.id;
       _nameController.text = widget.product!.name;
       _priceController.text = widget.product!.price.toString();
+      _descriptionController.text = widget.product!.description;
+      _categoryController.text = widget.product!.category;
     } else {
       // Generate a unique ID for new products
       _idController.text = DateTime.now().millisecondsSinceEpoch.toString();
@@ -39,6 +43,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     _idController.dispose();
     _nameController.dispose();
     _priceController.dispose();
+    _descriptionController.dispose();
+    _categoryController.dispose();
     super.dispose();
   }
 
@@ -182,6 +188,11 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       id: _idController.text.trim(),
       name: _nameController.text.trim(),
       price: double.parse(_priceController.text),
+      description: _descriptionController.text.trim(),
+      category: _categoryController.text.trim(),
+      isAvailable: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
     );
 
     final provider = context.read<ProductsProvider>();

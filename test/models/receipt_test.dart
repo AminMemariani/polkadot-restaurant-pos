@@ -1,6 +1,44 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:restaurant_pos_app/features/receipts/domain/entities/receipt.dart';
 
+// Helper function to create test receipts
+Receipt createTestReceipt({
+  String id = 'receipt-1',
+  List<ReceiptItem>? items,
+  double total = 30.00,
+  double tax = 2.40,
+  double serviceFee = 1.62,
+  String? customerName,
+  double subtotal = 25.98,
+  String? paymentMethod,
+  String status = 'completed',
+}) {
+  final now = DateTime.parse('2024-01-01T00:00:00.000Z');
+  return Receipt(
+    id: id,
+    items:
+        items ??
+        [
+          ReceiptItem(
+            productId: '1',
+            productName: 'Test Product',
+            price: 12.99,
+            quantity: 2,
+            total: 25.98,
+          ),
+        ],
+    total: total,
+    tax: tax,
+    serviceFee: serviceFee,
+    customerName: customerName,
+    subtotal: subtotal,
+    paymentMethod: paymentMethod,
+    status: status,
+    createdAt: now,
+    updatedAt: now,
+  );
+}
+
 void main() {
   group('Receipt', () {
     const testReceiptItem = ReceiptItem(
@@ -11,7 +49,7 @@ void main() {
       total: 25.98,
     );
 
-    const testReceipt = Receipt(
+    final testReceipt = createTestReceipt(
       id: 'receipt-1',
       items: [testReceiptItem],
       total: 30.00,
@@ -161,14 +199,14 @@ void main() {
 
     group('equality', () {
       test('should be equal when all fields are the same', () {
-        const receipt1 = Receipt(
+        final receipt1 = createTestReceipt(
           id: 'same',
           items: [testReceiptItem],
           total: 30.00,
           tax: 2.40,
           serviceFee: 1.62,
         );
-        const receipt2 = Receipt(
+        final receipt2 = createTestReceipt(
           id: 'same',
           items: [testReceiptItem],
           total: 30.00,
@@ -181,14 +219,14 @@ void main() {
       });
 
       test('should not be equal when fields are different', () {
-        const receipt1 = Receipt(
+        final receipt1 = createTestReceipt(
           id: '1',
           items: [testReceiptItem],
           total: 30.00,
           tax: 2.40,
           serviceFee: 1.62,
         );
-        const receipt2 = Receipt(
+        final receipt2 = createTestReceipt(
           id: '2',
           items: [testReceiptItem],
           total: 30.00,
@@ -214,7 +252,7 @@ void main() {
 
     group('edge cases', () {
       test('should handle zero values', () {
-        const receipt = Receipt(
+        final receipt = createTestReceipt(
           id: 'zero',
           items: [],
           total: 0.0,
@@ -228,7 +266,7 @@ void main() {
       });
 
       test('should handle very large amounts', () {
-        const receipt = Receipt(
+        final receipt = createTestReceipt(
           id: 'expensive',
           items: [],
           total: 999999.99,

@@ -46,6 +46,11 @@ final sl = GetIt.instance;
 
 /// Initialize dependency injection
 Future<void> init() async {
+  // Reset GetIt to avoid conflicts in tests
+  if (sl.isRegistered<SharedPreferences>()) {
+    await sl.reset();
+  }
+  
   // External dependencies
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
@@ -78,6 +83,9 @@ Future<void> init() async {
 
   // Features - Analytics
   _initAnalytics();
+
+  // Ensure async services are ready
+  await sl.isReady<StorageService>();
 }
 
 void _initProducts() {

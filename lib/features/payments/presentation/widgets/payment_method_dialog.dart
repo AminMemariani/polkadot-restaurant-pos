@@ -8,8 +8,9 @@ import '../../domain/entities/payment.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final double amount;
+  final String? receiptId;
 
-  const PaymentMethodDialog({super.key, required this.amount});
+  const PaymentMethodDialog({super.key, required this.amount, this.receiptId});
 
   @override
   State<PaymentMethodDialog> createState() => _PaymentMethodDialogState();
@@ -35,7 +36,11 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
     final colorScheme = theme.colorScheme;
 
     // Define payment steps for method selection
-    final steps = ['Select Payment Method', 'Process Payment', 'Confirmation'];
+    final steps = [
+      StepBarStep(label: 'Select Payment Method', status: StepStatus.active),
+      StepBarStep(label: 'Process Payment', status: StepStatus.inactive),
+      StepBarStep(label: 'Confirmation', status: StepStatus.inactive),
+    ];
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -309,6 +314,9 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
             id: DateTime.now().millisecondsSinceEpoch.toString(),
             status: 'completed',
             amount: widget.amount,
+            receiptId: widget.receiptId ?? '',
+            method: 'traditional',
+            createdAt: DateTime.now(),
           ),
         );
 

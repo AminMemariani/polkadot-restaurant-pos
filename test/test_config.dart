@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
 
 /// Test configuration and utilities
 class TestConfig {
