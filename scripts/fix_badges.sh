@@ -31,7 +31,7 @@ git commit -m "Fix GitHub Actions badges and add quality workflow
 # Check if remote origin is set
 if ! git remote get-url origin > /dev/null 2>&1; then
     echo "⚠️  No remote origin set. Setting up remote..."
-    git remote add origin https://github.com/cyberhonig/restaurant_pos_app.git
+    git remote add origin https://github.com/AminMemariani/polkadot-restaurant-pos.git
     git branch -M main
 fi
 
@@ -44,15 +44,15 @@ if [ $? -eq 0 ]; then
     echo "✅ Successfully pushed to GitHub!"
     echo ""
     echo "🎉 Your badges should now work:"
-    echo "   - CI/CD Pipeline: https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml"
-    echo "   - Code Quality: https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/quality.yml"
-    echo "   - Test Coverage: https://codecov.io/gh/cyberhonig/restaurant_pos_app"
+    echo "   - CI/CD Pipeline: https://github.com/AminMemariani/polkadot-restaurant-pos/actions/workflows/ci.yml"
+    echo "   - Code Quality: https://github.com/AminMemariani/polkadot-restaurant-pos/actions/workflows/quality.yml"
+    echo "   - Test Coverage: https://codecov.io/gh/AminMemariani/polkadot-restaurant-pos"
     echo ""
     echo "📊 Check your repository at:"
-    echo "   https://github.com/cyberhonig/restaurant_pos_app"
+    echo "   https://github.com/AminMemariani/polkadot-restaurant-pos"
     echo ""
     echo "🔍 Monitor workflows at:"
-    echo "   https://github.com/cyberhonig/restaurant_pos_app/actions"
+    echo "   https://github.com/AminMemariani/polkadot-restaurant-pos/actions"
 else
     echo "❌ Failed to push to GitHub. Please check your git configuration."
     exit 1
