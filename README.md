@@ -3,16 +3,17 @@
 [![Flutter](https://img.shields.io/badge/Flutter-3.8.1+-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)
 [![Dart](https://img.shields.io/badge/Dart-3.8.1+-0175C2?logo=dart&logoColor=white)](https://dart.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)](https://github.com/yourusername/restaurant_pos_app/actions)
-[![Test Coverage](https://img.shields.io/badge/Coverage-85%25-brightgreen)](https://github.com/yourusername/restaurant_pos_app/actions)
-[![Code Quality](https://img.shields.io/badge/Code%20Quality-A-brightgreen)](https://github.com/yourusername/restaurant_pos_app/actions)
+[![CI/CD Pipeline](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml/badge.svg)](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml)
+[![Test Coverage](https://codecov.io/gh/cyberhonig/restaurant_pos_app/branch/main/graph/badge.svg)](https://codecov.io/gh/cyberhonig/restaurant_pos_app)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-A-brightgreen)](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/Tests-99%20Passing-brightgreen)](https://github.com/cyberhonig/restaurant_pos_app/actions/workflows/ci.yml)
 
 A modern restaurant Point of Sale (POS) application built with Flutter, featuring a scalable architecture, blockchain payment integration, comprehensive analytics, and multi-language support.
 
 ## 🚀 Quick Start
 
 ```bash
-git clone https://github.com/yourusername/restaurant_pos_app.git
+git clone https://github.com/cyberhonig/restaurant_pos_app.git
 cd restaurant_pos_app
 flutter pub get
 flutter run
@@ -187,7 +188,7 @@ test/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/restaurant_pos_app.git
+   git clone https://github.com/cyberhonig/restaurant_pos_app.git
    cd restaurant_pos_app
    ```
 
@@ -379,6 +380,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **Made with ❤️ using Flutter**
 
-[⭐ Star this repo](https://github.com/yourusername/restaurant_pos_app) | [🐛 Report Bug](https://github.com/yourusername/restaurant_pos_app/issues) | [💡 Request Feature](https://github.com/yourusername/restaurant_pos_app/issues)
+[⭐ Star this repo](https://github.com/cyberhonig/restaurant_pos_app) | [🐛 Report Bug](https://github.com/cyberhonig/restaurant_pos_app/issues) | [💡 Request Feature](https://github.com/cyberhonig/restaurant_pos_app/issues)
 
 </div>

@@ -19,6 +19,7 @@ jobs:
       with:
         flutter-version: '3.8.1'
         channel: 'stable'
+        cache: true
     
     - name: Install dependencies
       run: flutter pub get
@@ -27,10 +28,24 @@ jobs:
       run: flutter format --dry-run --set-exit-if-changed .
     
     - name: Analyze project source
-      run: flutter analyze
+      run: flutter analyze --fatal-infos
     
-    - name: Run tests
-      run: flutter test --coverage
+    - name: Run unit tests
+      run: flutter test test/unit/ --coverage
+    
+    - name: Run widget tests
+      run: flutter test test/widget/ --coverage
+    
+    - name: Run model tests
+      run: flutter test test/models/ --coverage
+    
+    - name: Run integration tests
+      run: flutter test integration_test/ --coverage
+    
+    - name: Generate coverage report
+      run: |
+        flutter test --coverage
+        genhtml coverage/lcov.info -o coverage/html
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -39,6 +54,7 @@ jobs:
         flags: unittests
         name: codecov-umbrella
         fail_ci_if_error: false
+        verbose: true
 
   build:
     name: Build
@@ -53,18 +69,27 @@ jobs:
       with:
         flutter-version: '3.8.1'
         channel: 'stable'
+        cache: true
     
     - name: Install dependencies
       run: flutter pub get
     
     - name: Build APK
-      run: flutter build apk --release
+      run: flutter build apk --release --split-per-abi
     
     - name: Build Web
       run: flutter build web --release
     
-    - name: Upload APK
-      uses: actions/upload-artifact@v3
+    - name: Upload APK artifacts
+      uses: actions/upload-artifact@v4
       with:
         name: release-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+        path: build/app/outputs/flutter-apk/
+        retention-days: 30
+    
+    - name: Upload Web artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-web
+        path: build/web/
+        retention-days: 30
