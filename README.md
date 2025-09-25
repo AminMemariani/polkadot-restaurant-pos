@@ -1,7 +1,7 @@
 # Restaurant POS App
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.8.1+-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)
-[![Dart](https://img.shields.io/badge/Dart-3.8.1+-0175C2?logo=dart&logoColor=white)](https://dart.dev/)
+[![Flutter](https://img.shields.io/badge/Flutter-3.24+-02569B?logo=flutter&logoColor=white)](https://flutter.dev/)
+[![Dart](https://img.shields.io/badge/Dart-3.5+-0175C2?logo=dart&logoColor=white)](https://dart.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![CI/CD Pipeline](https://github.com/AminMemariani/polkadot-restaurant-pos/actions/workflows/ci.yml/badge.svg?branch=main&cache=none)](https://github.com/AminMemariani/polkadot-restaurant-pos/actions/workflows/ci.yml)
 [![Code Quality](https://github.com/AminMemariani/polkadot-restaurant-pos/actions/workflows/quality.yml/badge.svg?branch=main&cache=none)](https://github.com/AminMemariani/polkadot-restaurant-pos/actions/workflows/quality.yml)
