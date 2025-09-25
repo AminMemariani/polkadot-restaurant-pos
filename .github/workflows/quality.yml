@@ -31,12 +31,11 @@ jobs:
     - name: Analyze project source
       run: flutter analyze --fatal-infos
     
-    - name: Run tests
-      run: flutter test --coverage
+    - name: Run unit and widget tests
+      run: flutter test test/ --coverage
     
     - name: Generate coverage report
       run: |
-        flutter test --coverage
         genhtml coverage/lcov.info -o coverage/html || true
     
     - name: Upload coverage to Codecov

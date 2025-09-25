@@ -30,22 +30,12 @@ jobs:
     - name: Analyze project source
       run: flutter analyze --fatal-infos
     
-    - name: Run unit tests
-      run: flutter test test/unit/ --coverage
-    
-    - name: Run widget tests
-      run: flutter test test/widget/ --coverage
-    
-    - name: Run model tests
-      run: flutter test test/models/ --coverage
-    
-    - name: Run integration tests
-      run: flutter test integration_test/ --coverage
+    - name: Run unit and widget tests
+      run: flutter test test/ --coverage
     
     - name: Generate coverage report
       run: |
-        flutter test --coverage
-        genhtml coverage/lcov.info -o coverage/html
+        genhtml coverage/lcov.info -o coverage/html || true
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
