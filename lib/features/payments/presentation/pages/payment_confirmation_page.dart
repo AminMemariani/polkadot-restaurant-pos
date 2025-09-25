@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:step_bar/step_bar.dart';
 
 import '../providers/payments_provider.dart';
 
@@ -15,7 +16,8 @@ class PaymentConfirmationPage extends StatefulWidget {
   });
 
   @override
-  State<PaymentConfirmationPage> createState() => _PaymentConfirmationPageState();
+  State<PaymentConfirmationPage> createState() =>
+      _PaymentConfirmationPageState();
 }
 
 class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
@@ -28,34 +30,26 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize animations
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
     );
-    
+
     _checkController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _checkAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _checkController,
-      curve: Curves.elasticOut,
-    ));
-    
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+
+    _checkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _checkController, curve: Curves.elasticOut),
+    );
+
     // Start payment process
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startPayment();
@@ -72,12 +66,12 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
   Future<void> _startPayment() async {
     final provider = context.read<PaymentsProvider>();
     await provider.startPayment(widget.amount);
-    
+
     // Start pulse animation for waiting state
     if (provider.paymentStatus == PaymentStatus.waiting) {
       _pulseController.repeat(reverse: true);
     }
-    
+
     // Simulate blockchain confirmation after delay
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted && provider.paymentStatus == PaymentStatus.waiting) {
@@ -89,7 +83,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
   Future<void> _simulateConfirmation() async {
     final provider = context.read<PaymentsProvider>();
     await provider.simulateBlockchainConfirmation();
-    
+
     // Stop pulse and start check animation
     _pulseController.stop();
     _checkController.forward();
@@ -113,10 +107,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         backgroundColor: colorScheme.surface,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.close,
-            color: colorScheme.onSurface,
-          ),
+          icon: Icon(Icons.close, color: colorScheme.onSurface),
           onPressed: () {
             context.read<PaymentsProvider>().cancelPayment();
             Navigator.of(context).pop();
@@ -127,22 +118,25 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         builder: (context, provider, child) {
           return Padding(
             padding: const EdgeInsets.all(24),
-            child: Column(
-              children: [
-                // Amount Display
-                _buildAmountSection(context, provider),
-                
-                const SizedBox(height: 32),
-                
-                // Payment Status Section
-                Expanded(
-                  child: _buildPaymentStatusSection(context, provider),
-                ),
-                
-                // Action Buttons
-                _buildActionButtons(context, provider),
-              ],
-            ),
+              child: Column(
+                children: [
+                  // Amount Display
+                  _buildAmountSection(context, provider),
+
+                  const SizedBox(height: 24),
+
+                  // Payment Progress Steps
+                  _buildPaymentSteps(context, provider),
+
+                  const SizedBox(height: 24),
+
+                  // Payment Status Section
+                  Expanded(child: _buildPaymentStatusSection(context, provider)),
+
+                  // Action Buttons
+                  _buildActionButtons(context, provider),
+                ],
+              ),
           );
         },
       ),
@@ -159,9 +153,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       decoration: BoxDecoration(
         color: colorScheme.primaryContainer.withOpacity(0.3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.primary.withOpacity(0.2),
-        ),
+        border: Border.all(color: colorScheme.primary.withOpacity(0.2)),
       ),
       child: Column(
         children: [
@@ -203,10 +195,77 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
     );
   }
 
-  Widget _buildPaymentStatusSection(BuildContext context, PaymentsProvider provider) {
+  Widget _buildPaymentSteps(BuildContext context, PaymentsProvider provider) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    // Define payment steps
+    final steps = [
+      'Payment Initiated',
+      'QR Code Generated',
+      'Waiting for Payment',
+      'Blockchain Confirmation',
+      'Payment Complete',
+    ];
+
+    // Determine current step based on payment status
+    int currentStep = 0;
+    switch (provider.paymentStatus) {
+      case PaymentStatus.idle:
+        currentStep = 0;
+        break;
+      case PaymentStatus.waiting:
+        currentStep = 2; // QR code is generated and waiting
+        break;
+      case PaymentStatus.confirmed:
+        currentStep = 4; // Payment complete
+        break;
+      case PaymentStatus.cancelled:
+      case PaymentStatus.failed:
+        currentStep = 2; // Show as waiting step
+        break;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Payment Progress',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
+          StepBar(
+            steps: steps.map((step) => StepBarStep(
+              title: step,
+              isCompleted: steps.indexOf(step) < currentStep,
+              isActive: steps.indexOf(step) == currentStep,
+            )).toList(),
+            currentStep: currentStep,
+            completedColor: colorScheme.primary,
+            activeColor: colorScheme.primary.withOpacity(0.3),
+            inactiveColor: colorScheme.onSurface.withOpacity(0.3),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentStatusSection(
+    BuildContext context,
+    PaymentsProvider provider,
+  ) {
     switch (provider.paymentStatus) {
       case PaymentStatus.waiting:
         return _buildWaitingState(context, provider);
@@ -258,9 +317,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             );
           },
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         // Status Text
         Text(
           'Waiting for Payment...',
@@ -269,18 +328,18 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.onSurface,
           ),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           'Scan QR code to complete payment',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Payment ID
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -296,9 +355,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             ),
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Loading Indicator
         SizedBox(
           width: 24,
@@ -341,9 +400,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             );
           },
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         // Success Text
         Text(
           'Payment Confirmed ✅',
@@ -352,18 +411,18 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.primary,
           ),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           'Transaction completed successfully',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurface.withOpacity(0.7),
           ),
         ),
-        
+
         const SizedBox(height: 24),
-        
+
         // Transaction Details
         Container(
           width: double.infinity,
@@ -383,7 +442,10 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                 ),
               ),
               const SizedBox(height: 12),
-              _buildDetailRow('Amount', '\$${widget.amount.toStringAsFixed(2)}'),
+              _buildDetailRow(
+                'Amount',
+                '\$${widget.amount.toStringAsFixed(2)}',
+              ),
               _buildDetailRow('Payment ID', provider.paymentId ?? ''),
               if (provider.blockchainTxId != null)
                 _buildDetailRow('Transaction ID', provider.blockchainTxId!),
@@ -446,9 +508,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.onErrorContainer,
           ),
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         Text(
           'Payment Cancelled',
           style: theme.textTheme.headlineSmall?.copyWith(
@@ -456,9 +518,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.error,
           ),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           'Payment was cancelled by user',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -489,9 +551,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.onErrorContainer,
           ),
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         Text(
           'Payment Failed',
           style: theme.textTheme.headlineSmall?.copyWith(
@@ -499,9 +561,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.error,
           ),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           provider.error ?? 'An error occurred during payment',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -533,9 +595,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.onSurface.withOpacity(0.5),
           ),
         ),
-        
+
         const SizedBox(height: 32),
-        
+
         Text(
           'Preparing Payment...',
           style: theme.textTheme.headlineSmall?.copyWith(
@@ -543,9 +605,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.onSurface,
           ),
         ),
-        
+
         const SizedBox(height: 8),
-        
+
         Text(
           'Please wait while we set up your payment',
           style: theme.textTheme.bodyMedium?.copyWith(
@@ -576,14 +638,10 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
               ),
               label: Text(
                 'Cancel Payment',
-                style: TextStyle(
-                  color: colorScheme.onSurface.withOpacity(0.7),
-                ),
+                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
               ),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.5),
-                ),
+                side: BorderSide(color: colorScheme.outline.withOpacity(0.5)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -599,10 +657,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                 provider.resetPayment();
                 Navigator.of(context).pop();
               },
-              icon: Icon(
-                Icons.done,
-                color: colorScheme.onPrimary,
-              ),
+              icon: Icon(Icons.done, color: colorScheme.onPrimary),
               label: Text(
                 'Done',
                 style: TextStyle(
@@ -628,10 +683,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                 provider.resetPayment();
                 Navigator.of(context).pop();
               },
-              icon: Icon(
-                Icons.refresh,
-                color: colorScheme.onPrimary,
-              ),
+              icon: Icon(Icons.refresh, color: colorScheme.onPrimary),
               label: Text(
                 'Try Again',
                 style: TextStyle(

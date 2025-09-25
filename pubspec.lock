@@ -365,6 +365,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.1"
+  step_bar:
+    dependency: "direct main"
+    description:
+      name: step_bar
+      sha256: fe46bb550c7902a59ff40059ee72724f7bc2312f976a496e17d33f5825659021
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   stream_channel:
     dependency: transitive
     description:
@@ -439,4 +447,4 @@ packages:
     version: "1.1.0"
 sdks:
   dart: ">=3.8.1 <4.0.0"
-  flutter: ">=3.29.0"
+  flutter: ">=3.32.0"

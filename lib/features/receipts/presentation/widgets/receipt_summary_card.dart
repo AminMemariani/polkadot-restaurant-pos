@@ -154,7 +154,9 @@ class ReceiptSummaryCard extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: ElevatedButton.icon(
-                      onPressed: isLoading ? null : () => _showPaymentDialog(context),
+                      onPressed: isLoading
+                          ? null
+                          : () => _showPaymentDialog(context),
                       icon: isLoading
                           ? SizedBox(
                               width: 16,

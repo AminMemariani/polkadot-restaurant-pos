@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:step_bar/step_bar.dart';
 
 import '../providers/payments_provider.dart';
 import '../pages/payment_confirmation_page.dart';
@@ -8,10 +9,7 @@ import '../../domain/entities/payment.dart';
 class PaymentMethodDialog extends StatefulWidget {
   final double amount;
 
-  const PaymentMethodDialog({
-    super.key,
-    required this.amount,
-  });
+  const PaymentMethodDialog({super.key, required this.amount});
 
   @override
   State<PaymentMethodDialog> createState() => _PaymentMethodDialogState();
@@ -32,6 +30,53 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
     await provider.getAvailablePaymentMethods();
   }
 
+  Widget _buildPaymentSteps(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    // Define payment steps for method selection
+    final steps = [
+      'Select Payment Method',
+      'Process Payment',
+      'Confirmation',
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Payment Process',
+            style: theme.textTheme.bodySmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 8),
+          StepBar(
+            steps: steps.map((step) => StepBarStep(
+              title: step,
+              isCompleted: false,
+              isActive: steps.indexOf(step) == 0,
+            )).toList(),
+            currentStep: 0, // Currently on step 1 (Select Payment Method)
+            completedColor: colorScheme.primary,
+            activeColor: colorScheme.primary.withOpacity(0.3),
+            inactiveColor: colorScheme.onSurface.withOpacity(0.3),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -50,6 +95,11 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Payment Steps
+            _buildPaymentSteps(context),
+
+            const SizedBox(height: 16),
+
             // Amount Display
             Container(
               width: double.infinity,
@@ -77,24 +127,23 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Payment Methods
             Consumer<PaymentsProvider>(
               builder: (context, provider, child) {
                 if (provider.isLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
-                
+
                 return Column(
                   children: provider.paymentMethods.map((method) {
                     final isSelected = _selectedMethod == method;
-                    final isBlockchain = method.toLowerCase().contains('polkadot') ||
-                                       method.toLowerCase().contains('kusama');
-                    
+                    final isBlockchain =
+                        method.toLowerCase().contains('polkadot') ||
+                        method.toLowerCase().contains('kusama');
+
                     return Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       child: InkWell(
@@ -134,15 +183,15 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                                   isBlockchain
                                       ? Icons.account_balance_wallet
                                       : method.toLowerCase().contains('card')
-                                          ? Icons.credit_card
-                                          : Icons.payments,
+                                      ? Icons.credit_card
+                                      : Icons.payments,
                                   color: Colors.white,
                                   size: 24,
                                 ),
                               ),
-                              
+
                               const SizedBox(width: 16),
-                              
+
                               // Method Name
                               Expanded(
                                 child: Column(
@@ -150,24 +199,27 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                                   children: [
                                     Text(
                                       method,
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w600,
-                                        color: colorScheme.onSurface,
-                                      ),
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                            color: colorScheme.onSurface,
+                                          ),
                                     ),
                                     if (isBlockchain) ...[
                                       const SizedBox(height: 2),
                                       Text(
                                         'Blockchain Payment',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: colorScheme.onSurface.withOpacity(0.6),
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                              color: colorScheme.onSurface
+                                                  .withOpacity(0.6),
+                                            ),
                                       ),
                                     ],
                                   ],
                                 ),
                               ),
-                              
+
                               // Selection Indicator
                               if (isSelected)
                                 Icon(
@@ -196,10 +248,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text(
-            'Cancel',
-            style: TextStyle(color: colorScheme.onSurface),
-          ),
+          child: Text('Cancel', style: TextStyle(color: colorScheme.onSurface)),
         ),
         ElevatedButton(
           onPressed: _isLoading || _selectedMethod == null
@@ -218,7 +267,9 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      colorScheme.onPrimary,
+                    ),
                   ),
                 )
               : const Text('Continue'),
@@ -236,18 +287,19 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
 
     try {
       final provider = context.read<PaymentsProvider>();
-      
+
       // Check if it's a blockchain payment
-      final isBlockchain = _selectedMethod!.toLowerCase().contains('polkadot') ||
-                          _selectedMethod!.toLowerCase().contains('kusama');
-      
+      final isBlockchain =
+          _selectedMethod!.toLowerCase().contains('polkadot') ||
+          _selectedMethod!.toLowerCase().contains('kusama');
+
       if (isBlockchain) {
         // Process blockchain payment
         final success = await provider.processPaymentWithBlockchain(
           amount: widget.amount,
           network: _selectedMethod!,
         );
-        
+
         if (success && mounted) {
           Navigator.of(context).pop();
           // Navigate to payment confirmation page
@@ -269,7 +321,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
             amount: widget.amount,
           ),
         );
-        
+
         if (success && mounted) {
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(

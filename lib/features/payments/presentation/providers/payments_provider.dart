@@ -20,7 +20,7 @@ class PaymentsProvider extends ChangeNotifier {
   List<String> _paymentMethods = [];
   bool _isLoading = false;
   String? _error;
-  
+
   // Current payment state
   Payment? _currentPayment;
   PaymentStatus _paymentStatus = PaymentStatus.idle;
@@ -50,7 +50,10 @@ class PaymentsProvider extends ChangeNotifier {
   String _generateBlockchainTxId() {
     final random = Random();
     final hexChars = '0123456789abcdef';
-    final txId = List.generate(64, (index) => hexChars[random.nextInt(hexChars.length)]).join();
+    final txId = List.generate(
+      64,
+      (index) => hexChars[random.nextInt(hexChars.length)],
+    ).join();
     return '0x$txId';
   }
 
@@ -58,50 +61,50 @@ class PaymentsProvider extends ChangeNotifier {
   Future<String> startPayment(double amount) async {
     _setLoading(true);
     _clearError();
-    
+
     _paymentId = _generatePaymentId();
     _paymentAmount = amount;
     _paymentStatus = PaymentStatus.waiting;
     _blockchainTxId = null;
-    
+
     // Create payment entity
     _currentPayment = Payment(
       id: _paymentId!,
       status: 'pending',
       amount: amount,
     );
-    
+
     notifyListeners();
     _setLoading(false);
-    
+
     return _paymentId!;
   }
 
   /// Simulate blockchain payment confirmation
   Future<void> simulateBlockchainConfirmation() async {
     if (_paymentStatus != PaymentStatus.waiting) return;
-    
+
     _setLoading(true);
-    
+
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 3));
-    
+
     // Generate blockchain transaction ID
     _blockchainTxId = _generateBlockchainTxId();
-    
+
     // Update payment status
     _paymentStatus = PaymentStatus.confirmed;
-    
+
     if (_currentPayment != null) {
       _currentPayment = _currentPayment!.copyWith(
         status: 'completed',
         blockchainTxId: _blockchainTxId,
       );
-      
+
       // Add to payments list
       _payments.add(_currentPayment!);
     }
-    
+
     notifyListeners();
     _setLoading(false);
   }
@@ -131,17 +134,12 @@ class PaymentsProvider extends ChangeNotifier {
   Future<List<String>> getAvailablePaymentMethods() async {
     _setLoading(true);
     _clearError();
-    
+
     // Simulate API call
     await Future.delayed(const Duration(milliseconds: 500));
-    
-    final methods = [
-      'Polkadot (DOT)',
-      'Kusama (KSM)',
-      'Credit Card',
-      'Cash',
-    ];
-    
+
+    final methods = ['Polkadot (DOT)', 'Kusama (KSM)', 'Credit Card', 'Cash'];
+
     _setPaymentMethods(methods);
     _setLoading(false);
     return methods;
@@ -154,14 +152,14 @@ class PaymentsProvider extends ChangeNotifier {
   }) async {
     _setLoading(true);
     _clearError();
-    
+
     try {
       // Start payment process
       await startPayment(amount);
-      
+
       // Simulate blockchain processing
       await _simulateBlockchainProcessing(network);
-      
+
       _setLoading(false);
       return true;
     } catch (e) {
@@ -174,27 +172,27 @@ class PaymentsProvider extends ChangeNotifier {
   /// Simulate blockchain processing
   Future<void> _simulateBlockchainProcessing(String network) async {
     // Simulate network delay based on network
-    final delay = network.toLowerCase().contains('polkadot') 
+    final delay = network.toLowerCase().contains('polkadot')
         ? const Duration(seconds: 5)
         : const Duration(seconds: 3);
-    
+
     await Future.delayed(delay);
-    
+
     // Generate transaction ID
     _blockchainTxId = _generateBlockchainTxId();
-    
+
     // Update status
     _paymentStatus = PaymentStatus.confirmed;
-    
+
     if (_currentPayment != null) {
       _currentPayment = _currentPayment!.copyWith(
         status: 'completed',
         blockchainTxId: _blockchainTxId,
       );
-      
+
       _payments.add(_currentPayment!);
     }
-    
+
     notifyListeners();
   }
 
@@ -266,10 +264,4 @@ class PaymentsProvider extends ChangeNotifier {
 }
 
 /// Payment status enum
-enum PaymentStatus {
-  idle,
-  waiting,
-  confirmed,
-  cancelled,
-  failed,
-}
+enum PaymentStatus { idle, waiting, confirmed, cancelled, failed }
