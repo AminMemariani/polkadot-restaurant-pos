@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -38,7 +37,7 @@ class AppRouter {
             final amount = state.uri.queryParameters['amount'];
             final network = state.uri.queryParameters['network'];
             final receipts = context.read<ReceiptsProvider>();
-            final payments = context.read<PaymentsProvider>();
+            context.read<PaymentsProvider>();
 
             final parsedAmount =
                 double.tryParse(amount ?? '') ?? receipts.total;

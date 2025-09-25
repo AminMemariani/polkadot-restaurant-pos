@@ -65,7 +65,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(ProductCard));
+      await tester.tap(find.byType(ProductCard), warnIfMissed: false);
       await tester.pump();
 
       // Assert
