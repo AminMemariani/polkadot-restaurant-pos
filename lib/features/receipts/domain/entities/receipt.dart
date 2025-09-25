@@ -3,42 +3,67 @@ import 'package:equatable/equatable.dart';
 /// Receipt entity representing a sales transaction
 class Receipt extends Equatable {
   final String id;
-  final String customerName;
   final List<ReceiptItem> items;
-  final double subtotal;
-  final double tax;
   final double total;
-  final String paymentMethod;
-  final String status;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final double tax;
+  final double serviceFee;
 
   const Receipt({
     required this.id,
-    required this.customerName,
     required this.items,
-    required this.subtotal,
-    required this.tax,
     required this.total,
-    required this.paymentMethod,
-    required this.status,
-    required this.createdAt,
-    required this.updatedAt,
+    required this.tax,
+    required this.serviceFee,
   });
 
+  /// Create a copy of this receipt with updated fields
+  Receipt copyWith({
+    String? id,
+    List<ReceiptItem>? items,
+    double? total,
+    double? tax,
+    double? serviceFee,
+  }) {
+    return Receipt(
+      id: id ?? this.id,
+      items: items ?? this.items,
+      total: total ?? this.total,
+      tax: tax ?? this.tax,
+      serviceFee: serviceFee ?? this.serviceFee,
+    );
+  }
+
+  /// Create Receipt from JSON
+  factory Receipt.fromJson(Map<String, dynamic> json) {
+    return Receipt(
+      id: json['id'] as String,
+      items: (json['items'] as List<dynamic>)
+          .map((item) => ReceiptItem.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      total: (json['total'] as num).toDouble(),
+      tax: (json['tax'] as num).toDouble(),
+      serviceFee: (json['serviceFee'] as num).toDouble(),
+    );
+  }
+
+  /// Convert Receipt to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'items': items.map((item) => item.toJson()).toList(),
+      'total': total,
+      'tax': tax,
+      'serviceFee': serviceFee,
+    };
+  }
+
   @override
-  List<Object?> get props => [
-    id,
-    customerName,
-    items,
-    subtotal,
-    tax,
-    total,
-    paymentMethod,
-    status,
-    createdAt,
-    updatedAt,
-  ];
+  List<Object?> get props => [id, items, total, tax, serviceFee];
+
+  @override
+  String toString() {
+    return 'Receipt(id: $id, items: $items, total: $total, tax: $tax, serviceFee: $serviceFee)';
+  }
 }
 
 /// Receipt item entity
@@ -57,6 +82,50 @@ class ReceiptItem extends Equatable {
     required this.total,
   });
 
+  /// Create a copy of this receipt item with updated fields
+  ReceiptItem copyWith({
+    String? productId,
+    String? productName,
+    double? price,
+    int? quantity,
+    double? total,
+  }) {
+    return ReceiptItem(
+      productId: productId ?? this.productId,
+      productName: productName ?? this.productName,
+      price: price ?? this.price,
+      quantity: quantity ?? this.quantity,
+      total: total ?? this.total,
+    );
+  }
+
+  /// Create ReceiptItem from JSON
+  factory ReceiptItem.fromJson(Map<String, dynamic> json) {
+    return ReceiptItem(
+      productId: json['productId'] as String,
+      productName: json['productName'] as String,
+      price: (json['price'] as num).toDouble(),
+      quantity: json['quantity'] as int,
+      total: (json['total'] as num).toDouble(),
+    );
+  }
+
+  /// Convert ReceiptItem to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'productId': productId,
+      'productName': productName,
+      'price': price,
+      'quantity': quantity,
+      'total': total,
+    };
+  }
+
   @override
   List<Object?> get props => [productId, productName, price, quantity, total];
+
+  @override
+  String toString() {
+    return 'ReceiptItem(productId: $productId, productName: $productName, price: $price, quantity: $quantity, total: $total)';
+  }
 }
