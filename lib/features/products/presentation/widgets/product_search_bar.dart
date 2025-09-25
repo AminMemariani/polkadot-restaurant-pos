@@ -31,7 +31,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
     super.initState();
     _controller = TextEditingController(text: widget.initialQuery);
     _focusNode = FocusNode();
-    
+
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
         // Delay hiding suggestions to allow for tap
@@ -66,8 +66,8 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
             color: colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _focusNode.hasFocus 
-                  ? colorScheme.primary 
+              color: _focusNode.hasFocus
+                  ? colorScheme.primary
                   : colorScheme.outline.withOpacity(0.3),
               width: _focusNode.hasFocus ? 2 : 1,
             ),
@@ -87,12 +87,15 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
             onChanged: (value) {
               widget.onSearchChanged(value);
               setState(() {
-                _showSuggestions = value.isNotEmpty && widget.suggestions.isNotEmpty;
+                _showSuggestions =
+                    value.isNotEmpty && widget.suggestions.isNotEmpty;
               });
             },
             onTap: () {
               setState(() {
-                _showSuggestions = _controller.text.isNotEmpty && widget.suggestions.isNotEmpty;
+                _showSuggestions =
+                    _controller.text.isNotEmpty &&
+                    widget.suggestions.isNotEmpty;
               });
             },
             decoration: InputDecoration(
@@ -103,8 +106,8 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
               ),
               prefixIcon: Icon(
                 Icons.search,
-                color: _focusNode.hasFocus 
-                    ? colorScheme.primary 
+                color: _focusNode.hasFocus
+                    ? colorScheme.primary
                     : colorScheme.onSurface.withOpacity(0.6),
                 size: 24,
               ),
@@ -131,10 +134,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
                 vertical: 16,
               ),
             ),
-            style: TextStyle(
-              fontSize: 16,
-              color: colorScheme.onSurface,
-            ),
+            style: TextStyle(fontSize: 16, color: colorScheme.onSurface),
           ),
         ),
 
@@ -145,9 +145,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
             decoration: BoxDecoration(
               color: colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: colorScheme.outline.withOpacity(0.2),
-              ),
+              border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
               boxShadow: [
                 BoxShadow(
                   color: colorScheme.shadow.withOpacity(0.1),
@@ -181,10 +179,7 @@ class _SuggestionTile extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
 
-  const _SuggestionTile({
-    required this.product,
-    required this.onTap,
-  });
+  const _SuggestionTile({required this.product, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -215,7 +210,7 @@ class _SuggestionTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Product Info
               Expanded(
                 child: Column(
@@ -240,7 +235,7 @@ class _SuggestionTile extends StatelessWidget {
                   ],
                 ),
               ),
-              
+
               // Price
               Text(
                 '\$${product.price.toStringAsFixed(2)}',

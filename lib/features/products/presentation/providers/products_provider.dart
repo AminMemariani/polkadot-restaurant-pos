@@ -40,13 +40,12 @@ class ProductsProvider extends ChangeNotifier {
     _clearError();
 
     final result = await getProducts();
-    result.fold(
-      (failure) => _setError(_mapFailureToMessage(failure)),
-      (products) {
-        _setProducts(products);
-        _filteredProducts = products;
-      },
-    );
+    result.fold((failure) => _setError(_mapFailureToMessage(failure)), (
+      products,
+    ) {
+      _setProducts(products);
+      _filteredProducts = products;
+    });
 
     _setLoading(false);
   }
@@ -115,16 +114,16 @@ class ProductsProvider extends ChangeNotifier {
   /// Search products by name or ID
   void searchProducts(String query) {
     _searchQuery = query.toLowerCase();
-    
+
     if (_searchQuery.isEmpty) {
       _filteredProducts = _products;
     } else {
       _filteredProducts = _products.where((product) {
         return product.name.toLowerCase().contains(_searchQuery) ||
-               product.id.toLowerCase().contains(_searchQuery);
+            product.id.toLowerCase().contains(_searchQuery);
       }).toList();
     }
-    
+
     notifyListeners();
   }
 
@@ -138,12 +137,15 @@ class ProductsProvider extends ChangeNotifier {
   /// Get search suggestions for autocomplete
   List<Product> getSearchSuggestions(String query) {
     if (query.isEmpty) return [];
-    
+
     final lowercaseQuery = query.toLowerCase();
-    return _products.where((product) {
-      return product.name.toLowerCase().contains(lowercaseQuery) ||
-             product.id.toLowerCase().contains(lowercaseQuery);
-    }).take(5).toList();
+    return _products
+        .where((product) {
+          return product.name.toLowerCase().contains(lowercaseQuery) ||
+              product.id.toLowerCase().contains(lowercaseQuery);
+        })
+        .take(5)
+        .toList();
   }
 
   /// Get product by ID

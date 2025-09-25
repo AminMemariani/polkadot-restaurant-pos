@@ -5,7 +5,9 @@ import '../../domain/entities/receipt.dart';
 import '../../domain/usecases/create_receipt.dart';
 import '../../domain/usecases/get_receipts.dart';
 import '../../domain/usecases/update_receipt.dart';
+import '../../../products/domain/entities/product.dart';
 
+/// Provider for managing receipts state and current order
 class ReceiptsProvider extends ChangeNotifier {
   final GetReceipts getReceipts;
   final CreateReceipt createReceipt;
@@ -18,13 +20,151 @@ class ReceiptsProvider extends ChangeNotifier {
   });
 
   List<Receipt> _receipts = [];
+  List<ReceiptItem> _currentOrderItems = [];
   bool _isLoading = false;
   String? _error;
 
+  // Tax and fee rates (configurable)
+  double _taxRate = 0.08; // 8% tax
+  double _serviceFeeRate = 0.05; // 5% service fee
+
+  // Getters
   List<Receipt> get receipts => _receipts;
+  List<ReceiptItem> get currentOrderItems => _currentOrderItems;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  double get taxRate => _taxRate;
+  double get serviceFeeRate => _serviceFeeRate;
 
+  // Calculated values
+  double get subtotal {
+    return _currentOrderItems.fold(0.0, (sum, item) => sum + item.total);
+  }
+
+  double get tax {
+    return subtotal * _taxRate;
+  }
+
+  double get serviceFee {
+    return subtotal * _serviceFeeRate;
+  }
+
+  double get total {
+    return subtotal + tax + serviceFee;
+  }
+
+  bool get hasItems => _currentOrderItems.isNotEmpty;
+
+  /// Add a product to the current order
+  void addProductToOrder(Product product, {int quantity = 1}) {
+    final existingItemIndex = _currentOrderItems.indexWhere(
+      (item) => item.productId == product.id,
+    );
+
+    if (existingItemIndex != -1) {
+      // Update existing item quantity
+      final existingItem = _currentOrderItems[existingItemIndex];
+      final newQuantity = existingItem.quantity + quantity;
+      final newTotal = product.price * newQuantity;
+
+      _currentOrderItems[existingItemIndex] = existingItem.copyWith(
+        quantity: newQuantity,
+        total: newTotal,
+      );
+    } else {
+      // Add new item
+      final newItem = ReceiptItem(
+        productId: product.id,
+        productName: product.name,
+        price: product.price,
+        quantity: quantity,
+        total: product.price * quantity,
+      );
+      _currentOrderItems.add(newItem);
+    }
+
+    notifyListeners();
+  }
+
+  /// Remove a product from the current order
+  void removeProductFromOrder(String productId) {
+    _currentOrderItems.removeWhere((item) => item.productId == productId);
+    notifyListeners();
+  }
+
+  /// Update quantity of a product in the current order
+  void updateProductQuantity(String productId, int newQuantity) {
+    if (newQuantity <= 0) {
+      removeProductFromOrder(productId);
+      return;
+    }
+
+    final itemIndex = _currentOrderItems.indexWhere(
+      (item) => item.productId == productId,
+    );
+
+    if (itemIndex != -1) {
+      final item = _currentOrderItems[itemIndex];
+      final newTotal = item.price * newQuantity;
+
+      _currentOrderItems[itemIndex] = item.copyWith(
+        quantity: newQuantity,
+        total: newTotal,
+      );
+      notifyListeners();
+    }
+  }
+
+  /// Clear the current order
+  void clearCurrentOrder() {
+    _currentOrderItems.clear();
+    notifyListeners();
+  }
+
+  /// Set tax rate
+  void setTaxRate(double rate) {
+    _taxRate = rate.clamp(0.0, 1.0); // Clamp between 0% and 100%
+    notifyListeners();
+  }
+
+  /// Set service fee rate
+  void setServiceFeeRate(double rate) {
+    _serviceFeeRate = rate.clamp(0.0, 1.0); // Clamp between 0% and 100%
+    notifyListeners();
+  }
+
+  /// Create receipt from current order
+  Future<bool> createReceiptFromCurrentOrder() async {
+    if (_currentOrderItems.isEmpty) return false;
+
+    _setLoading(true);
+    _clearError();
+
+    final receipt = Receipt(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      items: List.from(_currentOrderItems),
+      total: total,
+      tax: tax,
+      serviceFee: serviceFee,
+    );
+
+    final result = await createReceipt(receipt);
+    bool success = false;
+
+    result.fold((failure) => _setError(_mapFailureToMessage(failure)), (
+      createdReceipt,
+    ) {
+      _receipts.add(createdReceipt);
+      clearCurrentOrder(); // Clear order after successful creation
+      notifyListeners();
+      success = true;
+    });
+
+    _setLoading(false);
+    return success;
+  }
+
+  /// Load all receipts
   Future<void> loadReceipts() async {
     _setLoading(true);
     _clearError();
@@ -38,7 +178,8 @@ class ReceiptsProvider extends ChangeNotifier {
     _setLoading(false);
   }
 
-  Future<bool> addReceipt(Receipt receipt) async {
+  /// Create a new receipt
+  Future<bool> createNewReceipt(Receipt receipt) async {
     _setLoading(true);
     _clearError();
 
@@ -57,6 +198,30 @@ class ReceiptsProvider extends ChangeNotifier {
     return success;
   }
 
+  /// Update an existing receipt
+  Future<bool> updateExistingReceipt(Receipt receipt) async {
+    _setLoading(true);
+    _clearError();
+
+    final result = await updateReceipt(receipt);
+    bool success = false;
+
+    result.fold((failure) => _setError(_mapFailureToMessage(failure)), (
+      updatedReceipt,
+    ) {
+      final index = _receipts.indexWhere((r) => r.id == updatedReceipt.id);
+      if (index != -1) {
+        _receipts[index] = updatedReceipt;
+        notifyListeners();
+      }
+      success = true;
+    });
+
+    _setLoading(false);
+    return success;
+  }
+
+  // Private methods
   void _setLoading(bool loading) {
     _isLoading = loading;
     notifyListeners();

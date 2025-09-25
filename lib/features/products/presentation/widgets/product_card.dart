@@ -6,6 +6,7 @@ class ProductCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onAddToOrder;
   final bool showActions;
 
   const ProductCard({
@@ -14,6 +15,7 @@ class ProductCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onAddToOrder,
     this.showActions = true,
   });
 
@@ -25,9 +27,7 @@ class ProductCard extends StatelessWidget {
     return Card(
       elevation: 2,
       shadowColor: colorScheme.shadow.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
@@ -54,7 +54,7 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  
+
                   // Product Info
                   Expanded(
                     child: Column(
@@ -80,7 +80,28 @@ class ProductCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  
+
+                  // Add to Order Button
+                  if (onAddToOrder != null)
+                    Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      child: IconButton(
+                        onPressed: onAddToOrder,
+                        icon: Icon(
+                          Icons.add_shopping_cart,
+                          color: colorScheme.primary,
+                          size: 20,
+                        ),
+                        tooltip: 'Add to Order',
+                        style: IconButton.styleFrom(
+                          backgroundColor: colorScheme.primaryContainer.withOpacity(0.3),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+
                   // Actions Menu
                   if (showActions)
                     PopupMenuButton<String>(
@@ -109,10 +130,7 @@ class ProductCard extends StatelessWidget {
                                 color: colorScheme.onSurface,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'Edit',
-                                style: theme.textTheme.bodyMedium,
-                              ),
+                              Text('Edit', style: theme.textTheme.bodyMedium),
                             ],
                           ),
                         ),
@@ -139,13 +157,16 @@ class ProductCard extends StatelessWidget {
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Price Section
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: colorScheme.primaryContainer.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
@@ -183,6 +204,7 @@ class ProductGridCard extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onAddToOrder;
   final bool showActions;
 
   const ProductGridCard({
@@ -191,6 +213,7 @@ class ProductGridCard extends StatelessWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.onAddToOrder,
     this.showActions = true,
   });
 
@@ -202,9 +225,7 @@ class ProductGridCard extends StatelessWidget {
     return Card(
       elevation: 2,
       shadowColor: colorScheme.shadow.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
@@ -231,7 +252,29 @@ class ProductGridCard extends StatelessWidget {
                       size: 20,
                     ),
                   ),
-                  
+
+                  // Add to Order Button
+                  if (onAddToOrder != null)
+                    Container(
+                      margin: const EdgeInsets.only(right: 4),
+                      child: IconButton(
+                        onPressed: onAddToOrder,
+                        icon: Icon(
+                          Icons.add_shopping_cart,
+                          color: colorScheme.primary,
+                          size: 16,
+                        ),
+                        tooltip: 'Add to Order',
+                        style: IconButton.styleFrom(
+                          backgroundColor: colorScheme.primaryContainer.withOpacity(0.3),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+
                   // Actions Menu
                   if (showActions)
                     PopupMenuButton<String>(
@@ -261,10 +304,7 @@ class ProductGridCard extends StatelessWidget {
                                 color: colorScheme.onSurface,
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                'Edit',
-                                style: theme.textTheme.bodySmall,
-                              ),
+                              Text('Edit', style: theme.textTheme.bodySmall),
                             ],
                           ),
                         ),
@@ -291,9 +331,9 @@ class ProductGridCard extends StatelessWidget {
                     ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Product Name
               Text(
                 product.name,
@@ -304,9 +344,9 @@ class ProductGridCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              
+
               const SizedBox(height: 4),
-              
+
               // Product ID
               Text(
                 'ID: ${product.id}',
@@ -317,9 +357,9 @@ class ProductGridCard extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              
+
               const Spacer(),
-              
+
               // Price
               Container(
                 width: double.infinity,

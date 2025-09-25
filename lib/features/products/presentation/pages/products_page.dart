@@ -6,6 +6,7 @@ import '../providers/products_provider.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_form_dialog.dart';
 import '../widgets/product_search_bar.dart';
+import '../../../receipts/presentation/providers/receipts_provider.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -58,10 +59,7 @@ class _ProductsPageState extends State<ProductsPage> {
           ),
           // Refresh Button
           IconButton(
-            icon: Icon(
-              Icons.refresh,
-              color: colorScheme.onSurface,
-            ),
+            icon: Icon(Icons.refresh, color: colorScheme.onSurface),
             onPressed: () => context.read<ProductsProvider>().loadProducts(),
             tooltip: 'Refresh',
           ),
@@ -76,7 +74,9 @@ class _ProductsPageState extends State<ProductsPage> {
               builder: (context, provider, child) {
                 return ProductSearchBar(
                   initialQuery: provider.searchQuery,
-                  suggestions: provider.getSearchSuggestions(provider.searchQuery),
+                  suggestions: provider.getSearchSuggestions(
+                    provider.searchQuery,
+                  ),
                   onSearchChanged: (query) => provider.searchProducts(query),
                   onSuggestionSelected: (product) {
                     provider.searchProducts(product.name);
@@ -86,7 +86,7 @@ class _ProductsPageState extends State<ProductsPage> {
               },
             ),
           ),
-          
+
           // Products List/Grid
           Expanded(
             child: Consumer<ProductsProvider>(
@@ -96,9 +96,7 @@ class _ProductsPageState extends State<ProductsPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(
-                          color: colorScheme.primary,
-                        ),
+                        CircularProgressIndicator(color: colorScheme.primary),
                         const SizedBox(height: 16),
                         Text(
                           'Loading products...',
@@ -220,12 +218,13 @@ class _ProductsPageState extends State<ProductsPage> {
                 if (_isGridView) {
                   return GridView.builder(
                     padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.8,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.8,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                        ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
@@ -233,6 +232,7 @@ class _ProductsPageState extends State<ProductsPage> {
                         product: product,
                         onEdit: () => _showProductForm(context, product),
                         onDelete: () => _deleteProduct(context, product),
+                        onAddToOrder: () => _addProductToOrder(context, product),
                       );
                     },
                   );
@@ -248,6 +248,7 @@ class _ProductsPageState extends State<ProductsPage> {
                           product: product,
                           onEdit: () => _showProductForm(context, product),
                           onDelete: () => _deleteProduct(context, product),
+                          onAddToOrder: () => _addProductToOrder(context, product),
                         ),
                       );
                     },
@@ -267,7 +268,6 @@ class _ProductsPageState extends State<ProductsPage> {
       ),
     );
   }
-
 
   void _showProductForm(BuildContext context, product) {
     showDialog(
@@ -305,5 +305,30 @@ class _ProductsPageState extends State<ProductsPage> {
         ],
       ),
     );
+  }
+
+  void _addProductToOrder(BuildContext context, product) {
+    try {
+      context.read<ReceiptsProvider>().addProductToOrder(product);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${product.name} added to order'),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add product to order: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 }

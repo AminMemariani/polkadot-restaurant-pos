@@ -72,10 +72,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  prefixIcon: Icon(
-                    Icons.tag,
-                    color: colorScheme.primary,
-                  ),
+                  prefixIcon: Icon(Icons.tag, color: colorScheme.primary),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -83,10 +80,11 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                   }
                   return null;
                 },
-                enabled: !isEditing, // Don't allow editing ID for existing products
+                enabled:
+                    !isEditing, // Don't allow editing ID for existing products
               ),
               const SizedBox(height: 16),
-              
+
               // Product Name Field
               TextFormField(
                 controller: _nameController,
@@ -109,7 +107,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 },
               ),
               const SizedBox(height: 16),
-              
+
               // Price Field
               TextFormField(
                 controller: _priceController,
@@ -124,7 +122,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                     color: colorScheme.primary,
                   ),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter a price';
@@ -143,10 +143,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: Text(
-            'Cancel',
-            style: TextStyle(color: colorScheme.onSurface),
-          ),
+          child: Text('Cancel', style: TextStyle(color: colorScheme.onSurface)),
         ),
         ElevatedButton(
           onPressed: _isLoading ? null : _saveProduct,
@@ -163,7 +160,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      colorScheme.onPrimary,
+                    ),
                   ),
                 )
               : Text(isEditing ? 'Update' : 'Add'),
