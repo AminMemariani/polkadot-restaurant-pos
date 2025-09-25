@@ -62,11 +62,7 @@ void main() {
 
     group('fromJson', () {
       test('should create a Product from valid JSON', () {
-        final json = {
-          'id': '2',
-          'name': 'Burger Deluxe',
-          'price': 9.99,
-        };
+        final json = {'id': '2', 'name': 'Burger Deluxe', 'price': 9.99};
 
         final product = Product.fromJson(json);
 
@@ -76,11 +72,7 @@ void main() {
       });
 
       test('should handle integer price in JSON', () {
-        final json = {
-          'id': '3',
-          'name': 'Coffee',
-          'price': 3,
-        };
+        final json = {'id': '3', 'name': 'Coffee', 'price': 3};
 
         final product = Product.fromJson(json);
 
@@ -89,10 +81,7 @@ void main() {
       });
 
       test('should throw when required fields are missing', () {
-        final json = {
-          'id': '4',
-          'name': 'Missing Price',
-        };
+        final json = {'id': '4', 'name': 'Missing Price'};
 
         expect(() => Product.fromJson(json), throwsA(isA<TypeError>()));
       });
@@ -102,11 +91,7 @@ void main() {
       test('should convert Product to JSON', () {
         final json = testProduct.toJson();
 
-        expect(json, {
-          'id': '1',
-          'name': 'Pizza Margherita',
-          'price': 12.99,
-        });
+        expect(json, {'id': '1', 'name': 'Pizza Margherita', 'price': 12.99});
       });
 
       test('should produce valid JSON that can be converted back', () {
@@ -119,32 +104,16 @@ void main() {
 
     group('equality', () {
       test('should be equal when all fields are the same', () {
-        const product1 = Product(
-          id: '1',
-          name: 'Pizza',
-          price: 10.0,
-        );
-        const product2 = Product(
-          id: '1',
-          name: 'Pizza',
-          price: 10.0,
-        );
+        const product1 = Product(id: '1', name: 'Pizza', price: 10.0);
+        const product2 = Product(id: '1', name: 'Pizza', price: 10.0);
 
         expect(product1, equals(product2));
         expect(product1.hashCode, equals(product2.hashCode));
       });
 
       test('should not be equal when fields are different', () {
-        const product1 = Product(
-          id: '1',
-          name: 'Pizza',
-          price: 10.0,
-        );
-        const product2 = Product(
-          id: '2',
-          name: 'Pizza',
-          price: 10.0,
-        );
+        const product1 = Product(id: '1', name: 'Pizza', price: 10.0);
+        const product2 = Product(id: '2', name: 'Pizza', price: 10.0);
 
         expect(product1, isNot(equals(product2)));
       });
@@ -168,11 +137,7 @@ void main() {
 
     group('edge cases', () {
       test('should handle zero price', () {
-        const product = Product(
-          id: 'free',
-          name: 'Free Item',
-          price: 0.0,
-        );
+        const product = Product(id: 'free', name: 'Free Item', price: 0.0);
 
         expect(product.price, 0.0);
         expect(product.toJson()['price'], 0.0);
@@ -189,11 +154,7 @@ void main() {
       });
 
       test('should handle empty strings', () {
-        const product = Product(
-          id: '',
-          name: '',
-          price: 0.0,
-        );
+        const product = Product(id: '', name: '', price: 0.0);
 
         expect(product.id, '');
         expect(product.name, '');

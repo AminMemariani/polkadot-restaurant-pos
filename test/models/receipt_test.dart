@@ -100,7 +100,7 @@ void main() {
               'price': 12.99,
               'quantity': 1,
               'total': 12.99,
-            }
+            },
           ],
           'total': 15.00,
           'tax': 1.20,
@@ -133,10 +133,7 @@ void main() {
       });
 
       test('should throw when required fields are missing', () {
-        final json = {
-          'id': 'incomplete',
-          'items': [],
-        };
+        final json = {'id': 'incomplete', 'items': []};
 
         expect(() => Receipt.fromJson(json), throwsA(isA<TypeError>()));
       });
@@ -276,10 +273,7 @@ void main() {
 
     group('copyWith', () {
       test('should return a new ReceiptItem with updated fields', () {
-        final updatedItem = testItem.copyWith(
-          quantity: 3,
-          total: 38.97,
-        );
+        final updatedItem = testItem.copyWith(quantity: 3, total: 38.97);
 
         expect(updatedItem.productId, '1');
         expect(updatedItem.productName, 'Pizza Margherita');
@@ -288,15 +282,18 @@ void main() {
         expect(updatedItem.total, 38.97);
       });
 
-      test('should return the same ReceiptItem when no fields are provided', () {
-        final copiedItem = testItem.copyWith();
+      test(
+        'should return the same ReceiptItem when no fields are provided',
+        () {
+          final copiedItem = testItem.copyWith();
 
-        expect(copiedItem.productId, testItem.productId);
-        expect(copiedItem.productName, testItem.productName);
-        expect(copiedItem.price, testItem.price);
-        expect(copiedItem.quantity, testItem.quantity);
-        expect(copiedItem.total, testItem.total);
-      });
+          expect(copiedItem.productId, testItem.productId);
+          expect(copiedItem.productName, testItem.productName);
+          expect(copiedItem.price, testItem.price);
+          expect(copiedItem.quantity, testItem.quantity);
+          expect(copiedItem.total, testItem.total);
+        },
+      );
 
       test('should create a completely new instance', () {
         final copiedItem = testItem.copyWith();

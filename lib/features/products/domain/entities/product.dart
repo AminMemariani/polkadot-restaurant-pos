@@ -6,18 +6,10 @@ class Product extends Equatable {
   final String name;
   final double price;
 
-  const Product({
-    required this.id,
-    required this.name,
-    required this.price,
-  });
+  const Product({required this.id, required this.name, required this.price});
 
   /// Create a copy of this product with updated fields
-  Product copyWith({
-    String? id,
-    String? name,
-    double? price,
-  }) {
+  Product copyWith({String? id, String? name, double? price}) {
     return Product(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -36,11 +28,7 @@ class Product extends Equatable {
 
   /// Convert Product to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'price': price,
-    };
+    return {'id': id, 'name': name, 'price': price};
   }
 
   @override

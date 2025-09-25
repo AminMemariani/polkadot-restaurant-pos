@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../shared/widgets/custom_button.dart';
 import '../../domain/entities/product.dart';
 import '../providers/products_provider.dart';
 
@@ -16,150 +15,158 @@ class ProductFormDialog extends StatefulWidget {
 
 class _ProductFormDialogState extends State<ProductFormDialog> {
   final _formKey = GlobalKey<FormState>();
+  final _idController = TextEditingController();
   final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
-  final _categoryController = TextEditingController();
-  final _imageUrlController = TextEditingController();
 
-  bool _isAvailable = true;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.product != null) {
+      _idController.text = widget.product!.id;
       _nameController.text = widget.product!.name;
-      _descriptionController.text = widget.product!.description;
       _priceController.text = widget.product!.price.toString();
-      _categoryController.text = widget.product!.category;
-      _imageUrlController.text = widget.product!.imageUrl ?? '';
-      _isAvailable = widget.product!.isAvailable;
+    } else {
+      // Generate a unique ID for new products
+      _idController.text = DateTime.now().millisecondsSinceEpoch.toString();
     }
   }
 
   @override
   void dispose() {
+    _idController.dispose();
     _nameController.dispose();
-    _descriptionController.dispose();
     _priceController.dispose();
-    _categoryController.dispose();
-    _imageUrlController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isEditing = widget.product != null;
 
     return AlertDialog(
-      title: Text(isEditing ? 'Edit Product' : 'Add Product'),
+      title: Text(
+        isEditing ? 'Edit Product' : 'Add Product',
+        style: theme.textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        ),
+      ),
       content: SizedBox(
         width: double.maxFinite,
         child: Form(
           key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Product Name',
-                    border: OutlineInputBorder(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Product ID Field
+              TextFormField(
+                controller: _idController,
+                decoration: InputDecoration(
+                  labelText: 'Product ID',
+                  hintText: 'Enter unique product ID',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a product name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _priceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
-                    border: OutlineInputBorder(),
-                    prefixText: '\$ ',
-                  ),
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
-                    }
-                    final price = double.tryParse(value);
-                    if (price == null || price <= 0) {
-                      return 'Please enter a valid price';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _categoryController,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a category';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _imageUrlController,
-                  decoration: const InputDecoration(
-                    labelText: 'Image URL (optional)',
-                    border: OutlineInputBorder(),
+                  prefixIcon: Icon(
+                    Icons.tag,
+                    color: colorScheme.primary,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _isAvailable,
-                      onChanged: (value) {
-                        setState(() {
-                          _isAvailable = value ?? true;
-                        });
-                      },
-                    ),
-                    const Text('Available'),
-                  ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a product ID';
+                  }
+                  return null;
+                },
+                enabled: !isEditing, // Don't allow editing ID for existing products
+              ),
+              const SizedBox(height: 16),
+              
+              // Product Name Field
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  labelText: 'Product Name',
+                  hintText: 'Enter product name',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.inventory_2_outlined,
+                    color: colorScheme.primary,
+                  ),
                 ),
-              ],
-            ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a product name';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              
+              // Price Field
+              TextFormField(
+                controller: _priceController,
+                decoration: InputDecoration(
+                  labelText: 'Price',
+                  hintText: '0.00',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: Icon(
+                    Icons.attach_money,
+                    color: colorScheme.primary,
+                  ),
+                ),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a price';
+                  }
+                  final price = double.tryParse(value);
+                  if (price == null || price < 0) {
+                    return 'Please enter a valid price';
+                  }
+                  return null;
+                },
+              ),
+            ],
           ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: colorScheme.onSurface),
+          ),
         ),
-        CustomButton(
-          text: isEditing ? 'Update' : 'Add',
-          isLoading: _isLoading,
+        ElevatedButton(
           onPressed: _isLoading ? null : _saveProduct,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: _isLoading
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(colorScheme.onPrimary),
+                  ),
+                )
+              : Text(isEditing ? 'Update' : 'Add'),
         ),
       ],
     );
@@ -172,21 +179,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       _isLoading = true;
     });
 
-    final now = DateTime.now();
     final product = Product(
-      id:
-          widget.product?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
+      id: _idController.text.trim(),
       name: _nameController.text.trim(),
-      description: _descriptionController.text.trim(),
       price: double.parse(_priceController.text),
-      category: _categoryController.text.trim(),
-      imageUrl: _imageUrlController.text.trim().isEmpty
-          ? null
-          : _imageUrlController.text.trim(),
-      isAvailable: _isAvailable,
-      createdAt: widget.product?.createdAt ?? now,
-      updatedAt: now,
     );
 
     final provider = context.read<ProductsProvider>();
@@ -207,6 +203,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 ? 'Product added successfully'
                 : 'Product updated successfully',
           ),
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
     }

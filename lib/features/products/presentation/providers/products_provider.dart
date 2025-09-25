@@ -22,33 +22,17 @@ class ProductsProvider extends ChangeNotifier {
   });
 
   List<Product> _products = [];
+  List<Product> _filteredProducts = [];
   bool _isLoading = false;
   String? _error;
-  String _selectedCategory = 'All';
+  String _searchQuery = '';
 
   // Getters
   List<Product> get products => _products;
+  List<Product> get filteredProducts => _filteredProducts;
   bool get isLoading => _isLoading;
   String? get error => _error;
-  String get selectedCategory => _selectedCategory;
-
-  List<Product> get filteredProducts {
-    if (_selectedCategory == 'All') {
-      return _products;
-    }
-    return _products
-        .where((product) => product.category == _selectedCategory)
-        .toList();
-  }
-
-  List<String> get categories {
-    final categories = _products
-        .map((product) => product.category)
-        .toSet()
-        .toList();
-    categories.insert(0, 'All');
-    return categories;
-  }
+  String get searchQuery => _searchQuery;
 
   /// Load all products
   Future<void> loadProducts() async {
@@ -58,7 +42,10 @@ class ProductsProvider extends ChangeNotifier {
     final result = await getProducts();
     result.fold(
       (failure) => _setError(_mapFailureToMessage(failure)),
-      (products) => _setProducts(products),
+      (products) {
+        _setProducts(products);
+        _filteredProducts = products;
+      },
     );
 
     _setLoading(false);
@@ -125,23 +112,38 @@ class ProductsProvider extends ChangeNotifier {
     return success;
   }
 
-  /// Set selected category
-  void setSelectedCategory(String category) {
-    _selectedCategory = category;
+  /// Search products by name or ID
+  void searchProducts(String query) {
+    _searchQuery = query.toLowerCase();
+    
+    if (_searchQuery.isEmpty) {
+      _filteredProducts = _products;
+    } else {
+      _filteredProducts = _products.where((product) {
+        return product.name.toLowerCase().contains(_searchQuery) ||
+               product.id.toLowerCase().contains(_searchQuery);
+      }).toList();
+    }
+    
     notifyListeners();
   }
 
-  /// Search products by name
-  List<Product> searchProducts(String query) {
-    if (query.isEmpty) return filteredProducts;
+  /// Clear search and show all products
+  void clearSearch() {
+    _searchQuery = '';
+    _filteredProducts = _products;
+    notifyListeners();
+  }
 
-    return filteredProducts
-        .where(
-          (product) =>
-              product.name.toLowerCase().contains(query.toLowerCase()) ||
-              product.description.toLowerCase().contains(query.toLowerCase()),
-        )
-        .toList();
+  /// Get search suggestions for autocomplete
+  List<Product> getSearchSuggestions(String query) {
+    if (query.isEmpty) return [];
+    
+    final lowercaseQuery = query.toLowerCase();
+    return _products.where((product) {
+      return product.name.toLowerCase().contains(lowercaseQuery) ||
+             product.id.toLowerCase().contains(lowercaseQuery);
+    }).take(5).toList();
   }
 
   /// Get product by ID
@@ -170,6 +172,7 @@ class ProductsProvider extends ChangeNotifier {
 
   void _setProducts(List<Product> products) {
     _products = products;
+    _filteredProducts = products;
     notifyListeners();
   }
 

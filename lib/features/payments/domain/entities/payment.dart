@@ -26,7 +26,9 @@ class Payment extends Equatable {
       id: id ?? this.id,
       status: status ?? this.status,
       amount: amount ?? this.amount,
-      blockchainTxId: clearBlockchainTxId ? null : (blockchainTxId ?? this.blockchainTxId),
+      blockchainTxId: clearBlockchainTxId
+          ? null
+          : (blockchainTxId ?? this.blockchainTxId),
     );
   }
 
