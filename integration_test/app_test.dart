@@ -39,7 +39,7 @@ void main() {
       if (find.byIcon(Icons.receipt_long_rounded).evaluate().isNotEmpty) {
         await tester.tap(find.byIcon(Icons.receipt_long_rounded));
         await tester.pumpAndSettle();
-        
+
         // Verify we're on the receipt page
         expect(find.text('Current Order'), findsOneWidget);
       }

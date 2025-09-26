@@ -21,7 +21,9 @@ abstract class BusinessLogicService {
   Future<DiscountCalculation> calculateDiscount(DiscountRequest request);
 
   /// Validate inventory levels
-  Future<InventoryValidation> validateInventory(InventoryValidationRequest request);
+  Future<InventoryValidation> validateInventory(
+    InventoryValidationRequest request,
+  );
 
   /// Apply business rules for refunds
   Future<RefundCalculation> calculateRefund(RefundRequest request);
@@ -200,13 +202,7 @@ class BusinessRule {
 }
 
 /// Order status enum
-enum OrderStatus {
-  pending,
-  processing,
-  completed,
-  cancelled,
-  refunded,
-}
+enum OrderStatus { pending, processing, completed, cancelled, refunded }
 
 /// Discount request
 class DiscountRequest {
@@ -244,9 +240,7 @@ class DiscountCalculation {
 class InventoryValidationRequest {
   final List<InventoryItem> items;
 
-  const InventoryValidationRequest({
-    required this.items,
-  });
+  const InventoryValidationRequest({required this.items});
 }
 
 /// Inventory item
@@ -361,7 +355,9 @@ class MockBusinessLogicService implements BusinessLogicService {
   }
 
   @override
-  Future<OrderCalculation> calculateOrderTotal(OrderCalculationRequest request) async {
+  Future<OrderCalculation> calculateOrderTotal(
+    OrderCalculationRequest request,
+  ) async {
     // Calculate subtotal
     double subtotal = 0.0;
     for (final item in request.items) {
@@ -384,17 +380,22 @@ class MockBusinessLogicService implements BusinessLogicService {
         serviceFeeApplicableAmount += item.subtotal;
       }
     }
-    final serviceFeeAmount = serviceFeeApplicableAmount * request.serviceFeeRate;
+    final serviceFeeAmount =
+        serviceFeeApplicableAmount * request.serviceFeeRate;
 
     // Calculate discount
-    final discountResult = await calculateDiscount(DiscountRequest(
-      discountCode: request.discountCode ?? '',
-      orderAmount: subtotal,
-      items: request.items,
-      customerId: request.customerId,
-    ));
+    final discountResult = await calculateDiscount(
+      DiscountRequest(
+        discountCode: request.discountCode ?? '',
+        orderAmount: subtotal,
+        items: request.items,
+        customerId: request.customerId,
+      ),
+    );
 
-    final discountAmount = discountResult.isValid ? discountResult.discountAmount : 0.0;
+    final discountAmount = discountResult.isValid
+        ? discountResult.discountAmount
+        : 0.0;
 
     // Calculate total
     final total = subtotal + taxAmount + serviceFeeAmount - discountAmount;
@@ -414,13 +415,15 @@ class MockBusinessLogicService implements BusinessLogicService {
         ),
       if (serviceFeeAmount > 0)
         CalculationBreakdown(
-          description: 'Service Fee (${(request.serviceFeeRate * 100).toStringAsFixed(1)}%)',
+          description:
+              'Service Fee (${(request.serviceFeeRate * 100).toStringAsFixed(1)}%)',
           amount: serviceFeeAmount,
           type: 'service_fee',
         ),
       if (discountAmount > 0)
         CalculationBreakdown(
-          description: 'Discount${discountResult.description.isNotEmpty ? ': ${discountResult.description}' : ''}',
+          description:
+              'Discount${discountResult.description.isNotEmpty ? ': ${discountResult.description}' : ''}',
           amount: -discountAmount,
           type: 'discount',
         ),
@@ -438,7 +441,9 @@ class MockBusinessLogicService implements BusinessLogicService {
   }
 
   @override
-  Future<ValidationResult> validateProduct(ProductValidationRequest request) async {
+  Future<ValidationResult> validateProduct(
+    ProductValidationRequest request,
+  ) async {
     final errors = <String>[];
     final warnings = <String>[];
 
@@ -471,7 +476,9 @@ class MockBusinessLogicService implements BusinessLogicService {
   }
 
   @override
-  Future<ValidationResult> validatePayment(PaymentValidationRequest request) async {
+  Future<ValidationResult> validatePayment(
+    PaymentValidationRequest request,
+  ) async {
     final errors = <String>[];
     final warnings = <String>[];
 
@@ -493,7 +500,8 @@ class MockBusinessLogicService implements BusinessLogicService {
     if (request.paymentMethod.toLowerCase().contains('card')) {
       if (request.cardNumber == null || request.cardNumber!.isEmpty) {
         errors.add('Card number is required for card payments');
-      } else if (request.cardNumber!.length < 13 || request.cardNumber!.length > 19) {
+      } else if (request.cardNumber!.length < 13 ||
+          request.cardNumber!.length > 19) {
         errors.add('Invalid card number length');
       }
 
@@ -516,7 +524,9 @@ class MockBusinessLogicService implements BusinessLogicService {
   }
 
   @override
-  Future<OrderProcessingResult> processOrder(OrderProcessingRequest request) async {
+  Future<OrderProcessingResult> processOrder(
+    OrderProcessingRequest request,
+  ) async {
     final orderId = 'ORD_${DateTime.now().millisecondsSinceEpoch}';
     final appliedRules = <BusinessRule>[];
 
@@ -542,26 +552,32 @@ class MockBusinessLogicService implements BusinessLogicService {
     }
 
     // Apply business rules
-    appliedRules.add(const BusinessRule(
-      id: 'min_order_validation',
-      name: 'Minimum Order Validation',
-      description: 'Validates minimum order requirements',
-      type: 'validation',
-    ));
+    appliedRules.add(
+      const BusinessRule(
+        id: 'min_order_validation',
+        name: 'Minimum Order Validation',
+        description: 'Validates minimum order requirements',
+        type: 'validation',
+      ),
+    );
 
-    appliedRules.add(const BusinessRule(
-      id: 'tax_calculation',
-      name: 'Tax Calculation',
-      description: 'Applies tax to taxable items',
-      type: 'tax',
-    ));
+    appliedRules.add(
+      const BusinessRule(
+        id: 'tax_calculation',
+        name: 'Tax Calculation',
+        description: 'Applies tax to taxable items',
+        type: 'tax',
+      ),
+    );
 
-    appliedRules.add(const BusinessRule(
-      id: 'service_fee_calculation',
-      name: 'Service Fee Calculation',
-      description: 'Applies service fee to applicable items',
-      type: 'tax',
-    ));
+    appliedRules.add(
+      const BusinessRule(
+        id: 'service_fee_calculation',
+        name: 'Service Fee Calculation',
+        description: 'Applies service fee to applicable items',
+        type: 'tax',
+      ),
+    );
 
     return OrderProcessingResult(
       success: true,
@@ -618,7 +634,9 @@ class MockBusinessLogicService implements BusinessLogicService {
   }
 
   @override
-  Future<InventoryValidation> validateInventory(InventoryValidationRequest request) async {
+  Future<InventoryValidation> validateInventory(
+    InventoryValidationRequest request,
+  ) async {
     final errors = <String>[];
     final insufficientItems = <InventoryItem>[];
 

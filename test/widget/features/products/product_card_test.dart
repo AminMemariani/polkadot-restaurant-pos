@@ -31,11 +31,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
-            body: ProductCard(
-              product: testProduct,
-              onTap: () {
-              },
-            ),
+            body: ProductCard(product: testProduct, onTap: () {}),
           ),
         ),
       );

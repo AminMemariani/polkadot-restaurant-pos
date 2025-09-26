@@ -82,17 +82,17 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                   tax: provider.tax,
                   serviceFee: provider.serviceFee,
                   total: provider.total,
-                taxRate: provider.taxRate,
-                serviceFeeRate: provider.serviceFeeRate,
-                hasItems: provider.hasItems,
-                isLoading: provider.isLoading,
-                onCheckout: () {
-                  final amount = provider.total.toStringAsFixed(2);
-                  context.go('/payment?amount=$amount');
-                },
-                onClear: () => _handleClearOrder(context, provider),
-              ),
-            ],
+                  taxRate: provider.taxRate,
+                  serviceFeeRate: provider.serviceFeeRate,
+                  hasItems: provider.hasItems,
+                  isLoading: provider.isLoading,
+                  onCheckout: () {
+                    final amount = provider.total.toStringAsFixed(2);
+                    context.go('/payment?amount=$amount');
+                  },
+                  onClear: () => _handleClearOrder(context, provider),
+                ),
+              ],
             ),
           );
         },
@@ -323,5 +323,4 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
       }
     }
   }
-
 }

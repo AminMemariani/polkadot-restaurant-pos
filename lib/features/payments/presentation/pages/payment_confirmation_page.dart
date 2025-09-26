@@ -199,45 +199,48 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             ),
           ],
         ),
-      child: Column(
-        children: [
-          Text(
-            'Amount to Pay',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.7),
-              fontWeight: FontWeight.w500,
-              fontSize: isTablet ? 18 : 16,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '\$${widget.amount.toStringAsFixed(2)}',
-            style: theme.textTheme.headlineLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: colorScheme.primary,
-              fontSize: isTablet ? 48 : 36,
-              letterSpacing: -1.0,
-            ),
-          ),
-          if (widget.network != null) ...[
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                borderRadius: BorderRadius.circular(12),
+        child: Column(
+          children: [
+            Text(
+              'Amount to Pay',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.7),
+                fontWeight: FontWeight.w500,
+                fontSize: isTablet ? 18 : 16,
               ),
-              child: Text(
-                widget.network!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onPrimary,
-                  fontWeight: FontWeight.w600,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '\$${widget.amount.toStringAsFixed(2)}',
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: colorScheme.primary,
+                fontSize: isTablet ? 48 : 36,
+                letterSpacing: -1.0,
+              ),
+            ),
+            if (widget.network != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  widget.network!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
-        ],
-      ),
+        ),
       ),
     );
   }
@@ -337,7 +340,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
           builder: (context, child) {
             final screenWidth = MediaQuery.of(context).size.width;
             final isTablet = screenWidth > 768;
-            
+
             return Transform.scale(
               scale: _pulseAnimation.value,
               child: Container(

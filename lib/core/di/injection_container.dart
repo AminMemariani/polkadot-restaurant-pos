@@ -50,7 +50,7 @@ Future<void> init() async {
   if (sl.isRegistered<SharedPreferences>()) {
     await sl.reset();
   }
-  
+
   // External dependencies
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
