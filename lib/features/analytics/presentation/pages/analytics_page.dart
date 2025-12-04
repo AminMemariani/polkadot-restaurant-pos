@@ -170,7 +170,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       crossAxisCount: isTablet ? 4 : 2,
       crossAxisSpacing: isTablet ? 20 : 16,
       mainAxisSpacing: isTablet ? 20 : 16,
-      childAspectRatio: isTablet ? 1.2 : 1.0,
+      childAspectRatio: isTablet ? 1.1 : 0.95,
       children: [
         _buildSummaryCard(
           context,
@@ -222,7 +222,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
+      padding: EdgeInsets.all(isTablet ? 20 : 16),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
@@ -239,41 +239,50 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(isTablet ? 10 : 8),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: color, size: isTablet ? 28 : 24),
+                child: Icon(icon, color: color, size: isTablet ? 24 : 20),
               ),
               const Spacer(),
               Icon(
                 Icons.trending_up_rounded,
                 color: colorScheme.onSurfaceVariant,
-                size: isTablet ? 20 : 16,
+                size: isTablet ? 18 : 14,
               ),
             ],
           ),
-          SizedBox(height: isTablet ? 20 : 16),
-          Text(
-            title,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontSize: isTablet ? 16 : 14,
+          SizedBox(height: isTablet ? 12 : 8),
+          Flexible(
+            child: Text(
+              title,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                fontSize: isTablet ? 15 : 12,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          SizedBox(height: isTablet ? 8 : 4),
-          Text(
-            value,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface,
-              fontSize: isTablet ? 24 : 20,
+          SizedBox(height: isTablet ? 6 : 4),
+          Flexible(
+            child: Text(
+              value,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: colorScheme.onSurface,
+                fontSize: isTablet ? 22 : 16,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
