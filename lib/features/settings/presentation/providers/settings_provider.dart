@@ -170,7 +170,7 @@ class SettingsProvider extends ChangeNotifier {
             await blockchainService.updateRpcEndpoint(rpcEndpoint);
           }
         } catch (e) {
-          print('Error updating blockchain service RPC endpoint: $e');
+          debugPrint('Error updating blockchain service RPC endpoint: $e');
         }
       } else {
         _setError('Failed to save RPC endpoint');
@@ -200,7 +200,9 @@ class SettingsProvider extends ChangeNotifier {
             await blockchainService.updateKusamaRpcEndpoint(rpcEndpoint);
           }
         } catch (e) {
-          print('Error updating blockchain service Kusama RPC endpoint: $e');
+          debugPrint(
+            'Error updating blockchain service Kusama RPC endpoint: $e',
+          );
         }
       } else {
         _setError('Failed to save Kusama RPC endpoint');
