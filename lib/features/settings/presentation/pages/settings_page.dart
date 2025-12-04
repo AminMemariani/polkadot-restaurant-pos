@@ -356,7 +356,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           ),
           const SizedBox(height: 20),
-          
+
           // Polkadot RPC Endpoints
           Text(
             'Polkadot RPC Endpoint',
@@ -376,9 +376,9 @@ class _SettingsPageState extends State<SettingsPage> {
               isTablet: isTablet,
             );
           }).toList(),
-          
+
           const SizedBox(height: 24),
-          
+
           // Kusama RPC Endpoints
           Text(
             'Kusama RPC Endpoint',

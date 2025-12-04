@@ -191,7 +191,7 @@ class StorageService {
   /// Load RPC endpoint
   Future<String> loadRpcEndpoint() async {
     try {
-      return _prefs!.getString(_rpcEndpointKey) ?? 
+      return _prefs!.getString(_rpcEndpointKey) ??
           'https://polkadot-rpc.publicnode.com'; // Default endpoint
     } catch (e) {
       print('Error loading RPC endpoint: $e');
@@ -212,7 +212,7 @@ class StorageService {
   /// Load Kusama RPC endpoint
   Future<String> loadKusamaRpcEndpoint() async {
     try {
-      return _prefs!.getString(_kusamaRpcEndpointKey) ?? 
+      return _prefs!.getString(_kusamaRpcEndpointKey) ??
           'https://kusama.publicnode.com'; // Default endpoint
     } catch (e) {
       print('Error loading Kusama RPC endpoint: $e');

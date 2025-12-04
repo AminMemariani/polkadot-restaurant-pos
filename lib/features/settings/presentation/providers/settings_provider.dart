@@ -162,7 +162,7 @@ class SettingsProvider extends ChangeNotifier {
       if (success) {
         _rpcEndpoint = rpcEndpoint;
         notifyListeners();
-        
+
         // Update blockchain service with new endpoint
         try {
           final blockchainService = GetIt.instance<BlockchainService>();
@@ -192,7 +192,7 @@ class SettingsProvider extends ChangeNotifier {
       if (success) {
         _kusamaRpcEndpoint = rpcEndpoint;
         notifyListeners();
-        
+
         // Update blockchain service with new endpoint
         try {
           final blockchainService = GetIt.instance<BlockchainService>();
