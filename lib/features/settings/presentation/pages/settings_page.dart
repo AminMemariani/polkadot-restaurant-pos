@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/settings_provider.dart';
+import '../../../../core/constants/constants.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -99,6 +100,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
                 // Tax & Fee Settings
                 _buildTaxFeeSection(context, provider, isTablet),
+
+                const SizedBox(height: 32),
+
+                // Blockchain RPC Settings
+                _buildBlockchainRpcSection(context, provider, isTablet),
 
                 const SizedBox(height: 32),
 
@@ -299,6 +305,167 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBlockchainRpcSection(
+    BuildContext context,
+    SettingsProvider provider,
+    bool isTablet,
+  ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(isTablet ? 24 : 20),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.link_rounded,
+                color: colorScheme.primary,
+                size: isTablet ? 24 : 20,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Blockchain RPC Endpoint',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          
+          // Polkadot RPC Endpoints
+          Text(
+            'Polkadot RPC Endpoint',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...AppConstants.polkadotRpcEndpoints.map((endpoint) {
+            final isSelected = provider.rpcEndpoint == endpoint;
+            return _buildRpcEndpointOption(
+              context,
+              endpoint: endpoint,
+              isSelected: isSelected,
+              onTap: () => provider.updateRpcEndpoint(endpoint),
+              isTablet: isTablet,
+            );
+          }).toList(),
+          
+          const SizedBox(height: 24),
+          
+          // Kusama RPC Endpoints
+          Text(
+            'Kusama RPC Endpoint',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...AppConstants.kusamaRpcEndpoints.map((endpoint) {
+            final isSelected = provider.kusamaRpcEndpoint == endpoint;
+            return _buildRpcEndpointOption(
+              context,
+              endpoint: endpoint,
+              isSelected: isSelected,
+              onTap: () => provider.updateKusamaRpcEndpoint(endpoint),
+              isTablet: isTablet,
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRpcEndpointOption(
+    BuildContext context, {
+    required String endpoint,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required bool isTablet,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.all(isTablet ? 16 : 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? colorScheme.primaryContainer.withOpacity(0.3)
+                : colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.outline.withOpacity(0.2),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
+                color: isSelected
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
+                size: isTablet ? 24 : 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  endpoint,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
+                    color: isSelected
+                        ? colorScheme.primary
+                        : colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              if (isSelected)
+                Icon(
+                  Icons.check_circle_rounded,
+                  color: colorScheme.primary,
+                  size: isTablet ? 20 : 18,
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

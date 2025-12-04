@@ -8,6 +8,8 @@ class StorageService {
   static const String _settingsKey = 'settings';
   static const String _taxRateKey = 'tax_rate';
   static const String _serviceFeeRateKey = 'service_fee_rate';
+  static const String _rpcEndpointKey = 'polkadot_rpc_endpoint';
+  static const String _kusamaRpcEndpointKey = 'kusama_rpc_endpoint';
 
   static StorageService? _instance;
   static SharedPreferences? _prefs;
@@ -142,9 +144,13 @@ class StorageService {
     try {
       await _prefs!.remove(_productsKey);
       await _prefs!.remove(_receiptsKey);
+      await _prefs!.remove(_productsKey);
+      await _prefs!.remove(_receiptsKey);
       await _prefs!.remove(_settingsKey);
       await _prefs!.remove(_taxRateKey);
       await _prefs!.remove(_serviceFeeRateKey);
+      await _prefs!.remove(_rpcEndpointKey);
+      await _prefs!.remove(_kusamaRpcEndpointKey);
       return true;
     } catch (e) {
       print('Error clearing data: $e');
@@ -172,12 +178,56 @@ class StorageService {
     }
   }
 
+  /// Save RPC endpoint
+  Future<bool> saveRpcEndpoint(String rpcEndpoint) async {
+    try {
+      return await _prefs!.setString(_rpcEndpointKey, rpcEndpoint);
+    } catch (e) {
+      print('Error saving RPC endpoint: $e');
+      return false;
+    }
+  }
+
+  /// Load RPC endpoint
+  Future<String> loadRpcEndpoint() async {
+    try {
+      return _prefs!.getString(_rpcEndpointKey) ?? 
+          'https://polkadot-rpc.publicnode.com'; // Default endpoint
+    } catch (e) {
+      print('Error loading RPC endpoint: $e');
+      return 'https://polkadot-rpc.publicnode.com';
+    }
+  }
+
+  /// Save Kusama RPC endpoint
+  Future<bool> saveKusamaRpcEndpoint(String rpcEndpoint) async {
+    try {
+      return await _prefs!.setString(_kusamaRpcEndpointKey, rpcEndpoint);
+    } catch (e) {
+      print('Error saving Kusama RPC endpoint: $e');
+      return false;
+    }
+  }
+
+  /// Load Kusama RPC endpoint
+  Future<String> loadKusamaRpcEndpoint() async {
+    try {
+      return _prefs!.getString(_kusamaRpcEndpointKey) ?? 
+          'https://kusama.publicnode.com'; // Default endpoint
+    } catch (e) {
+      print('Error loading Kusama RPC endpoint: $e');
+      return 'https://kusama.publicnode.com';
+    }
+  }
+
   /// Clear only settings
   Future<bool> clearSettings() async {
     try {
       await _prefs!.remove(_settingsKey);
       await _prefs!.remove(_taxRateKey);
       await _prefs!.remove(_serviceFeeRateKey);
+      await _prefs!.remove(_rpcEndpointKey);
+      await _prefs!.remove(_kusamaRpcEndpointKey);
       return true;
     } catch (e) {
       print('Error clearing settings: $e');

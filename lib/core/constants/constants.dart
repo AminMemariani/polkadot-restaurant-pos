@@ -18,4 +18,20 @@ class AppConstants {
   // Default values
   static const int defaultTimeout = 30; // seconds
   static const int maxRetries = 3;
+
+  // Polkadot RPC endpoints
+  static const List<String> polkadotRpcEndpoints = [
+    'https://polkadot-rpc.publicnode.com',
+    'https://polkadot-public-rpc.blockops.network/rpc',
+    'https://polkadot.publicnode.com',
+    'https://polkadot.drpc.org/',
+  ];
+
+  // Kusama RPC endpoints
+  static const List<String> kusamaRpcEndpoints = [
+    'https://kusama.publicnode.com',
+    'https://kusama.drpc.org/',
+    'https://kusama-rpc.n.dwellir.com/',
+    'https://rpc.ibp.network/kusama',
+  ];
 }

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import '../storage/storage_service.dart';
+
 /// Abstract blockchain service for handling cryptocurrency payments
 abstract class BlockchainService {
   /// Initialize connection to blockchain network
@@ -178,11 +180,14 @@ enum TransactionStatus { pending, confirmed, failed, reverted }
 
 /// Mock implementation for development/testing
 class MockBlockchainService implements BlockchainService {
-  static const List<BlockchainNetwork> _supportedNetworks = [
+  static List<BlockchainNetwork> _getSupportedNetworks(
+    String polkadotRpcUrl,
+    String kusamaRpcUrl,
+  ) => [
     BlockchainNetwork(
       name: 'Polkadot',
       chainId: 'polkadot',
-      rpcUrl: 'wss://rpc.polkadot.io',
+      rpcUrl: polkadotRpcUrl,
       currency: 'DOT',
       decimals: 10,
       isTestnet: false,
@@ -190,12 +195,12 @@ class MockBlockchainService implements BlockchainService {
     BlockchainNetwork(
       name: 'Kusama',
       chainId: 'kusama',
-      rpcUrl: 'wss://kusama-rpc.polkadot.io',
+      rpcUrl: kusamaRpcUrl,
       currency: 'KSM',
       decimals: 12,
       isTestnet: false,
     ),
-    BlockchainNetwork(
+    const BlockchainNetwork(
       name: 'Polkadot Testnet',
       chainId: 'westend',
       rpcUrl: 'wss://westend-rpc.polkadot.io',
@@ -205,14 +210,43 @@ class MockBlockchainService implements BlockchainService {
     ),
   ];
 
-  BlockchainNetwork _currentNetwork = _supportedNetworks.first;
+  List<BlockchainNetwork> _supportedNetworks = _getSupportedNetworks(
+    'https://polkadot-rpc.publicnode.com',
+    'https://kusama.publicnode.com',
+  );
+  BlockchainNetwork _currentNetwork;
   bool _isConnected = false;
   final Map<String, BlockchainPaymentRequest> _paymentRequests = {};
   final Map<String, StreamController<BlockchainPaymentStatus>> _paymentStreams =
       {};
 
+  MockBlockchainService()
+    : _currentNetwork = _getSupportedNetworks(
+        'https://polkadot-rpc.publicnode.com',
+        'https://kusama.publicnode.com',
+      ).first;
+
   @override
   Future<void> initialize() async {
+    // Load RPC endpoints from storage
+    try {
+      final storageService = await StorageService.getInstance();
+      final polkadotRpcEndpoint = await storageService.loadRpcEndpoint();
+      final kusamaRpcEndpoint = await storageService.loadKusamaRpcEndpoint();
+      _supportedNetworks = _getSupportedNetworks(
+        polkadotRpcEndpoint,
+        kusamaRpcEndpoint,
+      );
+      // Update current network if it's Polkadot or Kusama
+      if (_currentNetwork.chainId == 'polkadot') {
+        _currentNetwork = _supportedNetworks.first;
+      } else if (_currentNetwork.chainId == 'kusama') {
+        _currentNetwork = _supportedNetworks[1];
+      }
+    } catch (e) {
+      print('Error loading RPC endpoints: $e');
+    }
+
     // Simulate connection delay
     await Future.delayed(const Duration(seconds: 2));
     _isConnected = true;
@@ -329,6 +363,40 @@ class MockBlockchainService implements BlockchainService {
   @override
   List<BlockchainNetwork> getSupportedNetworks() {
     return List.unmodifiable(_supportedNetworks);
+  }
+
+  /// Update Polkadot RPC endpoint (for when user changes it in settings)
+  Future<void> updateRpcEndpoint(String rpcEndpoint) async {
+    final kusamaRpcUrl = _supportedNetworks
+        .firstWhere((n) => n.chainId == 'kusama')
+        .rpcUrl;
+    _supportedNetworks = _getSupportedNetworks(rpcEndpoint, kusamaRpcUrl);
+    // Update current network if it's Polkadot
+    if (_currentNetwork.chainId == 'polkadot') {
+      _currentNetwork = _supportedNetworks.first;
+    }
+    // Reconnect if already connected
+    if (_isConnected) {
+      await disconnect();
+      await initialize();
+    }
+  }
+
+  /// Update Kusama RPC endpoint (for when user changes it in settings)
+  Future<void> updateKusamaRpcEndpoint(String rpcEndpoint) async {
+    final polkadotRpcUrl = _supportedNetworks
+        .firstWhere((n) => n.chainId == 'polkadot')
+        .rpcUrl;
+    _supportedNetworks = _getSupportedNetworks(polkadotRpcUrl, rpcEndpoint);
+    // Update current network if it's Kusama
+    if (_currentNetwork.chainId == 'kusama') {
+      _currentNetwork = _supportedNetworks[1];
+    }
+    // Reconnect if already connected
+    if (_isConnected) {
+      await disconnect();
+      await initialize();
+    }
   }
 
   @override
