@@ -5,6 +5,7 @@ import '../../../../shared/services/product_image_service.dart';
 import '../../../../shared/widgets/image_picker_field.dart';
 import '../../domain/entities/product.dart';
 import '../providers/products_provider.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class ProductFormDialog extends StatefulWidget {
   final Product? product;
@@ -93,7 +94,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    prefixIcon: Icon(Icons.tag, color: colorScheme.primary),
+                    prefixIcon: Icon(AppIcons.tag, color: colorScheme.primary),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -116,7 +117,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     prefixIcon: Icon(
-                      Icons.inventory_2_outlined,
+                      AppIcons.inventory2Outlined,
                       color: colorScheme.primary,
                     ),
                   ),
@@ -139,7 +140,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     prefixIcon: Icon(
-                      Icons.attach_money,
+                      AppIcons.attachMoney,
                       color: colorScheme.primary,
                     ),
                   ),

@@ -9,6 +9,7 @@ import '../widgets/product_card.dart';
 import '../widgets/product_form_dialog.dart';
 import '../widgets/product_search_bar.dart';
 import '../../../receipts/presentation/providers/receipts_provider.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class ProductsPage extends StatefulWidget {
   const ProductsPage({super.key});
@@ -51,132 +52,38 @@ class _ProductsPageState extends State<ProductsPage> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         actions: [
-          // Go to Receipt Page
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => context.go('/receipt'),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.receipt_long_rounded,
-                    color: colorScheme.onPrimaryContainer,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+          IconButton(
+            onPressed: () => context.go('/receipt'),
+            icon: Icon(AppIcons.receiptLongRounded),
+            tooltip: 'Current order',
           ),
-          // View Toggle Button
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () {
-                  setState(() {
-                    _isGridView = !_isGridView;
-                  });
-                },
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _isGridView
-                        ? Icons.view_list_rounded
-                        : Icons.grid_view_rounded,
-                    color: colorScheme.onSecondaryContainer,
-                    size: 20,
-                  ),
-                ),
-              ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _isGridView = !_isGridView;
+              });
+            },
+            icon: Icon(
+              _isGridView ? AppIcons.viewListRounded : AppIcons.gridViewRounded,
             ),
+            tooltip: _isGridView ? 'List view' : 'Grid view',
           ),
-          // Refresh Button
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => context.read<ProductsProvider>().loadProducts(),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.tertiaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.refresh_rounded,
-                    color: colorScheme.onTertiaryContainer,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+          IconButton(
+            onPressed: () => context.read<ProductsProvider>().loadProducts(),
+            icon: Icon(AppIcons.refreshRounded),
+            tooltip: 'Refresh',
           ),
-          // Analytics Button
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => context.go('/analytics'),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.analytics_rounded,
-                    color: colorScheme.onSecondaryContainer,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+          IconButton(
+            onPressed: () => context.go('/analytics'),
+            icon: Icon(AppIcons.analyticsRounded),
+            tooltip: 'Analytics',
           ),
-          // Settings Button
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => context.go('/settings'),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.settings_rounded,
-                    color: colorScheme.onSurfaceVariant,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+          IconButton(
+            onPressed: () => context.go('/settings'),
+            icon: Icon(AppIcons.settingsRounded),
+            tooltip: 'Settings',
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
@@ -238,7 +145,7 @@ class _ProductsPageState extends State<ProductsPage> {
                               borderRadius: BorderRadius.circular(40),
                             ),
                             child: Icon(
-                              Icons.error_outline,
+                              AppIcons.errorOutline,
                               size: 40,
                               color: colorScheme.onErrorContainer,
                             ),
@@ -289,7 +196,7 @@ class _ProductsPageState extends State<ProductsPage> {
                               borderRadius: BorderRadius.circular(40),
                             ),
                             child: Icon(
-                              Icons.inventory_2_outlined,
+                              AppIcons.inventory2Outlined,
                               size: 40,
                               color: colorScheme.onPrimaryContainer,
                             ),
@@ -391,7 +298,7 @@ class _ProductsPageState extends State<ProductsPage> {
         ),
         child: FloatingActionButton.extended(
           onPressed: () => _showProductForm(context, null),
-          icon: const Icon(Icons.add_rounded),
+          icon: Icon(AppIcons.addRounded),
           label: Text(
             'Add Product',
             style: theme.textTheme.titleMedium?.copyWith(

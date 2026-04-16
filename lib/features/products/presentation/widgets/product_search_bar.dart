@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_pos_app/features/products/domain/entities/product.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class ProductSearchBar extends StatefulWidget {
   final String initialQuery;
@@ -105,7 +106,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
                 fontSize: 16,
               ),
               prefixIcon: Icon(
-                Icons.search,
+                AppIcons.search,
                 color: _focusNode.hasFocus
                     ? colorScheme.primary
                     : colorScheme.onSurface.withValues(alpha: 0.6),
@@ -114,7 +115,7 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
               suffixIcon: _controller.text.isNotEmpty
                   ? IconButton(
                       icon: Icon(
-                        Icons.clear,
+                        AppIcons.clear,
                         color: colorScheme.onSurface.withValues(alpha: 0.6),
                         size: 20,
                       ),
@@ -206,7 +207,7 @@ class _SuggestionTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
-                  Icons.inventory_2_outlined,
+                  AppIcons.inventory2Outlined,
                   color: colorScheme.onPrimaryContainer,
                   size: 20,
                 ),

@@ -6,6 +6,7 @@ import '../providers/receipts_provider.dart';
 import '../widgets/swipe_to_delete_item.dart';
 import '../widgets/receipt_summary_card.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class ActiveReceiptPage extends StatefulWidget {
   const ActiveReceiptPage({super.key});
@@ -36,29 +37,12 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: () => context.go('/'),
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.home_rounded,
-                    color: colorScheme.onPrimaryContainer,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+          IconButton(
+            onPressed: () => context.go('/'),
+            icon: Icon(AppIcons.homeRounded),
+            tooltip: 'Home',
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Consumer<ReceiptsProvider>(
@@ -143,7 +127,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
             onPressed: () {
               provider.updateProductQuantity(item.productId, item.quantity - 1);
             },
-            icon: Icon(Icons.remove, size: 16, color: colorScheme.primary),
+            icon: Icon(AppIcons.remove, size: 16, color: colorScheme.primary),
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             padding: EdgeInsets.zero,
           ),
@@ -158,7 +142,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
             onPressed: () {
               provider.updateProductQuantity(item.productId, item.quantity + 1);
             },
-            icon: Icon(Icons.add, size: 16, color: colorScheme.primary),
+            icon: Icon(AppIcons.add, size: 16, color: colorScheme.primary),
             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
             padding: EdgeInsets.zero,
           ),
@@ -185,7 +169,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                 borderRadius: BorderRadius.circular(60),
               ),
               child: Icon(
-                Icons.receipt_long_outlined,
+                AppIcons.receiptLongOutlined,
                 size: 60,
                 color: colorScheme.primary.withValues(alpha: 0.6),
               ),
@@ -212,7 +196,10 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                 // Navigate to products page
                 context.go('/');
               },
-              icon: Icon(Icons.add_shopping_cart, color: colorScheme.onPrimary),
+              icon: Icon(
+                AppIcons.addShoppingCart,
+                color: colorScheme.onPrimary,
+              ),
               label: Text(
                 'Add Products',
                 style: TextStyle(
@@ -256,7 +243,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
                 borderRadius: BorderRadius.circular(40),
               ),
               child: Icon(
-                Icons.error_outline,
+                AppIcons.errorOutline,
                 size: 40,
                 color: colorScheme.onErrorContainer,
               ),

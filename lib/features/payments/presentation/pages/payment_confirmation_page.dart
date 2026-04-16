@@ -5,6 +5,7 @@ import 'package:step_bar/step_bar.dart';
 
 import '../providers/payments_provider.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class PaymentConfirmationPage extends StatefulWidget {
   final double amount;
@@ -112,31 +113,13 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         backgroundColor: colorScheme.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 8),
-          child: Material(
-            elevation: 2,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () {
-                context.read<PaymentsProvider>().cancelPayment();
-                Navigator.of(context).pop();
-              },
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.errorContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.close_rounded,
-                  color: colorScheme.onErrorContainer,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
+        leading: IconButton(
+          onPressed: () {
+            context.read<PaymentsProvider>().cancelPayment();
+            Navigator.of(context).pop();
+          },
+          icon: Icon(AppIcons.closeRounded),
+          tooltip: 'Cancel',
         ),
       ),
       body: Consumer<PaymentsProvider>(
@@ -465,7 +448,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                   borderRadius: BorderRadius.circular(60),
                 ),
                 child: Icon(
-                  Icons.check,
+                  AppIcons.check,
                   size: 60,
                   color: colorScheme.onPrimary,
                 ),
@@ -576,7 +559,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             borderRadius: BorderRadius.circular(60),
           ),
           child: Icon(
-            Icons.cancel_outlined,
+            AppIcons.cancelOutlined,
             size: 60,
             color: colorScheme.onErrorContainer,
           ),
@@ -619,7 +602,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             borderRadius: BorderRadius.circular(60),
           ),
           child: Icon(
-            Icons.error_outline,
+            AppIcons.errorOutline,
             size: 60,
             color: colorScheme.onErrorContainer,
           ),
@@ -663,7 +646,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             borderRadius: BorderRadius.circular(60),
           ),
           child: Icon(
-            Icons.payment,
+            AppIcons.payment,
             size: 60,
             color: colorScheme.onSurface.withValues(alpha: 0.5),
           ),
@@ -706,7 +689,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                 Navigator.of(context).pop();
               },
               icon: Icon(
-                Icons.cancel_outlined,
+                AppIcons.cancelOutlined,
                 color: colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               label: Text(
@@ -734,7 +717,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                 provider.resetPayment();
                 Navigator.of(context).pop();
               },
-              icon: Icon(Icons.done, color: colorScheme.onPrimary),
+              icon: Icon(AppIcons.done, color: colorScheme.onPrimary),
               label: Text(
                 'Done',
                 style: TextStyle(
@@ -760,7 +743,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                 provider.resetPayment();
                 Navigator.of(context).pop();
               },
-              icon: Icon(Icons.refresh, color: colorScheme.onPrimary),
+              icon: Icon(AppIcons.refresh, color: colorScheme.onPrimary),
               label: Text(
                 'Try Again',
                 style: TextStyle(

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../services/product_image_service.dart';
 import '../utils/platform_utils.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 /// A form field that previews a product image and lets the user pick one
 /// from the gallery, capture a new photo, or clear the current selection.
@@ -65,7 +66,9 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
 
   void _showError(String message) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -73,7 +76,8 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     // Camera capture is not supported on macOS/desktop or web.
-    final canTakePhoto = PlatformUtils.isIOS ||
+    final canTakePhoto =
+        PlatformUtils.isIOS ||
         (!kIsWeb && defaultTargetPlatform == TargetPlatform.android);
 
     return Column(
@@ -89,9 +93,7 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
             ),
           ),
           clipBehavior: Clip.antiAlias,
-          child: _hasImage
-              ? _buildPreview()
-              : _buildPlaceholder(context),
+          child: _hasImage ? _buildPreview() : _buildPlaceholder(context),
         ),
         const SizedBox(height: 12),
         Row(
@@ -99,7 +101,7 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _busy ? null : _pickGallery,
-                icon: const Icon(Icons.photo_library_outlined, size: 18),
+                icon: Icon(AppIcons.photoLibraryOutlined, size: 18),
                 label: const Text('Gallery'),
               ),
             ),
@@ -108,7 +110,7 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _busy ? null : _takePhoto,
-                  icon: const Icon(Icons.camera_alt_outlined, size: 18),
+                  icon: Icon(AppIcons.cameraAltOutlined, size: 18),
                   label: const Text('Camera'),
                 ),
               ),
@@ -118,10 +120,7 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
               IconButton.outlined(
                 tooltip: 'Remove image',
                 onPressed: _busy ? null : _clear,
-                icon: Icon(
-                  Icons.delete_outline,
-                  color: colorScheme.error,
-                ),
+                icon: Icon(AppIcons.deleteOutline, color: colorScheme.error),
               ),
             ],
           ],
@@ -153,7 +152,7 @@ class _ImagePickerFieldState extends State<ImagePickerField> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.image_outlined,
+            AppIcons.imageOutlined,
             size: 40,
             color: colorScheme.onSurface.withValues(alpha: 0.4),
           ),

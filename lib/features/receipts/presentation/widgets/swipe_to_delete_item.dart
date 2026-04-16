@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_pos_app/features/receipts/domain/entities/receipt.dart';
 import 'package:restaurant_pos_app/shared/widgets/glass/glass.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class SwipeToDeleteItem extends StatefulWidget {
   final ReceiptItem item;
@@ -69,7 +70,7 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.delete_outline,
+                      AppIcons.deleteOutline,
                       color: colorScheme.onError,
                       size: 24,
                     ),
@@ -177,7 +178,7 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    Icons.inventory_2_outlined,
+                    AppIcons.inventory2Outlined,
                     color: colorScheme.onPrimaryContainer,
                     size: 24,
                   ),
@@ -234,7 +235,7 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
                                   // This would be handled by the parent widget
                                 },
                                 icon: Icon(
-                                  Icons.remove,
+                                  AppIcons.remove,
                                   size: 16,
                                   color: colorScheme.primary,
                                 ),
@@ -257,7 +258,7 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
                                   // This would be handled by the parent widget
                                 },
                                 icon: Icon(
-                                  Icons.add,
+                                  AppIcons.add,
                                   size: 16,
                                   color: colorScheme.primary,
                                 ),

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/analytics_provider.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -44,78 +45,23 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
         backgroundColor: colorScheme.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 8),
-          child: Material(
-            elevation: 2,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () => context.go('/'),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  color: colorScheme.onPrimaryContainer,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
+        leading: IconButton(
+          onPressed: () => context.go('/'),
+          icon: Icon(AppIcons.arrowBackRounded),
+          tooltip: 'Back',
         ),
         actions: [
-          // Date Range Picker
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: _selectDateRange,
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.date_range_rounded,
-                    color: colorScheme.onSecondaryContainer,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+          IconButton(
+            onPressed: _selectDateRange,
+            icon: Icon(AppIcons.dateRangeRounded),
+            tooltip: 'Date range',
           ),
-          // Export Button
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(12),
-              child: InkWell(
-                onTap: _exportAnalytics,
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: colorScheme.tertiaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    Icons.download_rounded,
-                    color: colorScheme.onTertiaryContainer,
-                    size: 20,
-                  ),
-                ),
-              ),
-            ),
+          IconButton(
+            onPressed: _exportAnalytics,
+            icon: Icon(AppIcons.downloadRounded),
+            tooltip: 'Export',
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Consumer<AnalyticsProvider>(
@@ -179,7 +125,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           title: 'Total Revenue',
           value:
               '\$${provider.summary?.totalRevenue.toStringAsFixed(2) ?? '0.00'}',
-          icon: Icons.attach_money_rounded,
+          icon: AppIcons.attachMoneyRounded,
           color: colorScheme.primary,
           isTablet: isTablet,
         ),
@@ -187,7 +133,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           context,
           title: 'Total Transactions',
           value: '${provider.summary?.totalTransactions ?? 0}',
-          icon: Icons.receipt_long_rounded,
+          icon: AppIcons.receiptLongRounded,
           color: colorScheme.secondary,
           isTablet: isTablet,
         ),
@@ -196,7 +142,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           title: 'Average Order',
           value:
               '\$${provider.summary?.averageTransactionValue.toStringAsFixed(2) ?? '0.00'}',
-          icon: Icons.shopping_cart_rounded,
+          icon: AppIcons.shoppingCartRounded,
           color: colorScheme.tertiary,
           isTablet: isTablet,
         ),
@@ -204,7 +150,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           context,
           title: 'Active Products',
           value: '${provider.summary?.activeProducts ?? 0}',
-          icon: Icons.inventory_2_rounded,
+          icon: AppIcons.inventory2Rounded,
           color: colorScheme.error,
           isTablet: isTablet,
         ),
@@ -256,7 +202,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               ),
               const Spacer(),
               Icon(
-                Icons.trending_up_rounded,
+                AppIcons.trendingUpRounded,
                 color: colorScheme.onSurfaceVariant,
                 size: isTablet ? 18 : 14,
               ),
@@ -324,7 +270,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           Row(
             children: [
               Icon(
-                Icons.bar_chart_rounded,
+                AppIcons.barChartRounded,
                 color: colorScheme.primary,
                 size: isTablet ? 24 : 20,
               ),
@@ -352,7 +298,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.show_chart_rounded,
+                    AppIcons.showChartRounded,
                     color: colorScheme.onSurfaceVariant,
                     size: isTablet ? 48 : 40,
                   ),
@@ -404,7 +350,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           Row(
             children: [
               Icon(
-                Icons.star_rounded,
+                AppIcons.starRounded,
                 color: colorScheme.primary,
                 size: isTablet ? 24 : 20,
               ),
@@ -518,7 +464,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           Row(
             children: [
               Icon(
-                Icons.payment_rounded,
+                AppIcons.paymentRounded,
                 color: colorScheme.primary,
                 size: isTablet ? 24 : 20,
               ),
@@ -590,7 +536,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline_rounded, color: colorScheme.error, size: 80),
+          Icon(
+            AppIcons.errorOutlineRounded,
+            color: colorScheme.error,
+            size: 80,
+          ),
           const SizedBox(height: 24),
           Text(
             'Error loading analytics',
@@ -610,7 +560,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () => provider.loadAnalytics(),
-            icon: const Icon(Icons.refresh_rounded),
+            icon: Icon(AppIcons.refreshRounded),
             label: const Text('Try Again'),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),

@@ -5,6 +5,7 @@ import 'package:step_bar/step_bar.dart';
 import '../providers/payments_provider.dart';
 import '../pages/payment_confirmation_page.dart';
 import '../../domain/entities/payment.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
   final double amount;
@@ -181,10 +182,10 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                                 ),
                                 child: Icon(
                                   isBlockchain
-                                      ? Icons.account_balance_wallet
+                                      ? AppIcons.accountBalanceWallet
                                       : method.toLowerCase().contains('card')
-                                      ? Icons.credit_card
-                                      : Icons.payments,
+                                      ? AppIcons.creditCard
+                                      : AppIcons.payments,
                                   color: Colors.white,
                                   size: 24,
                                 ),
@@ -223,13 +224,13 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                               // Selection Indicator
                               if (isSelected)
                                 Icon(
-                                  Icons.check_circle,
+                                  AppIcons.checkCircle,
                                   color: colorScheme.primary,
                                   size: 24,
                                 )
                               else
                                 Icon(
-                                  Icons.radio_button_unchecked,
+                                  AppIcons.radioButtonUnchecked,
                                   color: colorScheme.onSurface.withValues(
                                     alpha: 0.4,
                                   ),

@@ -70,8 +70,7 @@ class ProductImageService {
     final ext = p.extension(picked.path).isEmpty
         ? '.jpg'
         : p.extension(picked.path);
-    final filename =
-        'prod_${DateTime.now().microsecondsSinceEpoch}$ext';
+    final filename = 'prod_${DateTime.now().microsecondsSinceEpoch}$ext';
     final target = File(p.join(dir.path, filename));
     await target.writeAsBytes(await picked.readAsBytes());
     return target.path;

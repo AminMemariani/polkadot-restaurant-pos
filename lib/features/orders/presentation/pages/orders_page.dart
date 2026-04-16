@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/services/theme_service.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class OrdersPage extends StatelessWidget {
   const OrdersPage({super.key});
@@ -16,7 +17,9 @@ class OrdersPage extends StatelessWidget {
             builder: (context, themeService, child) {
               return IconButton(
                 icon: Icon(
-                  themeService.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                  themeService.isDarkMode
+                      ? AppIcons.lightMode
+                      : AppIcons.darkMode,
                 ),
                 onPressed: () => themeService.toggleTheme(),
                 tooltip: 'Toggle theme',

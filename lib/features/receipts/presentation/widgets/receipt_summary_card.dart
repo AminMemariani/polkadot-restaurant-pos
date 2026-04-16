@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../shared/utils/platform_utils.dart';
 import '../../../../shared/widgets/glass/glass.dart';
 import '../../../payments/presentation/widgets/payment_method_dialog.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class ReceiptSummaryCard extends StatefulWidget {
   final double subtotal;
@@ -162,7 +163,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
                 ],
               ),
               child: Icon(
-                Icons.receipt_long_rounded,
+                AppIcons.receiptLongRounded,
                 color: colorScheme.onPrimary,
                 size: isTablet ? 28 : 24,
               ),
@@ -358,7 +359,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
             child: OutlinedButton.icon(
               onPressed: widget.isLoading ? null : widget.onClear,
               icon: Icon(
-                Icons.clear_all_rounded,
+                AppIcons.clearAllRounded,
                 size: isTablet ? 20 : 18,
                 color: colorScheme.onSurface.withValues(alpha: 0.7),
               ),
@@ -416,7 +417,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
                       ),
                     )
                   : Icon(
-                      Icons.payment_rounded,
+                      AppIcons.paymentRounded,
                       size: isTablet ? 20 : 18,
                       color: colorScheme.onPrimary,
                     ),
@@ -461,7 +462,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
               borderRadius: BorderRadius.circular(isTablet ? 40 : 32),
             ),
             child: Icon(
-              Icons.shopping_cart_outlined,
+              AppIcons.shoppingCartOutlined,
               color: colorScheme.onSurface.withValues(alpha: 0.4),
               size: isTablet ? 40 : 32,
             ),

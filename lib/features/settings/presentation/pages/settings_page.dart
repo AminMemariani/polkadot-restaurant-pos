@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/settings_provider.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -64,28 +65,10 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: colorScheme.surface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        leading: Container(
-          margin: const EdgeInsets.only(left: 8),
-          child: Material(
-            elevation: 2,
-            borderRadius: BorderRadius.circular(12),
-            child: InkWell(
-              onTap: () => context.go('/'),
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.arrow_back_rounded,
-                  color: colorScheme.onPrimaryContainer,
-                  size: 20,
-                ),
-              ),
-            ),
-          ),
+        leading: IconButton(
+          onPressed: () => context.go('/'),
+          icon: Icon(AppIcons.arrowBackRounded),
+          tooltip: 'Back',
         ),
       ),
       body: Consumer<SettingsProvider>(
@@ -159,7 +142,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  Icons.settings_rounded,
+                  AppIcons.settingsRounded,
                   color: colorScheme.onPrimary,
                   size: isTablet ? 28 : 24,
                 ),
@@ -226,7 +209,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Row(
             children: [
               Icon(
-                Icons.calculate_rounded,
+                AppIcons.calculateRounded,
                 color: colorScheme.primary,
                 size: isTablet ? 24 : 20,
               ),
@@ -247,7 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
             context,
             label: 'Tax Rate (%)',
             controller: _taxRateController,
-            icon: Icons.receipt_long_rounded,
+            icon: AppIcons.receiptLongRounded,
             onChanged: (value) => _updateTaxRate(value),
             isTablet: isTablet,
           ),
@@ -259,7 +242,7 @@ class _SettingsPageState extends State<SettingsPage> {
             context,
             label: 'Service Fee Rate (%)',
             controller: _serviceFeeRateController,
-            icon: Icons.room_service_rounded,
+            icon: AppIcons.roomServiceRounded,
             onChanged: (value) => _updateServiceFeeRate(value),
             isTablet: isTablet,
           ),
@@ -284,7 +267,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     )
                   : Icon(
-                      Icons.save_rounded,
+                      AppIcons.saveRounded,
                       size: isTablet ? 20 : 18,
                       color: colorScheme.onPrimary,
                     ),
@@ -343,7 +326,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Row(
             children: [
               Icon(
-                Icons.link_rounded,
+                AppIcons.linkRounded,
                 color: colorScheme.primary,
                 size: isTablet ? 24 : 20,
               ),
@@ -438,8 +421,8 @@ class _SettingsPageState extends State<SettingsPage> {
             children: [
               Icon(
                 isSelected
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_unchecked,
+                    ? AppIcons.radioButtonChecked
+                    : AppIcons.radioButtonUnchecked,
                 color: isSelected
                     ? colorScheme.primary
                     : colorScheme.onSurfaceVariant,
@@ -461,7 +444,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               if (isSelected)
                 Icon(
-                  Icons.check_circle_rounded,
+                  AppIcons.checkCircleRounded,
                   color: colorScheme.primary,
                   size: isTablet ? 20 : 18,
                 ),
@@ -574,7 +557,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Row(
             children: [
               Icon(
-                Icons.storage_rounded,
+                AppIcons.storageRounded,
                 color: colorScheme.secondary,
                 size: isTablet ? 24 : 20,
               ),
@@ -595,7 +578,7 @@ class _SettingsPageState extends State<SettingsPage> {
             context,
             label: 'Clear Product Catalog',
             description: 'Remove all products from the catalog',
-            icon: Icons.inventory_2_outlined,
+            icon: AppIcons.inventory2Outlined,
             color: colorScheme.tertiary,
             onPressed: () => _showClearProductsDialog(context),
             isTablet: isTablet,
@@ -608,7 +591,7 @@ class _SettingsPageState extends State<SettingsPage> {
             context,
             label: 'Clear Receipt History',
             description: 'Remove all saved receipts',
-            icon: Icons.receipt_long_outlined,
+            icon: AppIcons.receiptLongOutlined,
             color: colorScheme.error,
             onPressed: () => _showClearReceiptsDialog(context),
             isTablet: isTablet,
@@ -621,7 +604,7 @@ class _SettingsPageState extends State<SettingsPage> {
             context,
             label: 'Clear All Data',
             description: 'Remove all products, receipts, and settings',
-            icon: Icons.delete_forever_outlined,
+            icon: AppIcons.deleteForeverOutlined,
             color: colorScheme.error,
             onPressed: () => _showClearAllDataDialog(context),
             isTablet: isTablet,
@@ -702,7 +685,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Row(
             children: [
               Icon(
-                Icons.info_outline_rounded,
+                AppIcons.infoOutlineRounded,
                 color: colorScheme.onSurfaceVariant,
                 size: isTablet ? 24 : 20,
               ),

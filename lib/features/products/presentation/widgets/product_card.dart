@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_pos_app/features/products/domain/entities/product.dart';
+import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
@@ -173,7 +174,7 @@ class _ProductCardState extends State<ProductCard>
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Icon(
-                                      Icons.add_shopping_cart_rounded,
+                                      AppIcons.addShoppingCartRounded,
                                       color: colorScheme.onPrimary,
                                       size: 20,
                                     ),
@@ -186,7 +187,7 @@ class _ProductCardState extends State<ProductCard>
                           if (widget.showActions)
                             PopupMenuButton<String>(
                               icon: Icon(
-                                Icons.more_vert_rounded,
+                                AppIcons.moreVertRounded,
                                 color: colorScheme.onSurfaceVariant,
                               ),
                               onSelected: (value) {
@@ -205,7 +206,7 @@ class _ProductCardState extends State<ProductCard>
                                   child: Row(
                                     children: [
                                       Icon(
-                                        Icons.edit_rounded,
+                                        AppIcons.editRounded,
                                         size: 20,
                                         color: colorScheme.onSurface,
                                       ),
@@ -222,7 +223,7 @@ class _ProductCardState extends State<ProductCard>
                                   child: Row(
                                     children: [
                                       Icon(
-                                        Icons.delete_rounded,
+                                        AppIcons.deleteRounded,
                                         size: 20,
                                         color: colorScheme.error,
                                       ),
@@ -418,7 +419,7 @@ class _ProductGridCardState extends State<ProductGridCard>
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Icon(
-                                  Icons.add_shopping_cart_rounded,
+                                  AppIcons.addShoppingCartRounded,
                                   color: colorScheme.onPrimary,
                                   size: 16,
                                 ),
@@ -430,7 +431,7 @@ class _ProductGridCardState extends State<ProductGridCard>
                         if (widget.showActions)
                           PopupMenuButton<String>(
                             icon: Icon(
-                              Icons.more_vert_rounded,
+                              AppIcons.moreVertRounded,
                               color: colorScheme.onSurfaceVariant,
                               size: 20,
                             ),
@@ -450,7 +451,7 @@ class _ProductGridCardState extends State<ProductGridCard>
                                 child: Row(
                                   children: [
                                     Icon(
-                                      Icons.edit_rounded,
+                                      AppIcons.editRounded,
                                       size: 18,
                                       color: colorScheme.onSurface,
                                     ),
@@ -467,7 +468,7 @@ class _ProductGridCardState extends State<ProductGridCard>
                                 child: Row(
                                   children: [
                                     Icon(
-                                      Icons.delete_rounded,
+                                      AppIcons.deleteRounded,
                                       size: 18,
                                       color: colorScheme.error,
                                     ),
@@ -635,7 +636,7 @@ class _ProductThumbnail extends StatelessWidget {
 
   Widget _buildFallbackIcon() {
     return Icon(
-      Icons.inventory_2_outlined,
+      AppIcons.inventory2Outlined,
       color: colorScheme.onPrimaryContainer,
       size: iconSize,
     );
