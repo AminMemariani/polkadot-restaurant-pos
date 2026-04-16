@@ -23,7 +23,7 @@ class ReceiptsProvider extends ChangeNotifier {
   });
 
   List<Receipt> _receipts = [];
-  List<ReceiptItem> _currentOrderItems = [];
+  final List<ReceiptItem> _currentOrderItems = [];
   bool _isLoading = false;
   String? _error;
 
@@ -245,14 +245,14 @@ class ReceiptsProvider extends ChangeNotifier {
   }
 
   String _mapFailureToMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case ServerFailure:
+    switch (failure) {
+      case ServerFailure _:
         return 'Server error: ${failure.message}';
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Network error: ${failure.message}';
-      case CacheFailure:
+      case CacheFailure _:
         return 'Cache error: ${failure.message}';
-      case ValidationFailure:
+      case ValidationFailure _:
         return 'Validation error: ${failure.message}';
       default:
         return 'An unexpected error occurred: ${failure.message}';

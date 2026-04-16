@@ -640,10 +640,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     );
 
     if (picked != null) {
+      if (!mounted) return;
       setState(() {
         _selectedDateRange = picked;
       });
-      // Load analytics for selected date range
       context.read<AnalyticsProvider>().loadAnalyticsForDateRange(
         picked.start,
         picked.end,

@@ -82,7 +82,7 @@ class _ProductCardState extends State<ProductCard>
             margin: const EdgeInsets.only(bottom: 12),
             child: Material(
               elevation: _isPressed ? 8 : 4,
-              shadowColor: colorScheme.shadow.withOpacity(0.15),
+              shadowColor: colorScheme.shadow.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(20),
               child: InkWell(
                 onTap: widget.onTap,
@@ -96,7 +96,7 @@ class _ProductCardState extends State<ProductCard>
                     color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: colorScheme.outline.withOpacity(0.1),
+                      color: colorScheme.outline.withValues(alpha: 0.1),
                       width: 1,
                     ),
                   ),
@@ -116,8 +116,8 @@ class _ProductCardState extends State<ProductCard>
                                 gradient: LinearGradient(
                                   colors: [
                                     colorScheme.primaryContainer,
-                                    colorScheme.primaryContainer.withOpacity(
-                                      0.7,
+                                    colorScheme.primaryContainer.withValues(
+                                      alpha: 0.7,
                                     ),
                                   ],
                                   begin: Alignment.topLeft,
@@ -126,7 +126,9 @@ class _ProductCardState extends State<ProductCard>
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: colorScheme.primary.withOpacity(0.2),
+                                    color: colorScheme.primary.withValues(
+                                      alpha: 0.2,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -276,8 +278,12 @@ class _ProductCardState extends State<ProductCard>
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              colorScheme.primaryContainer.withOpacity(0.3),
-                              colorScheme.primaryContainer.withOpacity(0.1),
+                              colorScheme.primaryContainer.withValues(
+                                alpha: 0.3,
+                              ),
+                              colorScheme.primaryContainer.withValues(
+                                alpha: 0.1,
+                              ),
                             ],
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
@@ -396,7 +402,7 @@ class _ProductGridCardState extends State<ProductGridCard>
           scale: _scaleAnimation.value,
           child: Material(
             elevation: _isPressed ? 8 : 4,
-            shadowColor: colorScheme.shadow.withOpacity(0.15),
+            shadowColor: colorScheme.shadow.withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(20),
             child: InkWell(
               onTap: widget.onTap,
@@ -410,7 +416,7 @@ class _ProductGridCardState extends State<ProductGridCard>
                   color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: colorScheme.outline.withOpacity(0.1),
+                    color: colorScheme.outline.withValues(alpha: 0.1),
                     width: 1,
                   ),
                 ),
@@ -516,7 +522,9 @@ class _ProductGridCardState extends State<ProductGridCard>
                             gradient: LinearGradient(
                               colors: [
                                 colorScheme.primaryContainer,
-                                colorScheme.primaryContainer.withOpacity(0.7),
+                                colorScheme.primaryContainer.withValues(
+                                  alpha: 0.7,
+                                ),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -524,7 +532,9 @@ class _ProductGridCardState extends State<ProductGridCard>
                             borderRadius: BorderRadius.circular(16),
                             boxShadow: [
                               BoxShadow(
-                                color: colorScheme.primary.withOpacity(0.2),
+                                color: colorScheme.primary.withValues(
+                                  alpha: 0.2,
+                                ),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -579,8 +589,8 @@ class _ProductGridCardState extends State<ProductGridCard>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            colorScheme.primaryContainer.withOpacity(0.3),
-                            colorScheme.primaryContainer.withOpacity(0.1),
+                            colorScheme.primaryContainer.withValues(alpha: 0.3),
+                            colorScheme.primaryContainer.withValues(alpha: 0.1),
                           ],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,

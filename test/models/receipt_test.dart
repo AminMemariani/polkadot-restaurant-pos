@@ -18,7 +18,7 @@ Receipt createTestReceipt({
     id: id,
     items:
         items ??
-        [
+        const [
           ReceiptItem(
             productId: '1',
             productName: 'Test Product',

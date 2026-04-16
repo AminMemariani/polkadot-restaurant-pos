@@ -14,6 +14,7 @@ class PaymentModel extends Payment {
     throw UnimplementedError();
   }
 
+  @override
   Map<String, dynamic> toJson() {
     throw UnimplementedError();
   }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Service for handling local storage operations using SharedPreferences
@@ -28,7 +29,7 @@ class StorageService {
       final jsonString = jsonEncode(products);
       return await _prefs!.setString(_productsKey, jsonString);
     } catch (e) {
-      print('Error saving products: $e');
+      debugPrint('Error saving products: $e');
       return false;
     }
   }
@@ -43,7 +44,7 @@ class StorageService {
       }
       return [];
     } catch (e) {
-      print('Error loading products: $e');
+      debugPrint('Error loading products: $e');
       return [];
     }
   }
@@ -54,7 +55,7 @@ class StorageService {
       final jsonString = jsonEncode(receipts);
       return await _prefs!.setString(_receiptsKey, jsonString);
     } catch (e) {
-      print('Error saving receipts: $e');
+      debugPrint('Error saving receipts: $e');
       return false;
     }
   }
@@ -69,7 +70,7 @@ class StorageService {
       }
       return [];
     } catch (e) {
-      print('Error loading receipts: $e');
+      debugPrint('Error loading receipts: $e');
       return [];
     }
   }
@@ -79,7 +80,7 @@ class StorageService {
     try {
       return await _prefs!.setDouble(_taxRateKey, taxRate);
     } catch (e) {
-      print('Error saving tax rate: $e');
+      debugPrint('Error saving tax rate: $e');
       return false;
     }
   }
@@ -89,7 +90,7 @@ class StorageService {
     try {
       return _prefs!.getDouble(_taxRateKey) ?? 0.08; // Default 8%
     } catch (e) {
-      print('Error loading tax rate: $e');
+      debugPrint('Error loading tax rate: $e');
       return 0.08;
     }
   }
@@ -99,7 +100,7 @@ class StorageService {
     try {
       return await _prefs!.setDouble(_serviceFeeRateKey, serviceFeeRate);
     } catch (e) {
-      print('Error saving service fee rate: $e');
+      debugPrint('Error saving service fee rate: $e');
       return false;
     }
   }
@@ -109,7 +110,7 @@ class StorageService {
     try {
       return _prefs!.getDouble(_serviceFeeRateKey) ?? 0.05; // Default 5%
     } catch (e) {
-      print('Error loading service fee rate: $e');
+      debugPrint('Error loading service fee rate: $e');
       return 0.05;
     }
   }
@@ -120,7 +121,7 @@ class StorageService {
       final jsonString = jsonEncode(settings);
       return await _prefs!.setString(_settingsKey, jsonString);
     } catch (e) {
-      print('Error saving settings: $e');
+      debugPrint('Error saving settings: $e');
       return false;
     }
   }
@@ -134,7 +135,7 @@ class StorageService {
       }
       return {};
     } catch (e) {
-      print('Error loading settings: $e');
+      debugPrint('Error loading settings: $e');
       return {};
     }
   }
@@ -153,7 +154,7 @@ class StorageService {
       await _prefs!.remove(_kusamaRpcEndpointKey);
       return true;
     } catch (e) {
-      print('Error clearing data: $e');
+      debugPrint('Error clearing data: $e');
       return false;
     }
   }
@@ -163,7 +164,7 @@ class StorageService {
     try {
       return await _prefs!.remove(_productsKey);
     } catch (e) {
-      print('Error clearing products: $e');
+      debugPrint('Error clearing products: $e');
       return false;
     }
   }
@@ -173,7 +174,7 @@ class StorageService {
     try {
       return await _prefs!.remove(_receiptsKey);
     } catch (e) {
-      print('Error clearing receipts: $e');
+      debugPrint('Error clearing receipts: $e');
       return false;
     }
   }
@@ -183,7 +184,7 @@ class StorageService {
     try {
       return await _prefs!.setString(_rpcEndpointKey, rpcEndpoint);
     } catch (e) {
-      print('Error saving RPC endpoint: $e');
+      debugPrint('Error saving RPC endpoint: $e');
       return false;
     }
   }
@@ -194,7 +195,7 @@ class StorageService {
       return _prefs!.getString(_rpcEndpointKey) ??
           'https://polkadot-rpc.publicnode.com'; // Default endpoint
     } catch (e) {
-      print('Error loading RPC endpoint: $e');
+      debugPrint('Error loading RPC endpoint: $e');
       return 'https://polkadot-rpc.publicnode.com';
     }
   }
@@ -204,7 +205,7 @@ class StorageService {
     try {
       return await _prefs!.setString(_kusamaRpcEndpointKey, rpcEndpoint);
     } catch (e) {
-      print('Error saving Kusama RPC endpoint: $e');
+      debugPrint('Error saving Kusama RPC endpoint: $e');
       return false;
     }
   }
@@ -215,7 +216,7 @@ class StorageService {
       return _prefs!.getString(_kusamaRpcEndpointKey) ??
           'https://kusama.publicnode.com'; // Default endpoint
     } catch (e) {
-      print('Error loading Kusama RPC endpoint: $e');
+      debugPrint('Error loading Kusama RPC endpoint: $e');
       return 'https://kusama.publicnode.com';
     }
   }
@@ -230,7 +231,7 @@ class StorageService {
       await _prefs!.remove(_kusamaRpcEndpointKey);
       return true;
     } catch (e) {
-      print('Error clearing settings: $e');
+      debugPrint('Error clearing settings: $e');
       return false;
     }
   }

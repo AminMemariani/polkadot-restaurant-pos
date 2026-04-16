@@ -131,7 +131,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer.withOpacity(0.3),
+        color: colorScheme.primaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -179,13 +179,13 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.3),
+                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(60),
               ),
               child: Icon(
                 Icons.receipt_long_outlined,
                 size: 60,
-                color: colorScheme.primary.withOpacity(0.6),
+                color: colorScheme.primary.withValues(alpha: 0.6),
               ),
             ),
             const SizedBox(height: 24),
@@ -200,7 +200,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
             Text(
               'Start by adding products to create an order',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.7),
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -271,7 +271,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
             Text(
               provider.error!,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.7),
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               textAlign: TextAlign.center,
             ),
@@ -290,6 +290,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
     BuildContext context,
     ReceiptsProvider provider,
   ) async {
+    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -316,11 +317,8 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
 
     if (confirmed == true) {
       provider.clearCurrentOrder();
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Order cleared')));
-      }
+      if (!mounted) return;
+      messenger.showSnackBar(const SnackBar(content: Text('Order cleared')));
     }
   }
 }

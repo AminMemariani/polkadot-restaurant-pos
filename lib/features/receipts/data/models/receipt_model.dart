@@ -20,6 +20,7 @@ class ReceiptModel extends Receipt {
     throw UnimplementedError();
   }
 
+  @override
   Map<String, dynamic> toJson() {
     // Implementation placeholder
     throw UnimplementedError();

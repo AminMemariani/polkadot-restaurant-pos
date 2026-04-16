@@ -16,7 +16,7 @@ class PaymentsProvider extends ChangeNotifier {
     required this.getPaymentMethods,
   });
 
-  List<Payment> _payments = [];
+  final List<Payment> _payments = [];
   List<String> _paymentMethods = [];
   bool _isLoading = false;
   String? _error;
@@ -49,7 +49,7 @@ class PaymentsProvider extends ChangeNotifier {
   /// Generate a mock blockchain transaction ID
   String _generateBlockchainTxId() {
     final random = Random();
-    final hexChars = '0123456789abcdef';
+    const hexChars = '0123456789abcdef';
     final txId = List.generate(
       64,
       (index) => hexChars[random.nextInt(hexChars.length)],
@@ -251,14 +251,14 @@ class PaymentsProvider extends ChangeNotifier {
   }
 
   String _mapFailureToMessage(Failure failure) {
-    switch (failure.runtimeType) {
-      case ServerFailure:
+    switch (failure) {
+      case ServerFailure _:
         return 'Server error: ${failure.message}';
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Network error: ${failure.message}';
-      case CacheFailure:
+      case CacheFailure _:
         return 'Cache error: ${failure.message}';
-      case ValidationFailure:
+      case ValidationFailure _:
         return 'Validation error: ${failure.message}';
       default:
         return 'An unexpected error occurred: ${failure.message}';

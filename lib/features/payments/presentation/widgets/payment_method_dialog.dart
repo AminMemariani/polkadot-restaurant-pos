@@ -37,9 +37,12 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
 
     // Define payment steps for method selection
     final steps = [
-      StepBarStep(label: 'Select Payment Method', status: StepStatus.active),
-      StepBarStep(label: 'Process Payment', status: StepStatus.inactive),
-      StepBarStep(label: 'Confirmation', status: StepStatus.inactive),
+      const StepBarStep(
+        label: 'Select Payment Method',
+        status: StepStatus.active,
+      ),
+      const StepBarStep(label: 'Process Payment', status: StepStatus.inactive),
+      const StepBarStep(label: 'Confirmation', status: StepStatus.inactive),
     ];
 
     return Container(
@@ -47,7 +50,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,8 +67,8 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
             steps: steps,
             currentStep: 0, // Currently on step 1 (Select Payment Method)
             completedColor: colorScheme.primary,
-            activeColor: colorScheme.primary.withOpacity(0.3),
-            inactiveColor: colorScheme.onSurface.withOpacity(0.3),
+            activeColor: colorScheme.primary.withValues(alpha: 0.3),
+            inactiveColor: colorScheme.onSurface.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -100,7 +103,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer.withOpacity(0.3),
+                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -108,7 +111,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                   Text(
                     'Total Amount',
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.7),
+                      color: colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -152,13 +155,15 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? colorScheme.primaryContainer.withOpacity(0.3)
+                                ? colorScheme.primaryContainer.withValues(
+                                    alpha: 0.3,
+                                  )
                                 : colorScheme.surfaceContainerHighest,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: isSelected
                                   ? colorScheme.primary
-                                  : colorScheme.outline.withOpacity(0.2),
+                                  : colorScheme.outline.withValues(alpha: 0.2),
                               width: isSelected ? 2 : 1,
                             ),
                           ),
@@ -207,7 +212,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
                                               color: colorScheme.onSurface
-                                                  .withOpacity(0.6),
+                                                  .withValues(alpha: 0.6),
                                             ),
                                       ),
                                     ],
@@ -225,7 +230,9 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                               else
                                 Icon(
                                   Icons.radio_button_unchecked,
-                                  color: colorScheme.onSurface.withOpacity(0.4),
+                                  color: colorScheme.onSurface.withValues(
+                                    alpha: 0.4,
+                                  ),
                                   size: 24,
                                 ),
                             ],
@@ -280,25 +287,26 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
       _isLoading = true;
     });
 
-    try {
-      final provider = context.read<PaymentsProvider>();
+    final provider = context.read<PaymentsProvider>();
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final errorColor = Theme.of(context).colorScheme.error;
 
-      // Check if it's a blockchain payment
+    try {
       final isBlockchain =
           _selectedMethod!.toLowerCase().contains('polkadot') ||
           _selectedMethod!.toLowerCase().contains('kusama');
 
       if (isBlockchain) {
-        // Process blockchain payment
         final success = await provider.processPaymentWithBlockchain(
           amount: widget.amount,
           network: _selectedMethod!,
         );
 
         if (success && mounted) {
-          Navigator.of(context).pop();
-          // Navigate to payment confirmation page
-          Navigator.of(context).push(
+          navigator.pop();
+          navigator.push(
             MaterialPageRoute(
               builder: (context) => PaymentConfirmationPage(
                 amount: widget.amount,
@@ -308,7 +316,6 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
           );
         }
       } else {
-        // Process traditional payment
         final success = await provider.processPaymentTransaction(
           Payment(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -321,21 +328,21 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
         );
 
         if (success && mounted) {
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
+          navigator.pop();
+          messenger.showSnackBar(
             SnackBar(
               content: Text('Payment completed with $_selectedMethod'),
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: primaryColor,
             ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Payment failed: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
+            backgroundColor: errorColor,
           ),
         );
       }

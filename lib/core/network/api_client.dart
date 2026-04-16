@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../config/app_config.dart';
 import '../errors/failures.dart';
 
 /// API client for making HTTP requests
@@ -8,7 +9,8 @@ class ApiClient {
   final http.Client _client;
   final String baseUrl;
 
-  ApiClient(this._client, {this.baseUrl = 'https://api.restaurant-pos.com'});
+  ApiClient(this._client, {String? baseUrl})
+    : baseUrl = baseUrl ?? AppConfig.apiBaseUrl;
 
   /// GET request
   Future<Map<String, dynamic>> get(String endpoint) async {

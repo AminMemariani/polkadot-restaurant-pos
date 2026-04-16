@@ -180,20 +180,20 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              colorScheme.primaryContainer.withOpacity(0.4),
-              colorScheme.primaryContainer.withOpacity(0.2),
+              colorScheme.primaryContainer.withValues(alpha: 0.4),
+              colorScheme.primaryContainer.withValues(alpha: 0.2),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: colorScheme.primary.withOpacity(0.3),
+            color: colorScheme.primary.withValues(alpha: 0.3),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.1),
+              color: colorScheme.primary.withValues(alpha: 0.1),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -204,7 +204,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             Text(
               'Amount to Pay',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.7),
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
                 fontWeight: FontWeight.w500,
                 fontSize: isTablet ? 18 : 16,
               ),
@@ -251,14 +251,23 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
 
     // Define payment steps
     final steps = [
-      StepBarStep(label: 'Payment Initiated', status: StepStatus.completed),
-      StepBarStep(label: 'QR Code Generated', status: StepStatus.completed),
-      StepBarStep(label: 'Waiting for Payment', status: StepStatus.active),
-      StepBarStep(
+      const StepBarStep(
+        label: 'Payment Initiated',
+        status: StepStatus.completed,
+      ),
+      const StepBarStep(
+        label: 'QR Code Generated',
+        status: StepStatus.completed,
+      ),
+      const StepBarStep(
+        label: 'Waiting for Payment',
+        status: StepStatus.active,
+      ),
+      const StepBarStep(
         label: 'Blockchain Confirmation',
         status: StepStatus.inactive,
       ),
-      StepBarStep(label: 'Payment Complete', status: StepStatus.inactive),
+      const StepBarStep(label: 'Payment Complete', status: StepStatus.inactive),
     ];
 
     // Determine current step based on payment status
@@ -284,7 +293,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,8 +310,8 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             steps: steps,
             currentStep: currentStep,
             completedColor: colorScheme.primary,
-            activeColor: colorScheme.primary.withOpacity(0.3),
-            inactiveColor: colorScheme.onSurface.withOpacity(0.3),
+            activeColor: colorScheme.primary.withValues(alpha: 0.3),
+            inactiveColor: colorScheme.onSurface.withValues(alpha: 0.3),
           ),
         ],
       ),
@@ -350,12 +359,12 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: colorScheme.shadow.withOpacity(0.15),
+                      color: colorScheme.shadow.withValues(alpha: 0.15),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
                     BoxShadow(
-                      color: colorScheme.primary.withOpacity(0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       blurRadius: 40,
                       offset: const Offset(0, 16),
                     ),
@@ -366,7 +375,14 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                   version: QrVersions.auto,
                   size: isTablet ? 240.0 : 200.0,
                   backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
+                  eyeStyle: const QrEyeStyle(
+                    eyeShape: QrEyeShape.square,
+                    color: Colors.black,
+                  ),
+                  dataModuleStyle: const QrDataModuleStyle(
+                    dataModuleShape: QrDataModuleShape.square,
+                    color: Colors.black,
+                  ),
                 ),
               ),
             );
@@ -389,7 +405,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         Text(
           'Scan QR code to complete payment',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
 
@@ -405,7 +421,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
           child: Text(
             'Payment ID: ${provider.paymentId ?? ''}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
               fontFamily: 'monospace',
             ),
           ),
@@ -472,7 +488,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         Text(
           'Transaction completed successfully',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
 
@@ -524,7 +540,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
           Text(
             label,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.7),
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
           Flexible(
@@ -579,7 +595,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         Text(
           'Payment was cancelled by user',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -622,7 +638,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         Text(
           provider.error ?? 'An error occurred during payment',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
           textAlign: TextAlign.center,
         ),
@@ -647,7 +663,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
           child: Icon(
             Icons.payment,
             size: 60,
-            color: colorScheme.onSurface.withOpacity(0.5),
+            color: colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
 
@@ -666,7 +682,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         Text(
           'Please wait while we set up your payment',
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ],
@@ -689,14 +705,18 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
               },
               icon: Icon(
                 Icons.cancel_outlined,
-                color: colorScheme.onSurface.withOpacity(0.7),
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               label: Text(
                 'Cancel Payment',
-                style: TextStyle(color: colorScheme.onSurface.withOpacity(0.7)),
+                style: TextStyle(
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
               ),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: colorScheme.outline.withOpacity(0.5)),
+                side: BorderSide(
+                  color: colorScheme.outline.withValues(alpha: 0.5),
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

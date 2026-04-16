@@ -7,8 +7,10 @@ class AppConstants {
   static const String appName = 'Restaurant POS';
   static const String appVersion = '1.0.0';
 
-  // API endpoints (to be configured later)
-  static const String baseUrl = 'https://api.restaurant-pos.com';
+  /// API base URL — resolved from --dart-define=API_BASE_URL at build time.
+  /// See [AppConfig.apiBaseUrl] for the canonical source.
+  @Deprecated('Use AppConfig.apiBaseUrl instead')
+  static const String baseUrl = 'https://api.restaurant-pos.dev';
 
   // Storage keys
   static const String themeKey = 'theme_mode';

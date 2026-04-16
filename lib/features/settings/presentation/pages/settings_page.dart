@@ -133,15 +133,15 @@ class _SettingsPageState extends State<SettingsPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            colorScheme.primaryContainer.withOpacity(0.3),
-            colorScheme.primaryContainer.withOpacity(0.1),
+            colorScheme.primaryContainer.withValues(alpha: 0.3),
+            colorScheme.primaryContainer.withValues(alpha: 0.1),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -207,12 +207,12 @@ class _SettingsPageState extends State<SettingsPage> {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
+          color: colorScheme.outline.withValues(alpha: 0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
+            color: colorScheme.shadow.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -324,12 +324,12 @@ class _SettingsPageState extends State<SettingsPage> {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
+          color: colorScheme.outline.withValues(alpha: 0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
+            color: colorScheme.shadow.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -375,7 +375,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () => provider.updateRpcEndpoint(endpoint),
               isTablet: isTablet,
             );
-          }).toList(),
+          }),
 
           const SizedBox(height: 24),
 
@@ -397,7 +397,7 @@ class _SettingsPageState extends State<SettingsPage> {
               onTap: () => provider.updateKusamaRpcEndpoint(endpoint),
               isTablet: isTablet,
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -422,13 +422,13 @@ class _SettingsPageState extends State<SettingsPage> {
           padding: EdgeInsets.all(isTablet ? 16 : 12),
           decoration: BoxDecoration(
             color: isSelected
-                ? colorScheme.primaryContainer.withOpacity(0.3)
-                : colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                ? colorScheme.primaryContainer.withValues(alpha: 0.3)
+                : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected
                   ? colorScheme.primary
-                  : colorScheme.outline.withOpacity(0.2),
+                  : colorScheme.outline.withValues(alpha: 0.2),
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -513,13 +513,13 @@ class _SettingsPageState extends State<SettingsPage> {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: colorScheme.outline.withOpacity(0.3),
+                color: colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: colorScheme.outline.withOpacity(0.3),
+                color: colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -527,7 +527,9 @@ class _SettingsPageState extends State<SettingsPage> {
               borderSide: BorderSide(color: colorScheme.primary, width: 2),
             ),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            fillColor: colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.3,
+            ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: isTablet ? 20 : 16,
               vertical: isTablet ? 16 : 12,
@@ -553,12 +555,12 @@ class _SettingsPageState extends State<SettingsPage> {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
+          color: colorScheme.outline.withValues(alpha: 0.1),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
+            color: colorScheme.shadow.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -639,7 +641,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
         onPressed: onPressed,
@@ -663,7 +665,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: color.withOpacity(0.3), width: 1.5),
+          side: BorderSide(color: color.withValues(alpha: 0.3), width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -685,10 +687,10 @@ class _SettingsPageState extends State<SettingsPage> {
       width: double.infinity,
       padding: EdgeInsets.all(isTablet ? 24 : 20),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
+          color: colorScheme.outline.withValues(alpha: 0.1),
           width: 1,
         ),
       ),
@@ -797,6 +799,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _showClearProductsDialog(BuildContext context) async {
+    final provider = context.read<SettingsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -822,17 +826,17 @@ class _SettingsPageState extends State<SettingsPage> {
     );
 
     if (confirmed == true) {
-      final provider = context.read<SettingsProvider>();
       await provider.clearProducts();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Product catalog cleared')),
-        );
-      }
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Product catalog cleared')),
+      );
     }
   }
 
   Future<void> _showClearReceiptsDialog(BuildContext context) async {
+    final provider = context.read<SettingsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -858,17 +862,17 @@ class _SettingsPageState extends State<SettingsPage> {
     );
 
     if (confirmed == true) {
-      final provider = context.read<SettingsProvider>();
       await provider.clearReceipts();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receipt history cleared')),
-        );
-      }
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Receipt history cleared')),
+      );
     }
   }
 
   Future<void> _showClearAllDataDialog(BuildContext context) async {
+    final provider = context.read<SettingsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -894,15 +898,10 @@ class _SettingsPageState extends State<SettingsPage> {
     );
 
     if (confirmed == true) {
-      final provider = context.read<SettingsProvider>();
       await provider.clearAllData();
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('All data cleared')));
-        // Reload settings after clearing
-        _loadSettings();
-      }
+      if (!mounted) return;
+      messenger.showSnackBar(const SnackBar(content: Text('All data cleared')));
+      _loadSettings();
     }
   }
 }

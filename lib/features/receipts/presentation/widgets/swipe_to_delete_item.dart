@@ -115,7 +115,7 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
             content: Text(
               'Are you sure you want to remove "${widget.item.productName}" from the order?',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.8),
+                color: colorScheme.onSurface.withValues(alpha: 0.8),
               ),
             ),
             actions: [
@@ -149,10 +149,10 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
       decoration: BoxDecoration(
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.05),
+            color: colorScheme.shadow.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -201,7 +201,7 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
                       Text(
                         'ID: ${widget.item.productId}',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurface.withOpacity(0.6),
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -219,8 +219,8 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
                         // Quantity Controls
                         Container(
                           decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer.withOpacity(
-                              0.3,
+                            color: colorScheme.primaryContainer.withValues(
+                              alpha: 0.3,
                             ),
                             borderRadius: BorderRadius.circular(6),
                           ),

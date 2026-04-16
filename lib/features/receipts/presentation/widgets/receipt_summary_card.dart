@@ -86,21 +86,23 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
               ),
               child: Material(
                 elevation: 12,
-                shadowColor: colorScheme.shadow.withOpacity(0.2),
+                shadowColor: colorScheme.shadow.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(24),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
                         colorScheme.surface,
-                        colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                        colorScheme.surfaceContainerHighest.withValues(
+                          alpha: 0.3,
+                        ),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: colorScheme.outline.withOpacity(0.1),
+                      color: colorScheme.outline.withValues(alpha: 0.1),
                       width: 1,
                     ),
                   ),
@@ -118,7 +120,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
                                 gradient: LinearGradient(
                                   colors: [
                                     colorScheme.primary,
-                                    colorScheme.primary.withOpacity(0.8),
+                                    colorScheme.primary.withValues(alpha: 0.8),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -126,7 +128,9 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
                                 borderRadius: BorderRadius.circular(16),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: colorScheme.primary.withOpacity(0.3),
+                                    color: colorScheme.primary.withValues(
+                                      alpha: 0.3,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 4),
                                   ),
@@ -174,7 +178,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
                             gradient: LinearGradient(
                               colors: [
                                 Colors.transparent,
-                                colorScheme.outline.withOpacity(0.3),
+                                colorScheme.outline.withValues(alpha: 0.3),
                                 Colors.transparent,
                               ],
                             ),
@@ -214,7 +218,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
                             gradient: LinearGradient(
                               colors: [
                                 Colors.transparent,
-                                colorScheme.primary.withOpacity(0.3),
+                                colorScheme.primary.withValues(alpha: 0.3),
                                 Colors.transparent,
                               ],
                             ),
@@ -261,7 +265,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
         Text(
           label,
           style: theme.textTheme.bodyLarge?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.8),
+            color: colorScheme.onSurface.withValues(alpha: 0.8),
             fontWeight: FontWeight.w500,
             fontSize: isTablet ? 16 : 14,
           ),
@@ -288,15 +292,15 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            colorScheme.primaryContainer.withOpacity(0.3),
-            colorScheme.primaryContainer.withOpacity(0.1),
+            colorScheme.primaryContainer.withValues(alpha: 0.3),
+            colorScheme.primaryContainer.withValues(alpha: 0.1),
           ],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -333,26 +337,26 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
         // Clear Order Button
         Expanded(
           flex: 1,
-          child: Container(
+          child: SizedBox(
             height: isTablet ? 56 : 48,
             child: OutlinedButton.icon(
               onPressed: widget.isLoading ? null : widget.onClear,
               icon: Icon(
                 Icons.clear_all_rounded,
                 size: isTablet ? 20 : 18,
-                color: colorScheme.onSurface.withOpacity(0.7),
+                color: colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               label: Text(
                 'Clear',
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
                   fontSize: isTablet ? 16 : 14,
                 ),
               ),
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
-                  color: colorScheme.outline.withOpacity(0.5),
+                  color: colorScheme.outline.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
                 shape: RoundedRectangleBorder(
@@ -374,7 +378,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: colorScheme.primary.withOpacity(0.3),
+                  color: colorScheme.primary.withValues(alpha: 0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -437,12 +441,12 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
             width: isTablet ? 80 : 64,
             height: isTablet ? 80 : 64,
             decoration: BoxDecoration(
-              color: colorScheme.primaryContainer.withOpacity(0.3),
+              color: colorScheme.primaryContainer.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(isTablet ? 40 : 32),
             ),
             child: Icon(
               Icons.shopping_cart_outlined,
-              color: colorScheme.onSurface.withOpacity(0.4),
+              color: colorScheme.onSurface.withValues(alpha: 0.4),
               size: isTablet ? 40 : 32,
             ),
           ),
@@ -450,7 +454,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
           Text(
             'No items in order',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: isTablet ? 18 : 16,
             ),
           ),
@@ -458,7 +462,7 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
           Text(
             'Add products to start a new order',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.5),
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: isTablet ? 14 : 12,
             ),
           ),

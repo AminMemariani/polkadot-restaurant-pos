@@ -213,7 +213,7 @@ class _ProductsPageState extends State<ProductsPage> {
                         Text(
                           'Loading products...',
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
@@ -253,7 +253,9 @@ class _ProductsPageState extends State<ProductsPage> {
                           Text(
                             provider.error!,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.7),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -306,7 +308,9 @@ class _ProductsPageState extends State<ProductsPage> {
                                 ? 'Add your first product to get started'
                                 : 'Try adjusting your search terms',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.7),
+                              color: colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -377,7 +381,7 @@ class _ProductsPageState extends State<ProductsPage> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: colorScheme.primary.withOpacity(0.3),
+              color: colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -424,13 +428,13 @@ class _ProductsPageState extends State<ProductsPage> {
           ),
           TextButton(
             onPressed: () async {
+              final provider = context.read<ProductsProvider>();
+              final messenger = ScaffoldMessenger.of(context);
               Navigator.of(context).pop();
-              final success = await context
-                  .read<ProductsProvider>()
-                  .deleteExistingProduct(product.id);
+              final success = await provider.deleteExistingProduct(product.id);
 
               if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   const SnackBar(content: Text('Product deleted successfully')),
                 );
               }

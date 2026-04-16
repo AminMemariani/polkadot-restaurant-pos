@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+
 import '../storage/storage_service.dart';
 
 /// Abstract blockchain service for handling cryptocurrency payments
@@ -244,7 +246,7 @@ class MockBlockchainService implements BlockchainService {
         _currentNetwork = _supportedNetworks[1];
       }
     } catch (e) {
-      print('Error loading RPC endpoints: $e');
+      debugPrint('Error loading RPC endpoints: $e');
     }
 
     // Simulate connection delay

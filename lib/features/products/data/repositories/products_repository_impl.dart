@@ -55,7 +55,9 @@ class ProductsRepositoryImpl implements ProductsRepository {
         if (product != null) {
           return Right(product.toEntity());
         } else {
-          return Left(CacheFailure(message: 'Product not found in cache'));
+          return const Left(
+            CacheFailure(message: 'Product not found in cache'),
+          );
         }
       } catch (e) {
         return Left(CacheFailure(message: e.toString()));
@@ -96,7 +98,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(NetworkFailure(message: 'No internet connection'));
+      return const Left(NetworkFailure(message: 'No internet connection'));
     }
   }
 
@@ -114,7 +116,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(NetworkFailure(message: 'No internet connection'));
+      return const Left(NetworkFailure(message: 'No internet connection'));
     }
   }
 
@@ -129,7 +131,7 @@ class ProductsRepositoryImpl implements ProductsRepository {
         return Left(ServerFailure(message: e.toString()));
       }
     } else {
-      return Left(NetworkFailure(message: 'No internet connection'));
+      return const Left(NetworkFailure(message: 'No internet connection'));
     }
   }
 

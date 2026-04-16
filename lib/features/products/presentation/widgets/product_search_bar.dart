@@ -68,13 +68,13 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
             border: Border.all(
               color: _focusNode.hasFocus
                   ? colorScheme.primary
-                  : colorScheme.outline.withOpacity(0.3),
+                  : colorScheme.outline.withValues(alpha: 0.3),
               width: _focusNode.hasFocus ? 2 : 1,
             ),
             boxShadow: _focusNode.hasFocus
                 ? [
                     BoxShadow(
-                      color: colorScheme.primary.withOpacity(0.1),
+                      color: colorScheme.primary.withValues(alpha: 0.1),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -101,21 +101,21 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
             decoration: InputDecoration(
               hintText: 'Search products by name or ID...',
               hintStyle: TextStyle(
-                color: colorScheme.onSurface.withOpacity(0.6),
+                color: colorScheme.onSurface.withValues(alpha: 0.6),
                 fontSize: 16,
               ),
               prefixIcon: Icon(
                 Icons.search,
                 color: _focusNode.hasFocus
                     ? colorScheme.primary
-                    : colorScheme.onSurface.withOpacity(0.6),
+                    : colorScheme.onSurface.withValues(alpha: 0.6),
                 size: 24,
               ),
               suffixIcon: _controller.text.isNotEmpty
                   ? IconButton(
                       icon: Icon(
                         Icons.clear,
-                        color: colorScheme.onSurface.withOpacity(0.6),
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                         size: 20,
                       ),
                       onPressed: () {
@@ -145,10 +145,12 @@ class _ProductSearchBarState extends State<ProductSearchBar> {
             decoration: BoxDecoration(
               color: colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: colorScheme.outline.withOpacity(0.2)),
+              border: Border.all(
+                color: colorScheme.outline.withValues(alpha: 0.2),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: colorScheme.shadow.withOpacity(0.1),
+                  color: colorScheme.shadow.withValues(alpha: 0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
                 ),
@@ -229,7 +231,7 @@ class _SuggestionTile extends StatelessWidget {
                     Text(
                       'ID: ${product.id}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurface.withOpacity(0.6),
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                   ],
