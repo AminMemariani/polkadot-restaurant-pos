@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../shared/services/product_image_service.dart';
+import '../../../../shared/widgets/image_picker_field.dart';
 import '../../domain/entities/product.dart';
 import '../providers/products_provider.dart';
 
@@ -22,6 +24,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   final _categoryController = TextEditingController();
 
   bool _isLoading = false;
+  String? _imageUrl;
+  String? _originalImageUrl;
+  final _imageService = ProductImageService();
 
   @override
   void initState() {
@@ -32,6 +37,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       _priceController.text = widget.product!.price.toString();
       _descriptionController.text = widget.product!.description;
       _categoryController.text = widget.product!.category;
+      _imageUrl = widget.product!.imageUrl;
+      _originalImageUrl = widget.product!.imageUrl;
     } else {
       // Generate a unique ID for new products
       _idController.text = DateTime.now().millisecondsSinceEpoch.toString();
@@ -66,83 +73,92 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
         width: double.maxFinite,
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Product ID Field
-              TextFormField(
-                controller: _idController,
-                decoration: InputDecoration(
-                  labelText: 'Product ID',
-                  hintText: 'Enter unique product ID',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: Icon(Icons.tag, color: colorScheme.primary),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Image Field
+                ImagePickerField(
+                  value: _imageUrl,
+                  onChanged: (path) => setState(() => _imageUrl = path),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a product ID';
-                  }
-                  return null;
-                },
-                enabled:
-                    !isEditing, // Don't allow editing ID for existing products
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Product Name Field
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: 'Product Name',
-                  hintText: 'Enter product name',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                // Product ID Field
+                TextFormField(
+                  controller: _idController,
+                  decoration: InputDecoration(
+                    labelText: 'Product ID',
+                    hintText: 'Enter unique product ID',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(Icons.tag, color: colorScheme.primary),
                   ),
-                  prefixIcon: Icon(
-                    Icons.inventory_2_outlined,
-                    color: colorScheme.primary,
-                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a product ID';
+                    }
+                    return null;
+                  },
+                  enabled:
+                      !isEditing, // Don't allow editing ID for existing products
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a product name';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-              // Price Field
-              TextFormField(
-                controller: _priceController,
-                decoration: InputDecoration(
-                  labelText: 'Price',
-                  hintText: '0.00',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                // Product Name Field
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: 'Product Name',
+                    hintText: 'Enter product name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.inventory_2_outlined,
+                      color: colorScheme.primary,
+                    ),
                   ),
-                  prefixIcon: Icon(
-                    Icons.attach_money,
-                    color: colorScheme.primary,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a product name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Price Field
+                TextFormField(
+                  controller: _priceController,
+                  decoration: InputDecoration(
+                    labelText: 'Price',
+                    hintText: '0.00',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    prefixIcon: Icon(
+                      Icons.attach_money,
+                      color: colorScheme.primary,
+                    ),
                   ),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a price';
+                    }
+                    final price = double.tryParse(value);
+                    if (price == null || price < 0) {
+                      return 'Please enter a valid price';
+                    }
+                    return null;
+                  },
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
-                  }
-                  final price = double.tryParse(value);
-                  if (price == null || price < 0) {
-                    return 'Please enter a valid price';
-                  }
-                  return null;
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -190,30 +206,41 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       price: double.parse(_priceController.text),
       description: _descriptionController.text.trim(),
       category: _categoryController.text.trim(),
+      imageUrl: _imageUrl,
       isAvailable: true,
-      createdAt: DateTime.now(),
+      createdAt: widget.product?.createdAt ?? DateTime.now(),
       updatedAt: DateTime.now(),
     );
 
     final provider = context.read<ProductsProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final primaryColor = Theme.of(context).colorScheme.primary;
     final success = widget.product == null
         ? await provider.addNewProduct(product)
         : await provider.updateExistingProduct(product);
 
+    if (success) {
+      // Edit replaced the image — delete the old file.
+      if (_originalImageUrl != null && _originalImageUrl != _imageUrl) {
+        await _imageService.delete(_originalImageUrl);
+      }
+    }
+
+    if (!mounted) return;
     setState(() {
       _isLoading = false;
     });
 
-    if (success && mounted) {
+    if (success) {
       Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
             widget.product == null
                 ? 'Product added successfully'
                 : 'Product updated successfully',
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: primaryColor,
         ),
       );
     }

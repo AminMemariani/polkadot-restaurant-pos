@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:restaurant_pos_app/features/products/domain/entities/product.dart';
 
@@ -106,39 +109,12 @@ class _ProductCardState extends State<ProductCard>
                       // Header Row
                       Row(
                         children: [
-                          // Product Icon with Hero Animation
+                          // Product Image / Icon with Hero Animation
                           Hero(
                             tag: 'product_icon_${widget.product.id}',
-                            child: Container(
-                              width: 56,
-                              height: 56,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    colorScheme.primaryContainer,
-                                    colorScheme.primaryContainer.withValues(
-                                      alpha: 0.7,
-                                    ),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: colorScheme.primary.withValues(
-                                      alpha: 0.2,
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.inventory_2_outlined,
-                                color: colorScheme.onPrimaryContainer,
-                                size: 28,
-                              ),
+                            child: _ProductThumbnail(
+                              imageUrl: widget.product.imageUrl,
+                              colorScheme: colorScheme,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -511,40 +487,15 @@ class _ProductGridCardState extends State<ProductGridCard>
 
                     const SizedBox(height: 12),
 
-                    // Product Icon
+                    // Product Image / Icon
                     Center(
                       child: Hero(
                         tag: 'product_icon_${widget.product.id}',
-                        child: Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                colorScheme.primaryContainer,
-                                colorScheme.primaryContainer.withValues(
-                                  alpha: 0.7,
-                                ),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: colorScheme.primary.withValues(
-                                  alpha: 0.2,
-                                ),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.inventory_2_outlined,
-                            color: colorScheme.onPrimaryContainer,
-                            size: 32,
-                          ),
+                        child: _ProductThumbnail(
+                          imageUrl: widget.product.imageUrl,
+                          colorScheme: colorScheme,
+                          size: 64,
+                          iconSize: 32,
                         ),
                       ),
                     ),
@@ -614,6 +565,79 @@ class _ProductGridCardState extends State<ProductGridCard>
           ),
         );
       },
+    );
+  }
+}
+
+/// Thumbnail that shows the product image when available and a default icon
+/// otherwise. Handles local file paths, network URLs, and decoding errors.
+class _ProductThumbnail extends StatelessWidget {
+  const _ProductThumbnail({
+    required this.imageUrl,
+    required this.colorScheme,
+    this.size = 56,
+    this.iconSize = 28,
+  });
+
+  final String? imageUrl;
+  final ColorScheme colorScheme;
+  final double size;
+  final double iconSize;
+
+  bool get _hasImage => imageUrl != null && imageUrl!.isNotEmpty;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: _hasImage
+            ? null
+            : LinearGradient(
+                colors: [
+                  colorScheme.primaryContainer,
+                  colorScheme.primaryContainer.withValues(alpha: 0.7),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+        color: _hasImage ? colorScheme.surfaceContainerHighest : null,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withValues(alpha: 0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: _hasImage ? _buildImage() : _buildFallbackIcon(),
+    );
+  }
+
+  Widget _buildImage() {
+    final url = imageUrl!;
+    if (kIsWeb || url.startsWith('http')) {
+      return Image.network(
+        url,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildFallbackIcon(),
+      );
+    }
+    return Image.file(
+      File(url),
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _buildFallbackIcon(),
+    );
+  }
+
+  Widget _buildFallbackIcon() {
+    return Icon(
+      Icons.inventory_2_outlined,
+      color: colorScheme.onPrimaryContainer,
+      size: iconSize,
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:restaurant_pos_app/features/receipts/domain/entities/receipt.dart';
+import 'package:restaurant_pos_app/shared/widgets/glass/glass.dart';
 
 class SwipeToDeleteItem extends StatefulWidget {
   final ReceiptItem item;
@@ -104,7 +105,7 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
 
     return await showDialog<bool>(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => GlassDialog(
             title: Text(
               'Remove Item',
               style: theme.textTheme.titleMedium?.copyWith(

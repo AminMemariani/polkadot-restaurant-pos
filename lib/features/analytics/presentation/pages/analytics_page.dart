@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/analytics_provider.dart';
+import '../../../../shared/widgets/glass/glass.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -30,7 +31,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(
           'Analytics',
           style: theme.textTheme.headlineMedium?.copyWith(

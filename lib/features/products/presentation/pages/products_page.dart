@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/custom_button.dart';
+import '../../../../shared/widgets/glass/glass.dart';
 import '../providers/products_provider.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_form_dialog.dart';
@@ -36,7 +37,8 @@ class _ProductsPageState extends State<ProductsPage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(
           'Products',
           style: theme.textTheme.headlineMedium?.copyWith(
@@ -418,7 +420,7 @@ class _ProductsPageState extends State<ProductsPage> {
   void _deleteProduct(BuildContext context, product) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => GlassDialog(
         title: const Text('Delete Product'),
         content: Text('Are you sure you want to delete "${product.name}"?'),
         actions: [

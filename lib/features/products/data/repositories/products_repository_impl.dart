@@ -27,16 +27,15 @@ class ProductsRepositoryImpl implements ProductsRepository {
         final products = await remoteDataSource.getProducts();
         await localDataSource.cacheProducts(products);
         return Right(products.map((model) => model.toEntity()).toList());
-      } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+      } catch (_) {
+        // Remote unreachable — fall through to local cache.
       }
-    } else {
-      try {
-        final products = await localDataSource.getProducts();
-        return Right(products.map((model) => model.toEntity()).toList());
-      } catch (e) {
-        return Left(CacheFailure(message: e.toString()));
-      }
+    }
+    try {
+      final products = await localDataSource.getProducts();
+      return Right(products.map((model) => model.toEntity()).toList());
+    } catch (e) {
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 

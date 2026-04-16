@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/receipts_provider.dart';
 import '../widgets/swipe_to_delete_item.dart';
 import '../widgets/receipt_summary_card.dart';
+import '../../../../shared/widgets/glass/glass.dart';
 
 class ActiveReceiptPage extends StatefulWidget {
   const ActiveReceiptPage({super.key});
@@ -21,7 +22,8 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(
           'Current Order',
           style: theme.textTheme.headlineMedium?.copyWith(
@@ -293,7 +295,7 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => GlassDialog(
         title: const Text('Clear Order'),
         content: const Text(
           'Are you sure you want to clear all items from the current order?',

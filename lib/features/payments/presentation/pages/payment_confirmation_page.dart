@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:step_bar/step_bar.dart';
 
 import '../providers/payments_provider.dart';
+import '../../../../shared/widgets/glass/glass.dart';
 
 class PaymentConfirmationPage extends StatefulWidget {
   final double amount;
@@ -98,7 +99,8 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(
           'Payment Confirmation',
           style: theme.textTheme.headlineMedium?.copyWith(

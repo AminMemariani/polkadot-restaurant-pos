@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../shared/utils/platform_utils.dart';
+import '../../../../shared/widgets/glass/glass.dart';
 import '../../../payments/presentation/widgets/payment_method_dialog.dart';
 
 class ReceiptSummaryCard extends StatefulWidget {
@@ -79,173 +81,187 @@ class _ReceiptSummaryCardState extends State<ReceiptSummaryCard>
           opacity: _fadeAnimation,
           child: SlideTransition(
             position: _slideAnimation,
-            child: Container(
-              margin: EdgeInsets.symmetric(
-                horizontal: isTablet ? 24 : 16,
-                vertical: 8,
-              ),
-              child: Material(
-                elevation: 12,
-                shadowColor: colorScheme.shadow.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colorScheme.surface,
-                        colorScheme.surfaceContainerHighest.withValues(
-                          alpha: 0.3,
-                        ),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+            child: PlatformUtils.isApple
+                ? GlassSurface(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 24 : 16,
+                      vertical: 8,
                     ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: colorScheme.outline.withValues(alpha: 0.1),
-                      width: 1,
-                    ),
-                  ),
-                  child: Padding(
                     padding: EdgeInsets.all(isTablet ? 28 : 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    colorScheme.primary,
-                                    colorScheme.primary.withValues(alpha: 0.8),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: colorScheme.primary.withValues(
-                                      alpha: 0.3,
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ],
+                    borderRadius: 24,
+                    elevation: 8,
+                    child: _buildCardBody(context, isTablet),
+                  )
+                : Container(
+                    margin: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 24 : 16,
+                      vertical: 8,
+                    ),
+                    child: Material(
+                      elevation: 12,
+                      shadowColor: colorScheme.shadow.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(24),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              colorScheme.surface,
+                              colorScheme.surfaceContainerHighest.withValues(
+                                alpha: 0.3,
                               ),
-                              child: Icon(
-                                Icons.receipt_long_rounded,
-                                color: colorScheme.onPrimary,
-                                size: isTablet ? 28 : 24,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Order Summary',
-                                    style: theme.textTheme.headlineSmall
-                                        ?.copyWith(
-                                          fontWeight: FontWeight.w800,
-                                          color: colorScheme.onSurface,
-                                          letterSpacing: -0.5,
-                                        ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Review your order details',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-
-                        // Divider
-                        Container(
-                          height: 1,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.transparent,
-                                colorScheme.outline.withValues(alpha: 0.3),
-                                Colors.transparent,
-                              ],
-                            ),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: colorScheme.outline.withValues(alpha: 0.1),
+                            width: 1,
                           ),
                         ),
-
-                        const SizedBox(height: 24),
-
-                        // Summary Rows
-                        _buildSummaryRow(
-                          context,
-                          'Subtotal',
-                          widget.subtotal,
-                          isTablet: isTablet,
+                        child: Padding(
+                          padding: EdgeInsets.all(isTablet ? 28 : 20),
+                          child: _buildCardBody(context, isTablet),
                         ),
-                        const SizedBox(height: 12),
-                        _buildSummaryRow(
-                          context,
-                          'Tax (${(widget.taxRate * 100).toStringAsFixed(0)}%)',
-                          widget.tax,
-                          isTablet: isTablet,
-                        ),
-                        const SizedBox(height: 12),
-                        _buildSummaryRow(
-                          context,
-                          'Service Fee (${(widget.serviceFeeRate * 100).toStringAsFixed(0)}%)',
-                          widget.serviceFee,
-                          isTablet: isTablet,
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Total Divider
-                        Container(
-                          height: 2,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                Colors.transparent,
-                                colorScheme.primary.withValues(alpha: 0.3),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Total Row
-                        _buildTotalRow(context, widget.total, isTablet),
-
-                        const SizedBox(height: 24),
-
-                        // Action Buttons
-                        if (widget.hasItems)
-                          _buildActionButtons(context, isTablet)
-                        else
-                          _buildEmptyState(context, isTablet),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildCardBody(BuildContext context, bool isTablet) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.primary,
+                    colorScheme.primary.withValues(alpha: 0.8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: colorScheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.receipt_long_rounded,
+                color: colorScheme.onPrimary,
+                size: isTablet ? 28 : 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Order Summary',
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: colorScheme.onSurface,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Review your order details',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 24),
+
+        // Divider
+        Container(
+          height: 1,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.transparent,
+                colorScheme.outline.withValues(alpha: 0.3),
+                Colors.transparent,
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 24),
+
+        // Summary Rows
+        _buildSummaryRow(
+          context,
+          'Subtotal',
+          widget.subtotal,
+          isTablet: isTablet,
+        ),
+        const SizedBox(height: 12),
+        _buildSummaryRow(
+          context,
+          'Tax (${(widget.taxRate * 100).toStringAsFixed(0)}%)',
+          widget.tax,
+          isTablet: isTablet,
+        ),
+        const SizedBox(height: 12),
+        _buildSummaryRow(
+          context,
+          'Service Fee (${(widget.serviceFeeRate * 100).toStringAsFixed(0)}%)',
+          widget.serviceFee,
+          isTablet: isTablet,
+        ),
+
+        const SizedBox(height: 20),
+
+        // Total Divider
+        Container(
+          height: 2,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.transparent,
+                colorScheme.primary.withValues(alpha: 0.3),
+                Colors.transparent,
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Total Row
+        _buildTotalRow(context, widget.total, isTablet),
+
+        const SizedBox(height: 24),
+
+        // Action Buttons
+        if (widget.hasItems)
+          _buildActionButtons(context, isTablet)
+        else
+          _buildEmptyState(context, isTablet),
+      ],
     );
   }
 

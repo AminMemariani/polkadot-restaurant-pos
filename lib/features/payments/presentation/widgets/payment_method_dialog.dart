@@ -23,7 +23,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
   @override
   void initState() {
     super.initState();
-    _loadPaymentMethods();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPaymentMethods());
   }
 
   Future<void> _loadPaymentMethods() async {

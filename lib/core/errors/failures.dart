@@ -4,6 +4,9 @@ abstract class Failure {
   final int? code;
 
   const Failure({required this.message, this.code});
+
+  @override
+  String toString() => message;
 }
 
 /// Server failure

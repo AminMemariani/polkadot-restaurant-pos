@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/settings_provider.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../shared/widgets/glass/glass.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -20,7 +21,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSettings());
   }
 
   @override
@@ -50,7 +51,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
-      appBar: AppBar(
+      extendBodyBehindAppBar: true,
+      appBar: GlassAppBar(
         title: Text(
           'Settings',
           style: theme.textTheme.headlineMedium?.copyWith(
@@ -803,7 +805,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => GlassDialog(
         title: const Text('Clear Product Catalog'),
         content: const Text(
           'Are you sure you want to clear all products? This action cannot be undone.',
@@ -839,7 +841,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => GlassDialog(
         title: const Text('Clear Receipt History'),
         content: const Text(
           'Are you sure you want to clear all receipts? This action cannot be undone.',
@@ -875,7 +877,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => GlassDialog(
         title: const Text('Clear All Data'),
         content: const Text(
           'Are you sure you want to clear all data? This will remove all products, receipts, and reset settings. This action cannot be undone.',
