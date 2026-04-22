@@ -4,8 +4,10 @@ import 'package:step_bar/step_bar.dart';
 
 import '../../../../shared/widgets/glass/glass.dart';
 import '../../../../shared/widgets/motion/motion.dart';
+import '../../domain/entities/money.dart';
 import '../../domain/entities/payment.dart';
 import '../../domain/entities/payment_method.dart';
+import '../../domain/entities/payment_request.dart';
 import '../../domain/services/payment_method_registry.dart';
 import '../../domain/services/payment_processor.dart';
 import '../pages/payment_confirmation_page.dart';
@@ -195,57 +197,55 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
     final primaryColor = Theme.of(context).colorScheme.primary;
     final errorColor = Theme.of(context).colorScheme.error;
 
+    final request = PaymentRequest(
+      orderId:
+          widget.receiptId ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      amount: Money.fromMajor(widget.amount, 'USD'),
+      // TODO(multi-tenant): wire real cashier/location once auth lands.
+      cashierId: 'default',
+      locationId: 'default',
+    );
+
     try {
-      switch (processor.method) {
-        case PaymentMethod.polkadot:
-        case PaymentMethod.kusama:
-          // Blockchain rails still drive the QR confirmation page via the
-          // existing PaymentsProvider state machine; the registry-routed
-          // refactor of that page comes with Phase 3 (Stripe).
-          final ok = await provider.processPaymentWithBlockchain(
+      if (processor.method == PaymentMethod.cash) {
+        // Cash resolves immediately; record it through the legacy repo and
+        // snackbar back without leaving the order screen.
+        await processor.process(request).drain<void>();
+        await provider.recordPayment(
+          Payment(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            status: 'completed',
             amount: widget.amount,
-            network: processor.displayName,
-          );
-          if (ok && mounted) {
-            navigator.pop();
-            navigator.push(
-              MaterialPageRoute(
-                builder: (_) => PaymentConfirmationPage(
-                  amount: widget.amount,
-                  network: processor.displayName,
-                ),
-              ),
-            );
-          }
-        case PaymentMethod.cash:
-          final ok = await provider.processPaymentTransaction(
-            Payment(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              status: 'completed',
-              amount: widget.amount,
-              receiptId: widget.receiptId ?? '',
-              method: 'cash',
-              createdAt: DateTime.now(),
-            ),
-          );
-          if (ok && mounted) {
-            navigator.pop();
-            messenger.showSnackBar(
-              SnackBar(
-                content: Text('Payment completed with ${processor.displayName}'),
-                backgroundColor: primaryColor,
-              ),
-            );
-          }
-        case PaymentMethod.stripeCard:
-        case PaymentMethod.stripeTerminal:
-          // Wired in a later phase.
+            receiptId: widget.receiptId ?? '',
+            method: 'cash',
+            createdAt: DateTime.now(),
+          ),
+        );
+        if (mounted) {
+          navigator.pop();
           messenger.showSnackBar(
             SnackBar(
-              content: Text('${processor.displayName} not yet wired up'),
-              backgroundColor: errorColor,
+              content: Text('Payment completed with ${processor.displayName}'),
+              backgroundColor: primaryColor,
             ),
           );
+        }
+        return;
+      }
+
+      // Interactive rails (blockchain, Stripe later): start the processor
+      // stream and let PaymentConfirmationPage observe it.
+      await provider.startProcessor(processor, request);
+      if (mounted) {
+        navigator.pop();
+        navigator.push(
+          MaterialPageRoute(
+            builder: (_) => PaymentConfirmationPage(
+              amount: widget.amount,
+              network: processor.displayName,
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -260,7 +260,6 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
 }
 
 /// Single tile in the payment-method picker. Animates the border and

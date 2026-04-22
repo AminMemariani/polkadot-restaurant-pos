@@ -3,12 +3,17 @@ import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:step_bar/step_bar.dart';
 
-import '../providers/payments_provider.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/glass/glass.dart';
 import '../../../../shared/widgets/motion/motion.dart';
+import '../../domain/entities/payment_progress.dart';
+import '../../domain/entities/payment_result.dart';
+import '../providers/payments_provider.dart';
 import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
+/// Renders the in-flight payment for whichever processor [PaymentsProvider]
+/// is currently driving. Pure presentation — pattern-matches on
+/// `provider.progress` events and reflects the current rail's UX.
 class PaymentConfirmationPage extends StatefulWidget {
   final double amount;
   final String? network;
@@ -25,27 +30,17 @@ class PaymentConfirmationPage extends StatefulWidget {
 }
 
 class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
-    with TickerProviderStateMixin {
-  late AnimationController _checkController;
-  late Animation<double> _checkAnimation;
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _checkController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 800),
+  );
+  late final Animation<double> _checkAnimation = Tween<double>(
+    begin: 0.0,
+    end: 1.0,
+  ).animate(CurvedAnimation(parent: _checkController, curve: Curves.elasticOut));
 
-  @override
-  void initState() {
-    super.initState();
-
-    _checkController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-
-    _checkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _checkController, curve: Curves.elasticOut),
-    );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startPayment();
-    });
-  }
+  bool _checkAnimationStarted = false;
 
   @override
   void dispose() {
@@ -53,29 +48,11 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
     super.dispose();
   }
 
-  Future<void> _startPayment() async {
-    final provider = context.read<PaymentsProvider>();
-    await provider.startPayment(widget.amount);
-
-    Future.delayed(const Duration(seconds: 5), () {
-      if (mounted && provider.paymentStatus == PaymentStatus.waiting) {
-        _simulateConfirmation();
-      }
-    });
-  }
-
-  Future<void> _simulateConfirmation() async {
-    final provider = context.read<PaymentsProvider>();
-    await provider.simulateBlockchainConfirmation();
-    _checkController.forward();
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
+    final isTablet = MediaQuery.of(context).size.width > 768;
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -94,7 +71,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           onPressed: () {
-            context.read<PaymentsProvider>().cancelPayment();
+            context.read<PaymentsProvider>().cancel();
             Navigator.of(context).pop();
           },
           icon: Icon(AppIcons.closeRounded),
@@ -102,7 +79,13 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
         ),
       ),
       body: Consumer<PaymentsProvider>(
-        builder: (context, provider, child) {
+        builder: (context, provider, _) {
+          final progress = provider.progress;
+          if (progress is PaymentSucceeded && !_checkAnimationStarted) {
+            _checkAnimationStarted = true;
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => _checkController.forward());
+          }
           return Padding(
             padding: EdgeInsets.fromLTRB(
               isTablet ? 32 : 24,
@@ -112,21 +95,17 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             ),
             child: Column(
               children: [
-                // Amount Display
-                _buildAmountSection(context, provider),
-
-                const SizedBox(height: 24),
-
-                // Payment Progress Steps
-                _buildPaymentSteps(context, provider),
-
-                const SizedBox(height: 24),
-
-                // Payment Status Section
-                Expanded(child: _buildPaymentStatusSection(context, provider)),
-
-                // Action Buttons
-                _buildActionButtons(context, provider),
+                _AmountSection(amount: widget.amount, network: widget.network),
+                const SizedBox(height: AppSpacing.xxl),
+                _StepsSection(progress: progress),
+                const SizedBox(height: AppSpacing.xxl),
+                Expanded(
+                  child: _StatusSection(
+                    progress: progress,
+                    checkAnimation: _checkAnimation,
+                  ),
+                ),
+                _ActionButtons(progress: progress),
               ],
             ),
           );
@@ -134,15 +113,26 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       ),
     );
   }
+}
 
-  Widget _buildAmountSection(BuildContext context, PaymentsProvider provider) {
+// ---------------------------------------------------------------------------
+// Layout sections
+// ---------------------------------------------------------------------------
+
+class _AmountSection extends StatelessWidget {
+  const _AmountSection({required this.amount, this.network});
+
+  final double amount;
+  final String? network;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
+    final isTablet = MediaQuery.of(context).size.width > 768;
 
     return Hero(
-      tag: 'payment_amount_${widget.amount}',
+      tag: 'payment_amount_$amount',
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.all(isTablet ? 32 : 24),
@@ -160,13 +150,6 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.primary.withValues(alpha: 0.3),
             width: 1.5,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withValues(alpha: 0.1),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
         child: Column(
           children: [
@@ -180,7 +163,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             ),
             const SizedBox(height: 12),
             Text(
-              '\$${widget.amount.toStringAsFixed(2)}',
+              '\$${amount.toStringAsFixed(2)}',
               style: theme.textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.w900,
                 color: colorScheme.primary,
@@ -188,7 +171,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                 letterSpacing: -1.0,
               ),
             ),
-            if (widget.network != null) ...[
+            if (network != null) ...[
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -200,7 +183,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  widget.network!,
+                  network!,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onPrimary,
                     fontWeight: FontWeight.w600,
@@ -213,55 +196,42 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       ),
     );
   }
+}
 
-  Widget _buildPaymentSteps(BuildContext context, PaymentsProvider provider) {
+class _StepsSection extends StatelessWidget {
+  const _StepsSection({this.progress});
+
+  final PaymentProgress? progress;
+
+  int _currentStep() {
+    return switch (progress) {
+      PaymentCreating() => 0,
+      PaymentAwaitingUser() => 2,
+      PaymentProcessing() => 3,
+      PaymentSucceeded() => 4,
+      PaymentFailed() || PaymentCancelled() => 2,
+      _ => 0,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Define payment steps
     final steps = [
-      const StepBarStep(
-        label: 'Payment Initiated',
-        status: StepStatus.completed,
-      ),
-      const StepBarStep(
-        label: 'QR Code Generated',
-        status: StepStatus.completed,
-      ),
-      const StepBarStep(
-        label: 'Waiting for Payment',
-        status: StepStatus.active,
-      ),
-      const StepBarStep(
-        label: 'Blockchain Confirmation',
-        status: StepStatus.inactive,
-      ),
-      const StepBarStep(label: 'Payment Complete', status: StepStatus.inactive),
+      const StepBarStep(label: 'Initiated', status: StepStatus.completed),
+      const StepBarStep(label: 'QR Generated', status: StepStatus.completed),
+      const StepBarStep(label: 'Awaiting Payment', status: StepStatus.active),
+      const StepBarStep(label: 'Confirming', status: StepStatus.inactive),
+      const StepBarStep(label: 'Complete', status: StepStatus.inactive),
     ];
 
-    // Determine current step based on payment status
-    int currentStep = 0;
-    switch (provider.paymentStatus) {
-      case PaymentStatus.idle:
-        currentStep = 0;
-        break;
-      case PaymentStatus.waiting:
-        currentStep = 2; // QR code is generated and waiting
-        break;
-      case PaymentStatus.confirmed:
-        currentStep = 4; // Payment complete
-        break;
-      case PaymentStatus.cancelled:
-      case PaymentStatus.failed:
-        currentStep = 2; // Show as waiting step
-        break;
-    }
-
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(color: colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
@@ -274,10 +244,10 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
               color: colorScheme.onSurface,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.lg),
           StepBar(
             steps: steps,
-            currentStep: currentStep,
+            currentStep: _currentStep(),
             completedColor: colorScheme.primary,
             activeColor: colorScheme.primary.withValues(alpha: 0.3),
             inactiveColor: colorScheme.onSurface.withValues(alpha: 0.3),
@@ -286,39 +256,90 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       ),
     );
   }
+}
 
-  Widget _buildPaymentStatusSection(
-    BuildContext context,
-    PaymentsProvider provider,
-  ) {
-    switch (provider.paymentStatus) {
-      case PaymentStatus.waiting:
-        return _buildWaitingState(context, provider);
-      case PaymentStatus.confirmed:
-        return _buildConfirmedState(context, provider);
-      case PaymentStatus.cancelled:
-        return _buildCancelledState(context, provider);
-      case PaymentStatus.failed:
-        return _buildFailedState(context, provider);
-      default:
-        return _buildIdleState(context, provider);
-    }
+class _StatusSection extends StatelessWidget {
+  const _StatusSection({
+    required this.progress,
+    required this.checkAnimation,
+  });
+
+  final PaymentProgress? progress;
+  final Animation<double> checkAnimation;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (progress) {
+      PaymentCreating() || null => const _IdleState(),
+      PaymentAwaitingUser(:final hint) => _AwaitingState(hint: hint),
+      PaymentProcessing(:final hint) => _ProcessingState(hint: hint),
+      PaymentSucceeded(:final result) => _SuccessState(
+          result: result,
+          checkAnimation: checkAnimation,
+        ),
+      PaymentFailed(:final message) => _FailureState(message: message),
+      PaymentCancelled() => const _CancelledState(),
+    };
   }
+}
 
-  Widget _buildWaitingState(BuildContext context, PaymentsProvider provider) {
+class _IdleState extends StatelessWidget {
+  const _IdleState();
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: 120,
+          height: 120,
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(60),
+          ),
+          child: Icon(
+            AppIcons.payment,
+            size: 60,
+            color: colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xxxl),
+        Text(
+          'Preparing Payment...',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 768;
+class _AwaitingState extends StatelessWidget {
+  const _AwaitingState({this.hint});
+  final String? hint;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isTablet = MediaQuery.of(context).size.width > 768;
+    final paymentId =
+        context.watch<PaymentsProvider>().lastResult?.providerPaymentId ??
+            context.watch<PaymentsProvider>().activeRequest?.orderId ??
+            '';
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         PulseScale(
-          enabled: provider.paymentStatus == PaymentStatus.waiting,
+          enabled: true,
           child: Container(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(AppSpacing.xl),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(20),
@@ -336,7 +357,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
               ],
             ),
             child: QrImageView(
-              data: provider.paymentId ?? '',
+              data: paymentId,
               version: QrVersions.auto,
               size: isTablet ? 240.0 : 200.0,
               backgroundColor: Colors.white,
@@ -351,48 +372,16 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             ),
           ),
         ),
-
-        const SizedBox(height: 32),
-
-        // Status Text
+        const SizedBox(height: AppSpacing.xxxl),
         Text(
-          'Waiting for Payment...',
+          hint ?? 'Waiting for payment...',
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w600,
             color: colorScheme.onSurface,
           ),
+          textAlign: TextAlign.center,
         ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'Scan QR code to complete payment',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Payment ID
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            'Payment ID: ${provider.paymentId ?? ''}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.6),
-              fontFamily: 'monospace',
-            ),
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Loading Indicator
+        const SizedBox(height: AppSpacing.xxl),
         SizedBox(
           width: 24,
           height: 24,
@@ -404,99 +393,120 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       ],
     );
   }
+}
 
-  Widget _buildConfirmedState(BuildContext context, PaymentsProvider provider) {
+class _ProcessingState extends StatelessWidget {
+  const _ProcessingState({this.hint});
+  final String? hint;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Success Animation
-        AnimatedBuilder(
-          animation: _checkAnimation,
-          builder: (context, child) {
-            return Transform.scale(
-              scale: _checkAnimation.value,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(60),
-                ),
-                child: Icon(
-                  AppIcons.check,
-                  size: 60,
-                  color: colorScheme.onPrimary,
-                ),
-              ),
-            );
-          },
-        ),
-
-        const SizedBox(height: 32),
-
-        // Success Text
+        const CircularProgressIndicator(),
+        const SizedBox(height: AppSpacing.xxl),
         Text(
-          'Payment Confirmed ✅',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: colorScheme.primary,
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'Transaction completed successfully',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Transaction Details
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Transaction Details',
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _buildDetailRow(
-                'Amount',
-                '\$${widget.amount.toStringAsFixed(2)}',
-              ),
-              _buildDetailRow('Payment ID', provider.paymentId ?? ''),
-              if (provider.blockchainTxId != null)
-                _buildDetailRow('Transaction ID', provider.blockchainTxId!),
-              _buildDetailRow('Status', 'Completed'),
-            ],
-          ),
+          hint ?? 'Processing...',
+          style: theme.textTheme.headlineSmall,
         ),
       ],
     );
   }
+}
 
-  Widget _buildDetailRow(String label, String value) {
+class _SuccessState extends StatelessWidget {
+  const _SuccessState({required this.result, required this.checkAnimation});
+
+  final PaymentResult result;
+  final Animation<double> checkAnimation;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ScaleTransition(
+            scale: checkAnimation,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: colorScheme.primary,
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Icon(
+                AppIcons.check,
+                size: 60,
+                color: colorScheme.onPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxxl),
+          Text(
+            'Payment Confirmed',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.primary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+          _TransactionDetails(result: result),
+        ],
+      ),
+    );
+  }
+}
+
+class _TransactionDetails extends StatelessWidget {
+  const _TransactionDetails({required this.result});
+  final PaymentResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final txId = result.raw['blockchain_tx_id'] as String?;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Transaction Details',
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          _row(context, 'Amount',
+              '\$${result.amountCharged.toMajor().toStringAsFixed(2)}'),
+          _row(context, 'Payment ID', result.providerPaymentId),
+          if (txId != null) _row(context, 'Transaction ID', txId, mono: true),
+          _row(context, 'Status', 'Completed'),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(BuildContext context, String label, String value,
+      {bool mono = false}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -512,7 +522,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurface,
                 fontWeight: FontWeight.w500,
-                fontFamily: label == 'Transaction ID' ? 'monospace' : null,
+                fontFamily: mono ? 'monospace' : null,
               ),
               textAlign: TextAlign.right,
             ),
@@ -521,54 +531,16 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       ),
     );
   }
+}
 
-  Widget _buildCancelledState(BuildContext context, PaymentsProvider provider) {
+class _FailureState extends StatelessWidget {
+  const _FailureState({required this.message});
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: colorScheme.errorContainer,
-            borderRadius: BorderRadius.circular(60),
-          ),
-          child: Icon(
-            AppIcons.cancelOutlined,
-            size: 60,
-            color: colorScheme.onErrorContainer,
-          ),
-        ),
-
-        const SizedBox(height: 32),
-
-        Text(
-          'Payment Cancelled',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: colorScheme.error,
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'Payment was cancelled by user',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withValues(alpha: 0.7),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFailedState(BuildContext context, PaymentsProvider provider) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -585,9 +557,7 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.onErrorContainer,
           ),
         ),
-
-        const SizedBox(height: 32),
-
+        const SizedBox(height: AppSpacing.xxxl),
         Text(
           'Payment Failed',
           style: theme.textTheme.headlineSmall?.copyWith(
@@ -595,11 +565,9 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             color: colorScheme.error,
           ),
         ),
-
-        const SizedBox(height: 8),
-
+        const SizedBox(height: AppSpacing.sm),
         Text(
-          provider.error ?? 'An error occurred during payment',
+          message,
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
@@ -608,11 +576,15 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       ],
     );
   }
+}
 
-  Widget _buildIdleState(BuildContext context, PaymentsProvider provider) {
+class _CancelledState extends StatelessWidget {
+  const _CancelledState();
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -620,127 +592,99 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
           width: 120,
           height: 120,
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
+            color: colorScheme.errorContainer,
             borderRadius: BorderRadius.circular(60),
           ),
           child: Icon(
-            AppIcons.payment,
+            AppIcons.cancelOutlined,
             size: 60,
-            color: colorScheme.onSurface.withValues(alpha: 0.5),
+            color: colorScheme.onErrorContainer,
           ),
         ),
-
-        const SizedBox(height: 32),
-
+        const SizedBox(height: AppSpacing.xxxl),
         Text(
-          'Preparing Payment...',
+          'Payment Cancelled',
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
-        ),
-
-        const SizedBox(height: 8),
-
-        Text(
-          'Please wait while we set up your payment',
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colorScheme.onSurface.withValues(alpha: 0.7),
+            color: colorScheme.error,
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildActionButtons(BuildContext context, PaymentsProvider provider) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+class _ActionButtons extends StatelessWidget {
+  const _ActionButtons({required this.progress});
+  final PaymentProgress? progress;
 
-    return Column(
-      children: [
-        if (provider.paymentStatus == PaymentStatus.waiting) ...[
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                provider.cancelPayment();
-                Navigator.of(context).pop();
-              },
-              icon: Icon(
-                AppIcons.cancelOutlined,
-                color: colorScheme.onSurface.withValues(alpha: 0.7),
-              ),
-              label: Text(
-                'Cancel Payment',
-                style: TextStyle(
-                  color: colorScheme.onSurface.withValues(alpha: 0.7),
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(
-                  color: colorScheme.outline.withValues(alpha: 0.5),
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-        ] else if (provider.paymentStatus == PaymentStatus.confirmed) ...[
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                provider.resetPayment();
-                Navigator.of(context).pop();
-              },
-              icon: Icon(AppIcons.done, color: colorScheme.onPrimary),
-              label: Text(
-                'Done',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onPrimary,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-        ] else if (provider.paymentStatus == PaymentStatus.failed) ...[
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                provider.resetPayment();
-                Navigator.of(context).pop();
-              },
-              icon: Icon(AppIcons.refresh, color: colorScheme.onPrimary),
-              label: Text(
-                'Try Again',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onPrimary,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
-        ],
-      ],
+  @override
+  Widget build(BuildContext context) {
+    final isAwaiting =
+        progress is PaymentAwaitingUser || progress is PaymentProcessing;
+    final isSucceeded = progress is PaymentSucceeded;
+    final isFailed = progress is PaymentFailed;
+
+    if (isAwaiting) {
+      return _CancelButton();
+    }
+    if (isSucceeded) {
+      return _DoneButton();
+    }
+    if (isFailed) {
+      return _RetryButton();
+    }
+    return const SizedBox.shrink();
+  }
+}
+
+class _CancelButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () {
+          context.read<PaymentsProvider>().cancel();
+          Navigator.of(context).pop();
+        },
+        icon: Icon(AppIcons.cancelOutlined),
+        label: const Text('Cancel Payment'),
+      ),
+    );
+  }
+}
+
+class _DoneButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () {
+          context.read<PaymentsProvider>().reset();
+          Navigator.of(context).pop();
+        },
+        icon: Icon(AppIcons.done),
+        label: const Text('Done'),
+      ),
+    );
+  }
+}
+
+class _RetryButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () {
+          context.read<PaymentsProvider>().reset();
+          Navigator.of(context).pop();
+        },
+        icon: Icon(AppIcons.refresh),
+        label: const Text('Try Again'),
+      ),
     );
   }
 }

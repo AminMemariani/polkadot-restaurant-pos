@@ -1,252 +1,128 @@
-import 'dart:math';
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/payment.dart';
-import '../../domain/usecases/process_payment.dart';
+import '../../domain/entities/payment_progress.dart';
+import '../../domain/entities/payment_request.dart';
+import '../../domain/entities/payment_result.dart';
+import '../../domain/services/payment_processor.dart';
 import '../../domain/usecases/get_payment_methods.dart';
+import '../../domain/usecases/process_payment.dart';
 
-/// Provider for managing payments state and blockchain integration
+/// Thin orchestrator around a [PaymentProcessor].
+///
+/// Holds the currently-running payment's progress so the UI (typically
+/// [PaymentConfirmationPage]) can rebuild on every event. All rail-specific
+/// logic lives in the processor — this class knows nothing about blockchain
+/// or Stripe.
 class PaymentsProvider extends ChangeNotifier {
-  final ProcessPayment processPayment;
-  final GetPaymentMethods getPaymentMethods;
-
   PaymentsProvider({
     required this.processPayment,
     required this.getPaymentMethods,
   });
 
-  final List<Payment> _payments = [];
-  List<String> _paymentMethods = [];
-  bool _isLoading = false;
+  // Use cases retained for the legacy traditional-payment code path (cash
+  // records still flow through [recordPayment] below). When everything has
+  // moved to the processor stream these can be removed.
+  final ProcessPayment processPayment;
+  final GetPaymentMethods getPaymentMethods;
+
+  StreamSubscription<PaymentProgress>? _subscription;
+  PaymentProcessor? _activeProcessor;
+  PaymentRequest? _activeRequest;
+  PaymentProgress? _progress;
+  PaymentResult? _lastResult;
   String? _error;
+  bool _isLoading = false;
 
-  // Current payment state
-  Payment? _currentPayment;
-  PaymentStatus _paymentStatus = PaymentStatus.idle;
-  String? _paymentId;
-  String? _blockchainTxId;
-  double _paymentAmount = 0.0;
-
-  // Getters
-  List<Payment> get payments => _payments;
-  List<String> get paymentMethods => _paymentMethods;
-  bool get isLoading => _isLoading;
+  PaymentProgress? get progress => _progress;
+  PaymentResult? get lastResult => _lastResult;
+  PaymentRequest? get activeRequest => _activeRequest;
+  PaymentProcessor? get activeProcessor => _activeProcessor;
   String? get error => _error;
-  Payment? get currentPayment => _currentPayment;
-  PaymentStatus get paymentStatus => _paymentStatus;
-  String? get paymentId => _paymentId;
-  String? get blockchainTxId => _blockchainTxId;
-  double get paymentAmount => _paymentAmount;
+  bool get isLoading => _isLoading;
 
-  /// Generate a unique payment ID
-  String _generatePaymentId() {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final random = Random().nextInt(9999).toString().padLeft(4, '0');
-    return 'PAY_${timestamp}_$random';
+  /// True once the current flow has emitted a terminal state
+  /// (succeeded / failed / cancelled).
+  bool get isTerminal {
+    final p = _progress;
+    return p is PaymentSucceeded || p is PaymentFailed || p is PaymentCancelled;
   }
 
-  /// Generate a mock blockchain transaction ID
-  String _generateBlockchainTxId() {
-    final random = Random();
-    const hexChars = '0123456789abcdef';
-    final txId = List.generate(
-      64,
-      (index) => hexChars[random.nextInt(hexChars.length)],
-    ).join();
-    return '0x$txId';
-  }
+  /// Kick off a payment via [processor]. Replaces any in-flight payment.
+  ///
+  /// Returns once the subscription is set up — the actual flow completes
+  /// asynchronously, with updates arriving via [notifyListeners]. UI should
+  /// watch [progress] and branch on its runtime type.
+  Future<void> startProcessor(
+    PaymentProcessor processor,
+    PaymentRequest request,
+  ) async {
+    await _subscription?.cancel();
+    _activeProcessor = processor;
+    _activeRequest = request;
+    _lastResult = null;
+    _error = null;
+    _progress = const PaymentProgress.creating();
+    notifyListeners();
 
-  /// Start a new payment process
-  Future<String> startPayment(double amount, {String? receiptId}) async {
-    _setLoading(true);
-    _clearError();
-
-    _paymentId = _generatePaymentId();
-    _paymentAmount = amount;
-    _paymentStatus = PaymentStatus.waiting;
-    _blockchainTxId = null;
-
-    // Create payment entity
-    _currentPayment = Payment(
-      id: _paymentId!,
-      status: 'pending',
-      amount: amount,
-      receiptId: receiptId ?? '',
-      method: 'blockchain',
-      createdAt: DateTime.now(),
+    _subscription = processor.process(request).listen(
+      (event) {
+        _progress = event;
+        if (event is PaymentSucceeded) _lastResult = event.result;
+        if (event is PaymentFailed) _error = event.message;
+        notifyListeners();
+      },
+      onError: (Object e, StackTrace _) {
+        _progress = PaymentFailed(e.toString());
+        _error = e.toString();
+        notifyListeners();
+      },
     );
-
-    notifyListeners();
-    _setLoading(false);
-
-    return _paymentId!;
   }
 
-  /// Simulate blockchain payment confirmation
-  Future<void> simulateBlockchainConfirmation() async {
-    if (_paymentStatus != PaymentStatus.waiting) return;
-
-    _setLoading(true);
-
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 3));
-
-    // Generate blockchain transaction ID
-    _blockchainTxId = _generateBlockchainTxId();
-
-    // Update payment status
-    _paymentStatus = PaymentStatus.confirmed;
-
-    if (_currentPayment != null) {
-      _currentPayment = _currentPayment!.copyWith(
-        status: 'completed',
-        blockchainTxId: _blockchainTxId,
-      );
-
-      // Add to payments list
-      _payments.add(_currentPayment!);
-    }
-
-    notifyListeners();
-    _setLoading(false);
-  }
-
-  /// Cancel current payment
-  void cancelPayment() {
-    _paymentStatus = PaymentStatus.cancelled;
-    _currentPayment = null;
-    _paymentId = null;
-    _blockchainTxId = null;
-    _paymentAmount = 0.0;
+  /// Cancel the in-flight payment (if any). Emits [PaymentCancelled] so UI
+  /// can react; does not reset [lastResult].
+  void cancel() {
+    _subscription?.cancel();
+    _subscription = null;
+    _progress = const PaymentProgress.cancelled();
     notifyListeners();
   }
 
-  /// Reset payment state
-  void resetPayment() {
-    _paymentStatus = PaymentStatus.idle;
-    _currentPayment = null;
-    _paymentId = null;
-    _blockchainTxId = null;
-    _paymentAmount = 0.0;
-    _clearError();
+  /// Clear all payment state. Call before starting a brand-new flow.
+  void reset() {
+    _subscription?.cancel();
+    _subscription = null;
+    _activeProcessor = null;
+    _activeRequest = null;
+    _progress = null;
+    _lastResult = null;
+    _error = null;
     notifyListeners();
   }
 
-  /// Get payment methods (mock implementation)
-  Future<List<String>> getAvailablePaymentMethods() async {
+  /// Legacy: record a completed traditional payment (cash) through the
+  /// repository so it lands in the payment history.
+  Future<bool> recordPayment(Payment payment) async {
     _setLoading(true);
-    _clearError();
-
-    // Simulate API call
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    final methods = ['Polkadot (DOT)', 'Kusama (KSM)', 'Credit Card', 'Cash'];
-
-    _setPaymentMethods(methods);
-    _setLoading(false);
-    return methods;
-  }
-
-  /// Process payment with blockchain integration
-  Future<bool> processPaymentWithBlockchain({
-    required double amount,
-    required String network,
-  }) async {
-    _setLoading(true);
-    _clearError();
-
-    try {
-      // Start payment process
-      await startPayment(amount);
-
-      // Simulate blockchain processing
-      await _simulateBlockchainProcessing(network);
-
-      _setLoading(false);
-      return true;
-    } catch (e) {
-      _setError('Payment processing failed: $e');
-      _setLoading(false);
-      return false;
-    }
-  }
-
-  /// Simulate blockchain processing
-  Future<void> _simulateBlockchainProcessing(String network) async {
-    // Simulate network delay based on network
-    final delay = network.toLowerCase().contains('polkadot')
-        ? const Duration(seconds: 5)
-        : const Duration(seconds: 3);
-
-    await Future.delayed(delay);
-
-    // Generate transaction ID
-    _blockchainTxId = _generateBlockchainTxId();
-
-    // Update status
-    _paymentStatus = PaymentStatus.confirmed;
-
-    if (_currentPayment != null) {
-      _currentPayment = _currentPayment!.copyWith(
-        status: 'completed',
-        blockchainTxId: _blockchainTxId,
-      );
-
-      _payments.add(_currentPayment!);
-    }
-
-    notifyListeners();
-  }
-
-  /// Load payment methods
-  Future<void> loadPaymentMethods() async {
-    _setLoading(true);
-    _clearError();
-
-    final result = await getPaymentMethods();
-    result.fold(
-      (failure) => _setError(_mapFailureToMessage(failure)),
-      (methods) => _setPaymentMethods(methods),
-    );
-
-    _setLoading(false);
-  }
-
-  /// Process a new payment
-  Future<bool> processPaymentTransaction(Payment payment) async {
-    _setLoading(true);
-    _clearError();
+    _error = null;
 
     final result = await processPayment(payment);
-    bool success = false;
-
+    bool ok = false;
     result.fold(
-      (failure) => _setError(_mapFailureToMessage(failure)),
-      (_) => success = true,
+      (failure) => _error = _mapFailureToMessage(failure),
+      (_) => ok = true,
     );
 
     _setLoading(false);
-    return success;
+    return ok;
   }
 
-  // Private methods
-  void _setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
-
-  void _setError(String error) {
-    _error = error;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    _error = null;
-  }
-
-  void _setPaymentMethods(List<String> methods) {
-    _paymentMethods = methods;
+  void _setLoading(bool v) {
+    _isLoading = v;
     notifyListeners();
   }
 
@@ -264,7 +140,10 @@ class PaymentsProvider extends ChangeNotifier {
         return 'An unexpected error occurred: ${failure.message}';
     }
   }
-}
 
-/// Payment status enum
-enum PaymentStatus { idle, waiting, confirmed, cancelled, failed }
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+}
