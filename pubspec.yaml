@@ -68,10 +68,19 @@ dependencies:
   
   # Functional programming
   dartz: ^0.10.1
-  
+
   # Value equality
   equatable: ^2.0.5
   go_router: ^16.2.4
+
+  # Stripe — card-not-present (PaymentSheet, Apple/Google Pay)
+  flutter_stripe: ^11.5.0
+
+  # Idempotency keys for payment requests
+  uuid: ^4.5.1
+
+  # HTTP client for backend calls (Stripe intent creation, polling)
+  dio: ^5.7.0
 
 dev_dependencies:
   flutter_test:
