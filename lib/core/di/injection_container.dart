@@ -29,8 +29,10 @@ import '../../features/receipts/presentation/providers/receipts_provider.dart';
 
 import '../../features/payments/data/datasources/payments_local_datasource.dart';
 import '../../features/payments/data/datasources/payments_remote_datasource.dart';
+import '../../features/payments/data/datasources/stripe_remote_datasource.dart';
 import '../../features/payments/data/processors/blockchain_processor.dart';
 import '../../features/payments/data/processors/cash_processor.dart';
+import '../../features/payments/data/processors/stripe_card_processor.dart';
 import '../../features/payments/data/repositories/payments_repository_impl.dart';
 import '../../features/payments/domain/entities/payment_method.dart';
 import '../../features/payments/domain/repositories/payments_repository.dart';
@@ -183,8 +185,13 @@ void _initPayments() {
   sl.registerLazySingleton(() => ProcessPayment(sl()));
   sl.registerLazySingleton(() => GetPaymentMethods(sl()));
 
+  // Stripe data source — used by StripeCardProcessor and (later) terminal.
+  sl.registerLazySingleton<StripeRemoteDataSource>(
+    () => StripeRemoteDataSource(),
+  );
+
   // Payment method registry — register one processor per rail. New rails
-  // (Stripe, Apple Pay, gift card) are added here without touching UI.
+  // (Apple Pay, gift card, Terminal) are added here without touching UI.
   sl.registerLazySingleton<PaymentMethodRegistry>(() {
     final registry = PaymentMethodRegistry();
     registry.register(
@@ -201,6 +208,7 @@ void _initPayments() {
         confirmationDelay: const Duration(seconds: 3),
       ),
     );
+    registry.register(StripeCardProcessor(api: sl<StripeRemoteDataSource>()));
     registry.register(CashProcessor());
     return registry;
   });

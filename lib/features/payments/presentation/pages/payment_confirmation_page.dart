@@ -6,6 +6,7 @@ import 'package:step_bar/step_bar.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/glass/glass.dart';
 import '../../../../shared/widgets/motion/motion.dart';
+import '../../domain/entities/payment_method.dart';
 import '../../domain/entities/payment_progress.dart';
 import '../../domain/entities/payment_result.dart';
 import '../providers/payments_provider.dart';
@@ -323,55 +324,27 @@ class _AwaitingState extends StatelessWidget {
   const _AwaitingState({this.hint});
   final String? hint;
 
+  bool _isBlockchain(PaymentMethod? method) =>
+      method == PaymentMethod.polkadot || method == PaymentMethod.kusama;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isTablet = MediaQuery.of(context).size.width > 768;
-    final paymentId =
-        context.watch<PaymentsProvider>().lastResult?.providerPaymentId ??
-            context.watch<PaymentsProvider>().activeRequest?.orderId ??
-            '';
+    final provider = context.watch<PaymentsProvider>();
+    final method = provider.activeProcessor?.method;
+    final paymentId = provider.lastResult?.providerPaymentId ??
+        provider.activeRequest?.orderId ??
+        '';
+
+    final centerWidget = _isBlockchain(method)
+        ? _QrCard(paymentId: paymentId)
+        : _PulsingIcon(method: method);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        PulseScale(
-          enabled: true,
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.shadow.withValues(alpha: 0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: colorScheme.primary.withValues(alpha: 0.1),
-                  blurRadius: 40,
-                  offset: const Offset(0, 16),
-                ),
-              ],
-            ),
-            child: QrImageView(
-              data: paymentId,
-              version: QrVersions.auto,
-              size: isTablet ? 240.0 : 200.0,
-              backgroundColor: Colors.white,
-              eyeStyle: const QrEyeStyle(
-                eyeShape: QrEyeShape.square,
-                color: Colors.black,
-              ),
-              dataModuleStyle: const QrDataModuleStyle(
-                dataModuleShape: QrDataModuleShape.square,
-                color: Colors.black,
-              ),
-            ),
-          ),
-        ),
+        centerWidget,
         const SizedBox(height: AppSpacing.xxxl),
         Text(
           hint ?? 'Waiting for payment...',
@@ -391,6 +364,87 @@ class _AwaitingState extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _QrCard extends StatelessWidget {
+  const _QrCard({required this.paymentId});
+  final String paymentId;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isTablet = MediaQuery.of(context).size.width > 768;
+    return PulseScale(
+      enabled: true,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: colorScheme.primary.withValues(alpha: 0.1),
+              blurRadius: 40,
+              offset: const Offset(0, 16),
+            ),
+          ],
+        ),
+        child: QrImageView(
+          data: paymentId,
+          version: QrVersions.auto,
+          size: isTablet ? 240.0 : 200.0,
+          backgroundColor: Colors.white,
+          eyeStyle: const QrEyeStyle(
+            eyeShape: QrEyeShape.square,
+            color: Colors.black,
+          ),
+          dataModuleStyle: const QrDataModuleStyle(
+            dataModuleShape: QrDataModuleShape.square,
+            color: Colors.black,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PulsingIcon extends StatelessWidget {
+  const _PulsingIcon({this.method});
+  final PaymentMethod? method;
+
+  IconData _iconFor(PaymentMethod? m) {
+    return switch (m) {
+      PaymentMethod.stripeCard => AppIcons.creditCard,
+      PaymentMethod.stripeTerminal => AppIcons.payment,
+      _ => AppIcons.payment,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return PulseScale(
+      enabled: true,
+      child: Container(
+        width: 120,
+        height: 120,
+        decoration: BoxDecoration(
+          color: colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(60),
+        ),
+        child: Icon(
+          _iconFor(method),
+          size: 60,
+          color: colorScheme.primary,
+        ),
+      ),
     );
   }
 }
