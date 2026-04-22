@@ -29,8 +29,12 @@ import '../../features/receipts/presentation/providers/receipts_provider.dart';
 
 import '../../features/payments/data/datasources/payments_local_datasource.dart';
 import '../../features/payments/data/datasources/payments_remote_datasource.dart';
+import '../../features/payments/data/processors/blockchain_processor.dart';
+import '../../features/payments/data/processors/cash_processor.dart';
 import '../../features/payments/data/repositories/payments_repository_impl.dart';
+import '../../features/payments/domain/entities/payment_method.dart';
 import '../../features/payments/domain/repositories/payments_repository.dart';
+import '../../features/payments/domain/services/payment_method_registry.dart';
 import '../../features/payments/domain/usecases/process_payment.dart';
 import '../../features/payments/domain/usecases/get_payment_methods.dart';
 import '../../features/payments/presentation/providers/payments_provider.dart';
@@ -178,6 +182,28 @@ void _initPayments() {
   // Use cases
   sl.registerLazySingleton(() => ProcessPayment(sl()));
   sl.registerLazySingleton(() => GetPaymentMethods(sl()));
+
+  // Payment method registry — register one processor per rail. New rails
+  // (Stripe, Apple Pay, gift card) are added here without touching UI.
+  sl.registerLazySingleton<PaymentMethodRegistry>(() {
+    final registry = PaymentMethodRegistry();
+    registry.register(
+      BlockchainPaymentProcessor(
+        method: PaymentMethod.polkadot,
+        displayName: 'Polkadot (DOT)',
+        confirmationDelay: const Duration(seconds: 5),
+      ),
+    );
+    registry.register(
+      BlockchainPaymentProcessor(
+        method: PaymentMethod.kusama,
+        displayName: 'Kusama (KSM)',
+        confirmationDelay: const Duration(seconds: 3),
+      ),
+    );
+    registry.register(CashProcessor());
+    return registry;
+  });
 
   // Provider
   sl.registerFactory(

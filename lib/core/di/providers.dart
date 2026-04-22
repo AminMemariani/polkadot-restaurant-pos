@@ -3,6 +3,7 @@ import 'package:provider/single_child_widget.dart';
 
 import '../../features/products/presentation/providers/products_provider.dart';
 import '../../features/receipts/presentation/providers/receipts_provider.dart';
+import '../../features/payments/domain/services/payment_method_registry.dart';
 import '../../features/payments/presentation/providers/payments_provider.dart';
 import '../../features/settings/presentation/providers/settings_provider.dart';
 import '../../features/analytics/presentation/providers/analytics_provider.dart';
@@ -24,6 +25,9 @@ class AppProviders {
     ),
     ChangeNotifierProvider<PaymentsProvider>(
       create: (_) => sl<PaymentsProvider>(),
+    ),
+    Provider<PaymentMethodRegistry>(
+      create: (_) => sl<PaymentMethodRegistry>(),
     ),
     ChangeNotifierProvider<SettingsProvider>(
       create: (_) => sl<SettingsProvider>(),

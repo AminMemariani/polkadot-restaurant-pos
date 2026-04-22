@@ -2,13 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:step_bar/step_bar.dart';
 
-import '../providers/payments_provider.dart';
-import '../pages/payment_confirmation_page.dart';
-import '../../domain/entities/payment.dart';
 import '../../../../shared/widgets/glass/glass.dart';
 import '../../../../shared/widgets/motion/motion.dart';
+import '../../domain/entities/payment.dart';
+import '../../domain/entities/payment_method.dart';
+import '../../domain/services/payment_method_registry.dart';
+import '../../domain/services/payment_processor.dart';
+import '../pages/payment_confirmation_page.dart';
+import '../providers/payments_provider.dart';
 import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
+/// Cashier-facing payment method picker.
+///
+/// Enumerates rails from [PaymentMethodRegistry] so adding a new processor
+/// (Stripe, Apple Pay, gift card) shows up here automatically. Routing per
+/// rail still lives in [_processPayment] — that's the next refactor target
+/// once Stripe lands and we have more than two flow shapes to manage.
 class PaymentMethodDialog extends StatefulWidget {
   final double amount;
   final String? receiptId;
@@ -20,25 +29,27 @@ class PaymentMethodDialog extends StatefulWidget {
 }
 
 class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
-  String? _selectedMethod;
+  PaymentProcessor? _selected;
   bool _isLoading = false;
+  List<PaymentProcessor> _processors = const [];
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadPaymentMethods());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProcessors());
   }
 
-  Future<void> _loadPaymentMethods() async {
-    final provider = context.read<PaymentsProvider>();
-    await provider.getAvailablePaymentMethods();
+  Future<void> _loadProcessors() async {
+    final registry = context.read<PaymentMethodRegistry>();
+    final available = await registry.available();
+    if (!mounted) return;
+    setState(() => _processors = available);
   }
 
   Widget _buildPaymentSteps(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Define payment steps for method selection
     final steps = [
       const StepBarStep(
         label: 'Select Payment Method',
@@ -68,7 +79,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
           const SizedBox(height: 8),
           StepBar(
             steps: steps,
-            currentStep: 0, // Currently on step 1 (Select Payment Method)
+            currentStep: 0,
             completedColor: colorScheme.primary,
             activeColor: colorScheme.primary.withValues(alpha: 0.3),
             inactiveColor: colorScheme.onSurface.withValues(alpha: 0.3),
@@ -96,7 +107,6 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Payment Steps
             _buildPaymentSteps(context),
 
             const SizedBox(height: 16),
@@ -131,123 +141,21 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
 
             const SizedBox(height: 24),
 
-            // Payment Methods
-            Consumer<PaymentsProvider>(
-              builder: (context, provider, child) {
-                if (provider.isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                return Column(
-                  children: provider.paymentMethods.map((method) {
-                    final isSelected = _selectedMethod == method;
-                    final isBlockchain =
-                        method.toLowerCase().contains('polkadot') ||
-                        method.toLowerCase().contains('kusama');
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: PressableScale(
-                        onTap: () {
-                          setState(() {
-                            _selectedMethod = method;
-                          });
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 180),
-                          curve: Curves.easeOut,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? colorScheme.primaryContainer.withValues(
-                                    alpha: 0.3,
-                                  )
-                                : colorScheme.surfaceContainerHighest,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isSelected
-                                  ? colorScheme.primary
-                                  : colorScheme.outline.withValues(alpha: 0.2),
-                              width: isSelected ? 2 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              // Payment Method Icon
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: isBlockchain
-                                      ? colorScheme.primary
-                                      : colorScheme.secondary,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  isBlockchain
-                                      ? AppIcons.accountBalanceWallet
-                                      : method.toLowerCase().contains('card')
-                                      ? AppIcons.creditCard
-                                      : AppIcons.payments,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                              ),
-
-                              const SizedBox(width: 16),
-
-                              // Method Name
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      method,
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: colorScheme.onSurface,
-                                          ),
-                                    ),
-                                    if (isBlockchain) ...[
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'Blockchain Payment',
-                                        style: theme.textTheme.bodySmall
-                                            ?.copyWith(
-                                              color: colorScheme.onSurface
-                                                  .withValues(alpha: 0.6),
-                                            ),
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-
-                              // Selection Indicator
-                              if (isSelected)
-                                Icon(
-                                  AppIcons.checkCircle,
-                                  color: colorScheme.primary,
-                                  size: 24,
-                                )
-                              else
-                                Icon(
-                                  AppIcons.radioButtonUnchecked,
-                                  color: colorScheme.onSurface.withValues(
-                                    alpha: 0.4,
-                                  ),
-                                  size: 24,
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
-              },
-            ),
+            if (_processors.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: CircularProgressIndicator(),
+              )
+            else
+              Column(
+                children: _processors
+                    .map((p) => _MethodTile(
+                          processor: p,
+                          isSelected: _selected?.method == p.method,
+                          onTap: () => setState(() => _selected = p),
+                        ))
+                    .toList(),
+              ),
           ],
         ),
       ),
@@ -256,17 +164,8 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
           child: Text('Cancel', style: TextStyle(color: colorScheme.onSurface)),
         ),
-        ElevatedButton(
-          onPressed: _isLoading || _selectedMethod == null
-              ? null
-              : () => _processPayment(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
+        FilledButton(
+          onPressed: _isLoading || _selected == null ? null : _processPayment,
           child: _isLoading
               ? SizedBox(
                   width: 16,
@@ -284,12 +183,11 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
     );
   }
 
-  Future<void> _processPayment(BuildContext context) async {
-    if (_selectedMethod == null) return;
+  Future<void> _processPayment() async {
+    final processor = _selected;
+    if (processor == null) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     final provider = context.read<PaymentsProvider>();
     final navigator = Navigator.of(context);
@@ -298,48 +196,56 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
     final errorColor = Theme.of(context).colorScheme.error;
 
     try {
-      final isBlockchain =
-          _selectedMethod!.toLowerCase().contains('polkadot') ||
-          _selectedMethod!.toLowerCase().contains('kusama');
-
-      if (isBlockchain) {
-        final success = await provider.processPaymentWithBlockchain(
-          amount: widget.amount,
-          network: _selectedMethod!,
-        );
-
-        if (success && mounted) {
-          navigator.pop();
-          navigator.push(
-            MaterialPageRoute(
-              builder: (context) => PaymentConfirmationPage(
-                amount: widget.amount,
-                network: _selectedMethod,
+      switch (processor.method) {
+        case PaymentMethod.polkadot:
+        case PaymentMethod.kusama:
+          // Blockchain rails still drive the QR confirmation page via the
+          // existing PaymentsProvider state machine; the registry-routed
+          // refactor of that page comes with Phase 3 (Stripe).
+          final ok = await provider.processPaymentWithBlockchain(
+            amount: widget.amount,
+            network: processor.displayName,
+          );
+          if (ok && mounted) {
+            navigator.pop();
+            navigator.push(
+              MaterialPageRoute(
+                builder: (_) => PaymentConfirmationPage(
+                  amount: widget.amount,
+                  network: processor.displayName,
+                ),
               ),
+            );
+          }
+        case PaymentMethod.cash:
+          final ok = await provider.processPaymentTransaction(
+            Payment(
+              id: DateTime.now().millisecondsSinceEpoch.toString(),
+              status: 'completed',
+              amount: widget.amount,
+              receiptId: widget.receiptId ?? '',
+              method: 'cash',
+              createdAt: DateTime.now(),
             ),
           );
-        }
-      } else {
-        final success = await provider.processPaymentTransaction(
-          Payment(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            status: 'completed',
-            amount: widget.amount,
-            receiptId: widget.receiptId ?? '',
-            method: 'traditional',
-            createdAt: DateTime.now(),
-          ),
-        );
-
-        if (success && mounted) {
-          navigator.pop();
+          if (ok && mounted) {
+            navigator.pop();
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('Payment completed with ${processor.displayName}'),
+                backgroundColor: primaryColor,
+              ),
+            );
+          }
+        case PaymentMethod.stripeCard:
+        case PaymentMethod.stripeTerminal:
+          // Wired in a later phase.
           messenger.showSnackBar(
             SnackBar(
-              content: Text('Payment completed with $_selectedMethod'),
-              backgroundColor: primaryColor,
+              content: Text('${processor.displayName} not yet wired up'),
+              backgroundColor: errorColor,
             ),
           );
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -351,11 +257,103 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
         );
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
+
 }
+
+/// Single tile in the payment-method picker. Animates the border and
+/// background when selection changes.
+class _MethodTile extends StatelessWidget {
+  const _MethodTile({
+    required this.processor,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final PaymentProcessor processor;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isBlockchain = processor.method == PaymentMethod.polkadot ||
+        processor.method == PaymentMethod.kusama;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: PressableScale(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? colorScheme.primaryContainer.withValues(alpha: 0.3)
+                : colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.outline.withValues(alpha: 0.2),
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isBlockchain
+                      ? colorScheme.primary
+                      : colorScheme.secondary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(processor.icon, color: Colors.white, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      processor.displayName,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    if (isBlockchain) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Blockchain Payment',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Icon(
+                isSelected
+                    ? AppIcons.checkCircle
+                    : AppIcons.radioButtonUnchecked,
+                color: isSelected
+                    ? colorScheme.primary
+                    : colorScheme.onSurface.withValues(alpha: 0.4),
+                size: 24,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
