@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Custom button widget with consistent styling
+import 'motion/motion.dart';
+
+/// Custom button with consistent styling and a press-down scale effect.
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
@@ -49,7 +51,7 @@ class CustomButton extends StatelessWidget {
             ],
           );
 
-    return SizedBox(
+    final Widget button = SizedBox(
       width: width,
       height: height ?? 48,
       child: isOutlined
@@ -61,6 +63,15 @@ class CustomButton extends StatelessWidget {
               onPressed: isLoading ? null : onPressed,
               child: buttonChild,
             ),
+    );
+
+    final canTap = !isLoading && onPressed != null;
+    if (!canTap) return button;
+    // PressableScale forwards taps; the underlying button handles the action.
+    return PressableScale(
+      onTap: onPressed,
+      behavior: HitTestBehavior.translucent,
+      child: IgnorePointer(child: button),
     );
   }
 }

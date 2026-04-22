@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/services/product_image_service.dart';
+import '../../../../shared/widgets/app_text_field.dart';
+import '../../../../shared/widgets/glass/glass.dart';
 import '../../../../shared/widgets/image_picker_field.dart';
 import '../../domain/entities/product.dart';
 import '../providers/products_provider.dart';
@@ -62,7 +65,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     final colorScheme = theme.colorScheme;
     final isEditing = widget.product != null;
 
-    return AlertDialog(
+    return GlassDialog(
       title: Text(
         isEditing ? 'Edit Product' : 'Add Product',
         style: theme.textTheme.headlineSmall?.copyWith(
@@ -78,48 +81,32 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Image Field
                 ImagePickerField(
                   value: _imageUrl,
                   onChanged: (path) => setState(() => _imageUrl = path),
                 ),
-                const SizedBox(height: 16),
-
-                // Product ID Field
-                TextFormField(
+                const SizedBox(height: AppSpacing.lg),
+                AppTextField(
                   controller: _idController,
-                  decoration: InputDecoration(
-                    labelText: 'Product ID',
-                    hintText: 'Enter unique product ID',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: Icon(AppIcons.tag, color: colorScheme.primary),
-                  ),
+                  label: 'Product ID',
+                  hint: 'Enter unique product ID',
+                  prefixIcon: Icon(AppIcons.tag, color: colorScheme.primary),
+                  enabled: !isEditing,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a product ID';
                     }
                     return null;
                   },
-                  enabled:
-                      !isEditing, // Don't allow editing ID for existing products
                 ),
-                const SizedBox(height: 16),
-
-                // Product Name Field
-                TextFormField(
+                const SizedBox(height: AppSpacing.lg),
+                AppTextField(
                   controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Product Name',
-                    hintText: 'Enter product name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: Icon(
-                      AppIcons.inventory2Outlined,
-                      color: colorScheme.primary,
-                    ),
+                  label: 'Product Name',
+                  hint: 'Enter product name',
+                  prefixIcon: Icon(
+                    AppIcons.inventory2Outlined,
+                    color: colorScheme.primary,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -128,21 +115,14 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 16),
-
-                // Price Field
-                TextFormField(
+                const SizedBox(height: AppSpacing.lg),
+                AppTextField(
                   controller: _priceController,
-                  decoration: InputDecoration(
-                    labelText: 'Price',
-                    hintText: '0.00',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    prefixIcon: Icon(
-                      AppIcons.attachMoney,
-                      color: colorScheme.primary,
-                    ),
+                  label: 'Price',
+                  hint: '0.00',
+                  prefixIcon: Icon(
+                    AppIcons.attachMoney,
+                    color: colorScheme.primary,
                   ),
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -168,15 +148,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
           onPressed: _isLoading ? null : () => Navigator.of(context).pop(),
           child: Text('Cancel', style: TextStyle(color: colorScheme.onSurface)),
         ),
-        ElevatedButton(
+        FilledButton(
           onPressed: _isLoading ? null : _saveProduct,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.primary,
-            foregroundColor: colorScheme.onPrimary,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
           child: _isLoading
               ? SizedBox(
                   width: 16,

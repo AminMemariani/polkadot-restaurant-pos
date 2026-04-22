@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/app_spacing.dart';
+import '../../utils/platform_utils.dart';
 import 'glass_surface.dart';
 
-/// A Material [Card]-shaped container with Liquid Glass styling on Apple
-/// platforms.
+/// A card-shaped container that uses [GlassSurface] on Apple platforms and
+/// a Material 3 [Card] elsewhere.
 ///
-/// Thin wrapper over [GlassSurface] with card-appropriate defaults
-/// (20px radius, elevation 4, inner padding).
+/// On Apple platforms it renders the Liquid Glass blur defined by
+/// [GlassSurface]. On other platforms it falls through to a Material [Card]
+/// so it picks up the app's [CardTheme] (color, elevation, shape).
 class GlassCard extends StatelessWidget {
   const GlassCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(20),
+    this.padding = const EdgeInsets.all(AppSpacing.xl),
     this.margin,
-    this.borderRadius = 20,
+    this.borderRadius = AppRadius.lg,
     this.elevation = 4,
   });
 
@@ -25,12 +28,27 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GlassSurface(
-      padding: padding,
-      margin: margin,
-      borderRadius: borderRadius,
+    if (PlatformUtils.isApple) {
+      return GlassSurface(
+        padding: padding,
+        margin: margin,
+        borderRadius: borderRadius,
+        elevation: elevation,
+        child: child,
+      );
+    }
+
+    final card = Card(
       elevation: elevation,
-      child: child,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+      child: Padding(padding: padding, child: child),
     );
+
+    if (margin == null) return card;
+    return Padding(padding: margin!, child: card);
   }
 }

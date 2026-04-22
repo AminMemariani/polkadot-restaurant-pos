@@ -79,11 +79,13 @@ class GlassDialog extends StatelessWidget {
                 if (title != null && content != null)
                   const SizedBox(height: 12),
                 if (content != null)
-                  DefaultTextStyle(
-                    style: theme.textTheme.bodyMedium!.copyWith(
-                      color: colorScheme.onSurface.withValues(alpha: 0.85),
+                  Flexible(
+                    child: DefaultTextStyle(
+                      style: theme.textTheme.bodyMedium!.copyWith(
+                        color: colorScheme.onSurface.withValues(alpha: 0.85),
+                      ),
+                      child: content!,
                     ),
-                    child: content!,
                   ),
                 if (actions != null && actions!.isNotEmpty) ...[
                   const SizedBox(height: 20),

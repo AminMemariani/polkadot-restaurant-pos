@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/analytics_provider.dart';
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import '../../../../shared/widgets/states/app_states.dart';
 import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class AnalyticsPage extends StatefulWidget {
@@ -67,15 +69,25 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
       body: Consumer<AnalyticsProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppLoadingState(message: 'Loading analytics...');
           }
 
           if (provider.error != null) {
-            return _buildErrorState(context, provider);
+            return AppErrorState(
+              title: 'Error loading analytics',
+              message: provider.error ?? 'An unknown error occurred.',
+              onRetry: () => provider.loadAnalytics(),
+              retryLabel: 'Try Again',
+            );
           }
 
           return SingleChildScrollView(
-            padding: EdgeInsets.all(isTablet ? 32 : 24),
+            padding: EdgeInsets.fromLTRB(
+              isTablet ? 32 : 24,
+              AppSpacing.appBarOffset(context) + (isTablet ? 32 : 24),
+              isTablet ? 32 : 24,
+              isTablet ? 32 : 24,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -169,23 +181,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      padding: EdgeInsets.all(isTablet ? 20 : 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return GlassCard(
+      padding: EdgeInsets.all(isTablet ? AppSpacing.xl : AppSpacing.lg),
+      borderRadius: AppRadius.lg,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -246,24 +244,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return GlassCard(
+      padding: EdgeInsets.all(isTablet ? AppSpacing.xxl : AppSpacing.xl),
+      borderRadius: AppRadius.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -326,24 +309,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return GlassCard(
+      padding: EdgeInsets.all(isTablet ? AppSpacing.xxl : AppSpacing.xl),
+      borderRadius: AppRadius.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -440,24 +408,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return GlassCard(
+      padding: EdgeInsets.all(isTablet ? AppSpacing.xxl : AppSpacing.xl),
+      borderRadius: AppRadius.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -523,56 +476,6 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               ),
             );
           }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(BuildContext context, AnalyticsProvider provider) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            AppIcons.errorOutlineRounded,
-            color: colorScheme.error,
-            size: 80,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'Error loading analytics',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: colorScheme.error,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            provider.error ?? 'An unknown error occurred.',
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => provider.loadAnalytics(),
-            icon: Icon(AppIcons.refreshRounded),
-            label: const Text('Try Again'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              textStyle: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 4,
-            ),
-          ),
         ],
       ),
     );

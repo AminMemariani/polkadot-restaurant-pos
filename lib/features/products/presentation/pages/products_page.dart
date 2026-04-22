@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../shared/widgets/custom_button.dart';
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import '../../../../shared/widgets/states/app_states.dart';
 import '../providers/products_provider.dart';
 import '../widgets/product_card.dart';
 import '../widgets/product_form_dialog.dart';
@@ -88,9 +89,10 @@ class _ProductsPageState extends State<ProductsPage> {
       ),
       body: Column(
         children: [
+          SizedBox(height: AppSpacing.appBarOffset(context)),
           // Search Bar
-          Container(
-            padding: const EdgeInsets.all(16),
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Consumer<ProductsProvider>(
               builder: (context, provider, child) {
                 return ProductSearchBar(
@@ -113,129 +115,37 @@ class _ProductsPageState extends State<ProductsPage> {
             child: Consumer<ProductsProvider>(
               builder: (context, provider, child) {
                 if (provider.isLoading) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(color: colorScheme.primary),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Loading products...',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colorScheme.onSurface.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
+                  return const AppLoadingState(message: 'Loading products...');
                 }
 
                 if (provider.error != null) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: colorScheme.errorContainer,
-                              borderRadius: BorderRadius.circular(40),
-                            ),
-                            child: Icon(
-                              AppIcons.errorOutline,
-                              size: 40,
-                              color: colorScheme.onErrorContainer,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            'Error Loading Products',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            provider.error!,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: 0.7,
-                              ),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          CustomButton(
-                            text: 'Retry',
-                            onPressed: () => provider.loadProducts(),
-                          ),
-                        ],
-                      ),
-                    ),
+                  return AppErrorState(
+                    title: 'Error Loading Products',
+                    message: provider.error!,
+                    onRetry: () => provider.loadProducts(),
                   );
                 }
 
                 final products = provider.filteredProducts;
 
                 if (products.isEmpty) {
-                  return Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(40),
+                  return AppEmptyState(
+                    icon: AppIcons.inventory2Outlined,
+                    title: provider.searchQuery.isEmpty
+                        ? 'No Products Found'
+                        : 'No Products Match Your Search',
+                    message: provider.searchQuery.isEmpty
+                        ? 'Add your first product to get started'
+                        : 'Try adjusting your search terms',
+                    action: provider.searchQuery.isNotEmpty
+                        ? TextButton(
+                            onPressed: () => provider.clearSearch(),
+                            child: Text(
+                              'Clear Search',
+                              style: TextStyle(color: colorScheme.primary),
                             ),
-                            child: Icon(
-                              AppIcons.inventory2Outlined,
-                              size: 40,
-                              color: colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          Text(
-                            provider.searchQuery.isEmpty
-                                ? 'No Products Found'
-                                : 'No Products Match Your Search',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            provider.searchQuery.isEmpty
-                                ? 'Add your first product to get started'
-                                : 'Try adjusting your search terms',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurface.withValues(
-                                alpha: 0.7,
-                              ),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          if (provider.searchQuery.isNotEmpty) ...[
-                            const SizedBox(height: 16),
-                            TextButton(
-                              onPressed: () => provider.clearSearch(),
-                              child: Text(
-                                'Clear Search',
-                                style: TextStyle(color: colorScheme.primary),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
+                          )
+                        : null,
                   );
                 }
 

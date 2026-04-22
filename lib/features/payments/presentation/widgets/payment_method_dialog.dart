@@ -5,6 +5,8 @@ import 'package:step_bar/step_bar.dart';
 import '../providers/payments_provider.dart';
 import '../pages/payment_confirmation_page.dart';
 import '../../domain/entities/payment.dart';
+import '../../../../shared/widgets/glass/glass.dart';
+import '../../../../shared/widgets/motion/motion.dart';
 import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class PaymentMethodDialog extends StatefulWidget {
@@ -81,7 +83,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return AlertDialog(
+    return GlassDialog(
       title: Text(
         'Select Payment Method',
         style: theme.textTheme.headlineSmall?.copyWith(
@@ -143,16 +145,17 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                         method.toLowerCase().contains('polkadot') ||
                         method.toLowerCase().contains('kusama');
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: InkWell(
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: PressableScale(
                         onTap: () {
                           setState(() {
                             _selectedMethod = method;
                           });
                         },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          curve: Curves.easeOut,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
                             color: isSelected

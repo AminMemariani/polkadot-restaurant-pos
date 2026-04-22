@@ -4,7 +4,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:step_bar/step_bar.dart';
 
 import '../providers/payments_provider.dart';
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import '../../../../shared/widgets/motion/motion.dart';
 import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class PaymentConfirmationPage extends StatefulWidget {
@@ -24,35 +26,22 @@ class PaymentConfirmationPage extends StatefulWidget {
 
 class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
     with TickerProviderStateMixin {
-  late AnimationController _pulseController;
   late AnimationController _checkController;
-  late Animation<double> _pulseAnimation;
   late Animation<double> _checkAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize animations
-    _pulseController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-
     _checkController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
-    );
-
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
     _checkAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _checkController, curve: Curves.elasticOut),
     );
 
-    // Start payment process
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _startPayment();
     });
@@ -60,7 +49,6 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
 
   @override
   void dispose() {
-    _pulseController.dispose();
     _checkController.dispose();
     super.dispose();
   }
@@ -69,12 +57,6 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
     final provider = context.read<PaymentsProvider>();
     await provider.startPayment(widget.amount);
 
-    // Start pulse animation for waiting state
-    if (provider.paymentStatus == PaymentStatus.waiting) {
-      _pulseController.repeat(reverse: true);
-    }
-
-    // Simulate blockchain confirmation after delay
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted && provider.paymentStatus == PaymentStatus.waiting) {
         _simulateConfirmation();
@@ -85,9 +67,6 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
   Future<void> _simulateConfirmation() async {
     final provider = context.read<PaymentsProvider>();
     await provider.simulateBlockchainConfirmation();
-
-    // Stop pulse and start check animation
-    _pulseController.stop();
     _checkController.forward();
   }
 
@@ -125,7 +104,12 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
       body: Consumer<PaymentsProvider>(
         builder: (context, provider, child) {
           return Padding(
-            padding: EdgeInsets.all(isTablet ? 32 : 24),
+            padding: EdgeInsets.fromLTRB(
+              isTablet ? 32 : 24,
+              AppSpacing.appBarOffset(context) + (isTablet ? 32 : 24),
+              isTablet ? 32 : 24,
+              isTablet ? 32 : 24,
+            ),
             child: Column(
               children: [
                 // Amount Display
@@ -325,53 +309,47 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTablet = screenWidth > 768;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Animated QR Code
-        AnimatedBuilder(
-          animation: _pulseAnimation,
-          builder: (context, child) {
-            final screenWidth = MediaQuery.of(context).size.width;
-            final isTablet = screenWidth > 768;
-
-            return Transform.scale(
-              scale: _pulseAnimation.value,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colorScheme.shadow.withValues(alpha: 0.15),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                    BoxShadow(
-                      color: colorScheme.primary.withValues(alpha: 0.1),
-                      blurRadius: 40,
-                      offset: const Offset(0, 16),
-                    ),
-                  ],
+        PulseScale(
+          enabled: provider.paymentStatus == PaymentStatus.waiting,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withValues(alpha: 0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
                 ),
-                child: QrImageView(
-                  data: provider.paymentId ?? '',
-                  version: QrVersions.auto,
-                  size: isTablet ? 240.0 : 200.0,
-                  backgroundColor: Colors.white,
-                  eyeStyle: const QrEyeStyle(
-                    eyeShape: QrEyeShape.square,
-                    color: Colors.black,
-                  ),
-                  dataModuleStyle: const QrDataModuleStyle(
-                    dataModuleShape: QrDataModuleShape.square,
-                    color: Colors.black,
-                  ),
+                BoxShadow(
+                  color: colorScheme.primary.withValues(alpha: 0.1),
+                  blurRadius: 40,
+                  offset: const Offset(0, 16),
                 ),
+              ],
+            ),
+            child: QrImageView(
+              data: provider.paymentId ?? '',
+              version: QrVersions.auto,
+              size: isTablet ? 240.0 : 200.0,
+              backgroundColor: Colors.white,
+              eyeStyle: const QrEyeStyle(
+                eyeShape: QrEyeShape.square,
+                color: Colors.black,
               ),
-            );
-          },
+              dataModuleStyle: const QrDataModuleStyle(
+                dataModuleShape: QrDataModuleShape.square,
+                color: Colors.black,
+              ),
+            ),
+          ),
         ),
 
         const SizedBox(height: 32),

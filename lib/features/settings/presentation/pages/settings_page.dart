@@ -3,8 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/settings_provider.dart';
+import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/glass/glass.dart';
+import '../../../../shared/widgets/motion/motion.dart';
 import 'package:restaurant_pos_app/shared/utils/app_icons.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -74,7 +77,12 @@ class _SettingsPageState extends State<SettingsPage> {
       body: Consumer<SettingsProvider>(
         builder: (context, provider, child) {
           return SingleChildScrollView(
-            padding: EdgeInsets.all(isTablet ? 32 : 24),
+            padding: EdgeInsets.fromLTRB(
+              isTablet ? 32 : 24,
+              AppSpacing.appBarOffset(context) + (isTablet ? 32 : 24),
+              isTablet ? 32 : 24,
+              isTablet ? 32 : 24,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -185,24 +193,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return GlassCard(
+      padding: EdgeInsets.all(isTablet ? AppSpacing.xxl : AppSpacing.xl),
+      borderRadius: AppRadius.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -302,24 +295,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return GlassCard(
+      padding: EdgeInsets.all(isTablet ? AppSpacing.xxl : AppSpacing.xl),
+      borderRadius: AppRadius.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -398,18 +376,19 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: PressableScale(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: EdgeInsets.all(isTablet ? 16 : 12),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.all(isTablet ? AppSpacing.lg : AppSpacing.md),
           decoration: BoxDecoration(
             color: isSelected
                 ? colorScheme.primaryContainer.withValues(alpha: 0.3)
                 : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(
               color: isSelected
                   ? colorScheme.primary
@@ -428,7 +407,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     : colorScheme.onSurfaceVariant,
                 size: isTablet ? 24 : 20,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
                   endpoint,
@@ -476,50 +455,17 @@ class _SettingsPageState extends State<SettingsPage> {
             color: colorScheme.onSurface,
           ),
         ),
-        const SizedBox(height: 8),
-        TextField(
+        const SizedBox(height: AppSpacing.sm),
+        AppTextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: onChanged,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            fontSize: isTablet ? 18 : 16,
+          prefixIcon: Icon(
+            icon,
+            color: colorScheme.primary,
+            size: isTablet ? 24 : 20,
           ),
-          decoration: InputDecoration(
-            prefixIcon: Icon(
-              icon,
-              color: colorScheme.primary,
-              size: isTablet ? 24 : 20,
-            ),
-            suffixText: '%',
-            suffixStyle: theme.textTheme.bodyLarge?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colorScheme.outline.withValues(alpha: 0.3),
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colorScheme.outline.withValues(alpha: 0.3),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-            filled: true,
-            fillColor: colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.3,
-            ),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: isTablet ? 20 : 16,
-              vertical: isTablet ? 16 : 12,
-            ),
-          ),
+          suffixText: '%',
         ),
       ],
     );
@@ -533,24 +479,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(isTablet ? 24 : 20),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return GlassCard(
+      padding: EdgeInsets.all(isTablet ? AppSpacing.xxl : AppSpacing.xl),
+      borderRadius: AppRadius.lg,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
