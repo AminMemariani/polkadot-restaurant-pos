@@ -60,13 +60,15 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
               children: [
                 const OrderContextBar(),
 
-                // Order Items List
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.55,
-                  child: provider.hasItems
-                      ? _buildOrderItemsList(context, provider)
-                      : _buildEmptyState(context),
-                ),
+                // Order items render inline; the outer scroll view is the
+                // only scrollable here so the page feels like one surface.
+                if (provider.hasItems)
+                  _buildOrderItemsList(context, provider)
+                else
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.4,
+                    child: _buildEmptyState(context),
+                  ),
 
                 // Receipt Summary Card
                 ReceiptSummaryCard(
@@ -96,7 +98,12 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth > 768;
 
+    // shrinkWrap + NeverScrollable so the outer SingleChildScrollView owns
+    // scrolling — prevents the nested-scroll glitch where two regions
+    // compete for gestures.
     return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(
         horizontal: isTablet ? 24 : 16,
         vertical: 8,

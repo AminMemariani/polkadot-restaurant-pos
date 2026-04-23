@@ -82,7 +82,6 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
           const SizedBox(height: 8),
           StepBar(
             steps: steps,
-            currentStep: 0,
             completedColor: colorScheme.primary,
             activeColor: colorScheme.primary.withValues(alpha: 0.3),
             inactiveColor: colorScheme.onSurface.withValues(alpha: 0.3),
@@ -107,10 +106,11 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
       ),
       content: SizedBox(
         width: double.maxFinite,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildPaymentSteps(context),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildPaymentSteps(context),
 
             const SizedBox(height: 16),
 
@@ -157,9 +157,10 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
                           isSelected: _selected?.method == p.method,
                           onTap: () => setState(() => _selected = p),
                         ))
-                    .toList(),
-              ),
-          ],
+                      .toList(),
+                ),
+            ],
+          ),
         ),
       ),
       actions: [

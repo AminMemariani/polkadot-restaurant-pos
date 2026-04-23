@@ -7,6 +7,7 @@ import '../providers/settings_provider.dart';
 import '../../../../core/config/app_config.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/constants.dart';
+import '../../../../shared/services/theme_service.dart';
 import '../../../../shared/widgets/app_text_field.dart';
 import '../../../../shared/widgets/glass/glass.dart';
 import '../../../../shared/widgets/motion/motion.dart';
@@ -93,6 +94,11 @@ class _SettingsPageState extends State<SettingsPage> {
 
                 const SizedBox(height: 32),
 
+                // Appearance (light / dark / system)
+                _buildAppearanceSection(context, isTablet),
+
+                const SizedBox(height: 32),
+
                 // Tax & Fee Settings
                 _buildTaxFeeSection(context, provider, isTablet),
 
@@ -168,6 +174,68 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAppearanceSection(BuildContext context, bool isTablet) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Consumer<ThemeService>(
+      builder: (context, themeService, _) {
+        return GlassCard(
+          padding: EdgeInsets.all(isTablet ? AppSpacing.xxl : AppSpacing.xl),
+          borderRadius: AppRadius.lg,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    themeService.isDarkMode
+                        ? AppIcons.darkMode
+                        : AppIcons.lightMode,
+                    color: colorScheme.primary,
+                    size: isTablet ? 24 : 20,
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Text(
+                    'Appearance',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              _ThemeOptionTile(
+                label: 'Light',
+                icon: AppIcons.lightMode,
+                isSelected: themeService.themeMode == ThemeMode.light,
+                onTap: () => themeService.setThemeMode(ThemeMode.light),
+                isTablet: isTablet,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _ThemeOptionTile(
+                label: 'Dark',
+                icon: AppIcons.darkMode,
+                isSelected: themeService.themeMode == ThemeMode.dark,
+                onTap: () => themeService.setThemeMode(ThemeMode.dark),
+                isTablet: isTablet,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              _ThemeOptionTile(
+                label: 'System default',
+                icon: AppIcons.settingsRounded,
+                isSelected: themeService.themeMode == ThemeMode.system,
+                onTap: () => themeService.setThemeMode(ThemeMode.system),
+                isTablet: isTablet,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -874,5 +942,80 @@ class _SettingsPageState extends State<SettingsPage> {
       messenger.showSnackBar(const SnackBar(content: Text('All data cleared')));
       _loadSettings();
     }
+  }
+}
+
+/// Single tappable row in the appearance picker. Same pattern as the RPC
+/// endpoint selector — animated container, primary tint when selected.
+class _ThemeOptionTile extends StatelessWidget {
+  const _ThemeOptionTile({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+    required this.isTablet,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final bool isTablet;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return PressableScale(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.all(isTablet ? AppSpacing.lg : AppSpacing.md),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colorScheme.primaryContainer.withValues(alpha: 0.3)
+              : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(
+            color: isSelected
+                ? colorScheme.primary
+                : colorScheme.outline.withValues(alpha: 0.2),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
+              size: isTablet ? 24 : 20,
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                label,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight:
+                      isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected
+                      ? colorScheme.primary
+                      : colorScheme.onSurface,
+                ),
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                AppIcons.checkCircleRounded,
+                color: colorScheme.primary,
+                size: isTablet ? 20 : 18,
+              ),
+          ],
+        ),
+      ),
+    );
   }
 }

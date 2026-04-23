@@ -211,80 +211,16 @@ class _SwipeToDeleteItemState extends State<SwipeToDeleteItem>
                   ),
                 ),
 
-                // Quantity and Price
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Quantity Controls
-                        Container(
-                          decoration: BoxDecoration(
-                            color: colorScheme.primaryContainer.withValues(
-                              alpha: 0.3,
-                            ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  // Decrease quantity
-                                  // This would be handled by the parent widget
-                                },
-                                icon: Icon(
-                                  AppIcons.remove,
-                                  size: 16,
-                                  color: colorScheme.primary,
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 32,
-                                  minHeight: 32,
-                                ),
-                                padding: EdgeInsets.zero,
-                              ),
-                              Text(
-                                '${widget.item.quantity}',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                  color: colorScheme.primary,
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  // Increase quantity
-                                  // This would be handled by the parent widget
-                                },
-                                icon: Icon(
-                                  AppIcons.add,
-                                  size: 16,
-                                  color: colorScheme.primary,
-                                ),
-                                constraints: const BoxConstraints(
-                                  minWidth: 32,
-                                  minHeight: 32,
-                                ),
-                                padding: EdgeInsets.zero,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '\$${widget.item.total.toStringAsFixed(2)}',
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                  ],
+                // Line total. Quantity controls are supplied by the parent
+                // via [trailing] so the buttons can mutate provider state.
+                Text(
+                  '\$${widget.item.total.toStringAsFixed(2)}',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.primary,
+                  ),
                 ),
 
-                // Trailing Widget
                 if (widget.trailing != null) ...[
                   const SizedBox(width: 8),
                   widget.trailing!,

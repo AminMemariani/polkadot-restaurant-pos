@@ -48,7 +48,7 @@ dependencies:
   qr_flutter: ^4.1.0
   
   # Step indicator for payment process
-  step_bar: ^0.1.2
+  step_bar: ^0.1.3
   
   # Internationalization
   intl: ^0.20.2

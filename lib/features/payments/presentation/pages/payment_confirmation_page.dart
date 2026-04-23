@@ -87,28 +87,45 @@ class _PaymentConfirmationPageState extends State<PaymentConfirmationPage>
             WidgetsBinding.instance
                 .addPostFrameCallback((_) => _checkController.forward());
           }
-          return Padding(
-            padding: EdgeInsets.fromLTRB(
-              isTablet ? 32 : 24,
-              AppSpacing.appBarOffset(context) + (isTablet ? 32 : 24),
-              isTablet ? 32 : 24,
-              isTablet ? 32 : 24,
-            ),
-            child: Column(
-              children: [
-                _AmountSection(amount: widget.amount, network: widget.network),
-                const SizedBox(height: AppSpacing.xxl),
-                _StepsSection(progress: progress),
-                const SizedBox(height: AppSpacing.xxl),
-                Expanded(
-                  child: _StatusSection(
-                    progress: progress,
-                    checkAnimation: _checkAnimation,
+          // Page itself scrolls. No Expanded — every section renders at
+          // its natural height, so no inner scroll contexts are needed.
+          // ConstrainedBox keeps the layout looking centered when content
+          // is shorter than the viewport.
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(
+                  isTablet ? 32 : 24,
+                  AppSpacing.appBarOffset(context) + (isTablet ? 32 : 24),
+                  isTablet ? 32 : 24,
+                  isTablet ? 32 : 24,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight -
+                        AppSpacing.appBarOffset(context) -
+                        (isTablet ? 64 : 48),
+                  ),
+                  child: Column(
+                    children: [
+                      _AmountSection(
+                        amount: widget.amount,
+                        network: widget.network,
+                      ),
+                      const SizedBox(height: AppSpacing.xxl),
+                      _StepsSection(progress: progress),
+                      const SizedBox(height: AppSpacing.xxl),
+                      _StatusSection(
+                        progress: progress,
+                        checkAnimation: _checkAnimation,
+                      ),
+                      const SizedBox(height: AppSpacing.xxl),
+                      _ActionButtons(progress: progress),
+                    ],
                   ),
                 ),
-                _ActionButtons(progress: progress),
-              ],
-            ),
+              );
+            },
           );
         },
       ),
@@ -204,7 +221,8 @@ class _StepsSection extends StatelessWidget {
 
   final PaymentProgress? progress;
 
-  int _currentStep() {
+  /// Map progress → 0-based "current" step index used to colour the bar.
+  int _currentIndex() {
     return switch (progress) {
       PaymentCreating() => 0,
       PaymentAwaitingUser() => 2,
@@ -215,18 +233,34 @@ class _StepsSection extends StatelessWidget {
     };
   }
 
+  /// Build the steps with per-step status — the package now requires status
+  /// on each StepBarStep instead of a separate currentStep argument.
+  List<StepBarStep> _buildSteps() {
+    const labels = [
+      'Initiated',
+      'QR Generated',
+      'Awaiting Payment',
+      'Confirming',
+      'Complete',
+    ];
+    final cur = _currentIndex();
+    return List.generate(labels.length, (i) {
+      final StepStatus status;
+      if (i < cur) {
+        status = StepStatus.completed;
+      } else if (i == cur) {
+        status = StepStatus.active;
+      } else {
+        status = StepStatus.inactive;
+      }
+      return StepBarStep(label: labels[i], status: status);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
-    final steps = [
-      const StepBarStep(label: 'Initiated', status: StepStatus.completed),
-      const StepBarStep(label: 'QR Generated', status: StepStatus.completed),
-      const StepBarStep(label: 'Awaiting Payment', status: StepStatus.active),
-      const StepBarStep(label: 'Confirming', status: StepStatus.inactive),
-      const StepBarStep(label: 'Complete', status: StepStatus.inactive),
-    ];
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -247,8 +281,7 @@ class _StepsSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           StepBar(
-            steps: steps,
-            currentStep: _currentStep(),
+            steps: _buildSteps(),
             completedColor: colorScheme.primary,
             activeColor: colorScheme.primary.withValues(alpha: 0.3),
             inactiveColor: colorScheme.onSurface.withValues(alpha: 0.3),
@@ -346,6 +379,7 @@ class _AwaitingState extends StatelessWidget {
         ? _QrCard(paymentId: qrPayload)
         : _PulsingIcon(method: method);
 
+    // Page-level scroll handles overflow now; render at natural height.
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -486,38 +520,36 @@ class _SuccessState extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ScaleTransition(
-            scale: checkAnimation,
-            child: Container(
-              width: 120,
-              height: 120,
-              decoration: BoxDecoration(
-                color: colorScheme.primary,
-                borderRadius: BorderRadius.circular(60),
-              ),
-              child: Icon(
-                AppIcons.check,
-                size: 60,
-                color: colorScheme.onPrimary,
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxxl),
-          Text(
-            'Payment Confirmed',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w600,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ScaleTransition(
+          scale: checkAnimation,
+          child: Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
               color: colorScheme.primary,
+              borderRadius: BorderRadius.circular(60),
+            ),
+            child: Icon(
+              AppIcons.check,
+              size: 60,
+              color: colorScheme.onPrimary,
             ),
           ),
-          const SizedBox(height: AppSpacing.xxl),
-          _TransactionDetails(result: result),
-        ],
-      ),
+        ),
+        const SizedBox(height: AppSpacing.xxxl),
+        Text(
+          'Payment Confirmed',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        _TransactionDetails(result: result),
+      ],
     );
   }
 }
