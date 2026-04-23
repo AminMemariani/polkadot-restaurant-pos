@@ -10,7 +10,7 @@ sealed class PaymentProgress {
   const PaymentProgress();
 
   const factory PaymentProgress.creating() = PaymentCreating;
-  const factory PaymentProgress.awaitingUser({String? hint}) =
+  const factory PaymentProgress.awaitingUser({String? hint, String? qrData}) =
       PaymentAwaitingUser;
   const factory PaymentProgress.processing({String? hint}) = PaymentProcessing;
   const factory PaymentProgress.succeeded(PaymentResult result) =
@@ -25,8 +25,13 @@ class PaymentCreating extends PaymentProgress {
 }
 
 class PaymentAwaitingUser extends PaymentProgress {
-  const PaymentAwaitingUser({this.hint});
+  const PaymentAwaitingUser({this.hint, this.qrData});
+
   final String? hint;
+
+  /// Opaque payload for QR-based rails (blockchain) to render. Null when the
+  /// rail doesn't display a code (Stripe, Tap to Pay).
+  final String? qrData;
 }
 
 class PaymentProcessing extends PaymentProgress {

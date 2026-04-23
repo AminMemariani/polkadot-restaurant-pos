@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -14,11 +15,15 @@ import '../../domain/services/payment_processor.dart';
 /// Wraps the existing blockchain payment flow behind [PaymentProcessor].
 ///
 /// Two instances are registered (one per network) so the cashier sees
-/// "Polkadot (DOT)" and "Kusama (KSM)" as distinct options. Behaviour is
-/// identical to the previous inline logic in `PaymentsProvider`: emit a
-/// waiting state, simulate confirmation after a network-specific delay, then
-/// resolve with a generated tx hash. Once a real RPC integration replaces
-/// the simulation, only [process] needs to change.
+/// "Polkadot (DOT)" and "Kusama (KSM)" as distinct options. The processor
+/// emits a JSON-encoded payload as `qrData` containing the full transaction
+/// context (amount, network, order id, table number, serve time) so a
+/// scanning wallet has everything it needs.
+///
+/// TODO(real-onchain): replace the JSON payload with a Polkadot URI scheme
+/// (`polkadot:<address>?amount=...&memo=...`) once a recipient wallet
+/// address is configured per location, and replace the simulated delay with
+/// a real RPC subscription via the Substrate client.
 class BlockchainPaymentProcessor implements PaymentProcessor {
   BlockchainPaymentProcessor({
     required PaymentMethod method,
@@ -49,8 +54,25 @@ class BlockchainPaymentProcessor implements PaymentProcessor {
     yield const PaymentProgress.creating();
 
     final paymentId = _generatePaymentId();
-    yield const PaymentProgress.awaitingUser(
+    final now = DateTime.now();
+
+    final payload = <String, dynamic>{
+      'v': 1,
+      'type': _method.id, // 'polkadot' | 'kusama'
+      'paymentId': paymentId,
+      'orderId': request.orderId,
+      'amount': request.amount.toMajor().toStringAsFixed(2),
+      'currency': request.amount.currency,
+      'network': _displayName,
+      'tip': request.tip?.toMajor().toStringAsFixed(2),
+      'tableNumber': request.metadata['table_number'],
+      'serveAt': request.metadata['serve_at'],
+      'createdAt': now.toIso8601String(),
+    }..removeWhere((_, v) => v == null);
+
+    yield PaymentProgress.awaitingUser(
       hint: 'Scan QR code to complete payment',
+      qrData: jsonEncode(payload),
     );
 
     await Future.delayed(_confirmationDelay);
@@ -64,7 +86,7 @@ class BlockchainPaymentProcessor implements PaymentProcessor {
         amountCharged: request.amount,
         tipCaptured: request.tip,
         completedAt: DateTime.now(),
-        raw: {'blockchain_tx_id': txId, 'network': _displayName},
+        raw: {'blockchain_tx_id': txId, 'network': _displayName, 'qr': payload},
       ),
     );
   }

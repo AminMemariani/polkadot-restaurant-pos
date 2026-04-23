@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers/receipts_provider.dart';
+import '../widgets/order_context_bar.dart';
 import '../widgets/swipe_to_delete_item.dart';
 import '../widgets/receipt_summary_card.dart';
 import '../../../../core/constants/app_spacing.dart';
@@ -57,9 +58,11 @@ class _ActiveReceiptPageState extends State<ActiveReceiptPage> {
             padding: EdgeInsets.only(top: AppSpacing.appBarOffset(context)),
             child: Column(
               children: [
+                const OrderContextBar(),
+
                 // Order Items List
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.6,
+                  height: MediaQuery.of(context).size.height * 0.55,
                   child: provider.hasItems
                       ? _buildOrderItemsList(context, provider)
                       : _buildEmptyState(context),

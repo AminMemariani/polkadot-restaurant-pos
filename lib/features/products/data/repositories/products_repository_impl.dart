@@ -87,35 +87,43 @@ class ProductsRepositoryImpl implements ProductsRepository {
 
   @override
   Future<Either<Failure, Product>> addProduct(Product product) async {
+    final productModel = ProductModel.fromEntity(product);
     if (await networkInfo.isConnected) {
       try {
-        final productModel = ProductModel.fromEntity(product);
         final addedProduct = await remoteDataSource.addProduct(productModel);
         await localDataSource.addProduct(addedProduct);
         return Right(addedProduct.toEntity());
-      } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+      } catch (_) {
+        // Remote unreachable — fall through to local-only write.
       }
-    } else {
-      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final addedProduct = await localDataSource.addProduct(productModel);
+      return Right(addedProduct.toEntity());
+    } catch (e) {
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
   @override
   Future<Either<Failure, Product>> updateProduct(Product product) async {
+    final productModel = ProductModel.fromEntity(product);
     if (await networkInfo.isConnected) {
       try {
-        final productModel = ProductModel.fromEntity(product);
         final updatedProduct = await remoteDataSource.updateProduct(
           productModel,
         );
         await localDataSource.updateProduct(updatedProduct);
         return Right(updatedProduct.toEntity());
-      } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+      } catch (_) {
+        // Remote unreachable — fall through to local-only write.
       }
-    } else {
-      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      final updatedProduct = await localDataSource.updateProduct(productModel);
+      return Right(updatedProduct.toEntity());
+    } catch (e) {
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 
@@ -126,11 +134,15 @@ class ProductsRepositoryImpl implements ProductsRepository {
         await remoteDataSource.deleteProduct(id);
         await localDataSource.deleteProduct(id);
         return const Right(null);
-      } catch (e) {
-        return Left(ServerFailure(message: e.toString()));
+      } catch (_) {
+        // Remote unreachable — fall through to local-only delete.
       }
-    } else {
-      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+    try {
+      await localDataSource.deleteProduct(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(CacheFailure(message: e.toString()));
     }
   }
 

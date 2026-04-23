@@ -27,11 +27,17 @@ class ReceiptsProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
+  // Order context — set per-order, cleared when the order is finalised.
+  int? _tableNumber;
+  DateTime? _serveAt;
+
   // Getters
   List<Receipt> get receipts => _receipts;
   List<ReceiptItem> get currentOrderItems => _currentOrderItems;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  int? get tableNumber => _tableNumber;
+  DateTime? get serveAt => _serveAt;
   double get taxRate => settingsProvider?.taxRate ?? 0.08;
   double get serviceFeeRate => settingsProvider?.serviceFeeRate ?? 0.05;
 
@@ -126,9 +132,23 @@ class ReceiptsProvider extends ChangeNotifier {
     }
   }
 
-  /// Clear the current order
+  /// Set the table this order belongs to. Pass null to unset.
+  void setTableNumber(int? value) {
+    _tableNumber = value;
+    notifyListeners();
+  }
+
+  /// Set when the order should be served. Pass null for "as soon as possible".
+  void setServeAt(DateTime? value) {
+    _serveAt = value;
+    notifyListeners();
+  }
+
+  /// Clear the current order — items, table, and serve time.
   void clearCurrentOrder() {
     _currentOrderItems.clear();
+    _tableNumber = null;
+    _serveAt = null;
     notifyListeners();
   }
 
@@ -149,6 +169,8 @@ class ReceiptsProvider extends ChangeNotifier {
       status: 'pending',
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
+      tableNumber: _tableNumber,
+      serveAt: _serveAt,
     );
 
     final result = await createReceipt(receipt);

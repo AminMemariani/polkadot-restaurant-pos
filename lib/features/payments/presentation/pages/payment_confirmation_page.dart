@@ -272,7 +272,8 @@ class _StatusSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return switch (progress) {
       PaymentCreating() || null => const _IdleState(),
-      PaymentAwaitingUser(:final hint) => _AwaitingState(hint: hint),
+      PaymentAwaitingUser(:final hint, :final qrData) =>
+        _AwaitingState(hint: hint, qrData: qrData),
       PaymentProcessing(:final hint) => _ProcessingState(hint: hint),
       PaymentSucceeded(:final result) => _SuccessState(
           result: result,
@@ -321,8 +322,9 @@ class _IdleState extends StatelessWidget {
 }
 
 class _AwaitingState extends StatelessWidget {
-  const _AwaitingState({this.hint});
+  const _AwaitingState({this.hint, this.qrData});
   final String? hint;
+  final String? qrData;
 
   bool _isBlockchain(PaymentMethod? method) =>
       method == PaymentMethod.polkadot || method == PaymentMethod.kusama;
@@ -333,12 +335,15 @@ class _AwaitingState extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final provider = context.watch<PaymentsProvider>();
     final method = provider.activeProcessor?.method;
-    final paymentId = provider.lastResult?.providerPaymentId ??
+    // Prefer the rich qrData payload from the processor; fall back to the
+    // raw payment id for older processors that don't supply one.
+    final qrPayload = qrData ??
+        provider.lastResult?.providerPaymentId ??
         provider.activeRequest?.orderId ??
         '';
 
     final centerWidget = _isBlockchain(method)
-        ? _QrCard(paymentId: paymentId)
+        ? _QrCard(paymentId: qrPayload)
         : _PulsingIcon(method: method);
 
     return Column(

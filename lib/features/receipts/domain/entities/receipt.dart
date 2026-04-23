@@ -14,6 +14,12 @@ class Receipt extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  /// Restaurant table the order belongs to. Null for take-out / counter.
+  final int? tableNumber;
+
+  /// When the food should be served. Null when serving immediately.
+  final DateTime? serveAt;
+
   const Receipt({
     required this.id,
     required this.items,
@@ -26,6 +32,8 @@ class Receipt extends Equatable {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.tableNumber,
+    this.serveAt,
   });
 
   /// Create a copy of this receipt with updated fields
@@ -41,6 +49,8 @@ class Receipt extends Equatable {
     String? status,
     DateTime? createdAt,
     DateTime? updatedAt,
+    int? tableNumber,
+    DateTime? serveAt,
   }) {
     return Receipt(
       id: id ?? this.id,
@@ -54,6 +64,8 @@ class Receipt extends Equatable {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      tableNumber: tableNumber ?? this.tableNumber,
+      serveAt: serveAt ?? this.serveAt,
     );
   }
 
@@ -77,6 +89,10 @@ class Receipt extends Equatable {
       updatedAt: json['updatedAt'] != null
           ? DateTime.parse(json['updatedAt'] as String)
           : DateTime.now(),
+      tableNumber: json['tableNumber'] as int?,
+      serveAt: json['serveAt'] != null
+          ? DateTime.parse(json['serveAt'] as String)
+          : null,
     );
   }
 
@@ -94,6 +110,8 @@ class Receipt extends Equatable {
       'status': status,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      if (tableNumber != null) 'tableNumber': tableNumber,
+      if (serveAt != null) 'serveAt': serveAt!.toIso8601String(),
     };
   }
 
@@ -110,11 +128,13 @@ class Receipt extends Equatable {
     status,
     createdAt,
     updatedAt,
+    tableNumber,
+    serveAt,
   ];
 
   @override
   String toString() {
-    return 'Receipt(id: $id, items: $items, total: $total, tax: $tax, serviceFee: $serviceFee, customerName: $customerName, subtotal: $subtotal, paymentMethod: $paymentMethod, status: $status, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Receipt(id: $id, items: $items, total: $total, tax: $tax, serviceFee: $serviceFee, customerName: $customerName, subtotal: $subtotal, paymentMethod: $paymentMethod, status: $status, createdAt: $createdAt, updatedAt: $updatedAt, tableNumber: $tableNumber, serveAt: $serveAt)';
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:step_bar/step_bar.dart';
 
 import '../../../../shared/widgets/glass/glass.dart';
 import '../../../../shared/widgets/motion/motion.dart';
+import '../../../receipts/presentation/providers/receipts_provider.dart';
 import '../../domain/entities/money.dart';
 import '../../domain/entities/payment.dart';
 import '../../domain/entities/payment_method.dart';
@@ -197,6 +198,16 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
     final primaryColor = Theme.of(context).colorScheme.primary;
     final errorColor = Theme.of(context).colorScheme.error;
 
+    // Pull table + serveAt from the active order so they flow to the
+    // processor (and into the crypto QR payload).
+    final receipts = context.read<ReceiptsProvider>();
+    final metadata = <String, String>{
+      if (receipts.tableNumber != null)
+        'table_number': receipts.tableNumber.toString(),
+      if (receipts.serveAt != null)
+        'serve_at': receipts.serveAt!.toIso8601String(),
+    };
+
     final request = PaymentRequest(
       orderId:
           widget.receiptId ?? DateTime.now().millisecondsSinceEpoch.toString(),
@@ -204,6 +215,7 @@ class _PaymentMethodDialogState extends State<PaymentMethodDialog> {
       // TODO(multi-tenant): wire real cashier/location once auth lands.
       cashierId: 'default',
       locationId: 'default',
+      metadata: metadata,
     );
 
     try {

@@ -189,6 +189,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     final provider = context.read<ProductsProvider>();
     final messenger = ScaffoldMessenger.of(context);
     final primaryColor = Theme.of(context).colorScheme.primary;
+    final errorColor = Theme.of(context).colorScheme.error;
     final success = widget.product == null
         ? await provider.addNewProduct(product)
         : await provider.updateExistingProduct(product);
@@ -215,6 +216,14 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 : 'Product updated successfully',
           ),
           backgroundColor: primaryColor,
+        ),
+      );
+    } else {
+      // Surface the failure so the dialog isn't dead.
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(provider.error ?? 'Could not save product'),
+          backgroundColor: errorColor,
         ),
       );
     }

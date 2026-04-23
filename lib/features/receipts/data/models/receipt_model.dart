@@ -13,17 +13,13 @@ class ReceiptModel extends Receipt {
     required super.status,
     required super.createdAt,
     required super.updatedAt,
+    super.tableNumber,
+    super.serveAt,
   });
 
   factory ReceiptModel.fromJson(Map<String, dynamic> json) {
-    // Implementation placeholder
-    throw UnimplementedError();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    // Implementation placeholder
-    throw UnimplementedError();
+    final r = Receipt.fromJson(json);
+    return ReceiptModel.fromEntity(r);
   }
 
   factory ReceiptModel.fromEntity(Receipt receipt) {
@@ -39,6 +35,8 @@ class ReceiptModel extends Receipt {
       status: receipt.status,
       createdAt: receipt.createdAt,
       updatedAt: receipt.updatedAt,
+      tableNumber: receipt.tableNumber,
+      serveAt: receipt.serveAt,
     );
   }
 
@@ -55,6 +53,8 @@ class ReceiptModel extends Receipt {
       status: status,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      tableNumber: tableNumber,
+      serveAt: serveAt,
     );
   }
 }
