@@ -4,7 +4,9 @@
 ///   flutter run --dart-define=API_BASE_URL=https://staging.api.example.com \
 ///               --dart-define=APP_ENV=staging \
 ///               --dart-define=STRIPE_PUBLISHABLE_KEY=pk_test_xxx \
-///               --dart-define=PAYMENTS_BACKEND_URL=http://localhost:8080
+///               --dart-define=PAYMENTS_BACKEND_URL=http://localhost:8080 \
+///               --dart-define=SUPABASE_URL=https://xxx.supabase.co \
+///               --dart-define=SUPABASE_ANON_KEY=sb_publishable_xxx
 class AppConfig {
   AppConfig._();
 
@@ -41,9 +43,25 @@ class AppConfig {
     defaultValue: 'merchant.com.example.restaurantpos',
   );
 
+  /// Supabase project URL.
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: '',
+  );
+
+  /// Supabase anon / publishable key. Safe to ship in the client; RLS is
+  /// what protects data. Never put the service-role key here.
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: '',
+  );
+
   static bool get isProduction => environment == 'prod';
   static bool get isStaging => environment == 'staging';
   static bool get isDevelopment => environment == 'dev';
 
   static bool get isStripeConfigured => stripePublishableKey.isNotEmpty;
+  static bool get isSupabaseConfigured =>
+      supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 }
+

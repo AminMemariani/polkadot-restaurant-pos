@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../providers/settings_provider.dart';
+import '../../../../core/config/app_config.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../shared/widgets/app_text_field.dart';
@@ -108,10 +110,63 @@ class _SettingsPageState extends State<SettingsPage> {
 
                 // App Information Section
                 _buildAppInfoSection(context, isTablet),
+
+                if (AppConfig.isSupabaseConfigured) ...[
+                  const SizedBox(height: 32),
+                  _buildAccountSection(context, isTablet),
+                ],
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildAccountSection(BuildContext context, bool isTablet) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final session = Supabase.instance.client.auth.currentSession;
+    final email = session?.user.email ?? 'Signed in';
+
+    return GlassCard(
+      padding: EdgeInsets.all(isTablet ? AppSpacing.xxl : AppSpacing.xl),
+      borderRadius: AppRadius.lg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(AppIcons.settingsRounded, color: colorScheme.primary),
+              const SizedBox(width: AppSpacing.md),
+              Text(
+                'Account',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            email,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          OutlinedButton.icon(
+            onPressed: () async {
+              await Supabase.instance.client.auth.signOut();
+            },
+            icon: Icon(AppIcons.closeRounded),
+            label: const Text('Sign out'),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: colorScheme.error,
+              side: BorderSide(color: colorScheme.error.withValues(alpha: 0.5)),
+            ),
+          ),
+        ],
       ),
     );
   }

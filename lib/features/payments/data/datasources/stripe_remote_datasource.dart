@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/config/app_config.dart';
 import '../../domain/entities/money.dart';
@@ -19,7 +20,24 @@ class StripeRemoteDataSource {
                 receiveTimeout: const Duration(seconds: 30),
                 headers: {'Content-Type': 'application/json'},
               ),
-            );
+            ) {
+    // Attach the current Supabase session JWT (if any) to every request.
+    // Token refresh happens inside supabase_flutter; we just read what's
+    // current per request so refreshed tokens are picked up automatically.
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          if (AppConfig.isSupabaseConfigured) {
+            final token = Supabase.instance.client.auth.currentSession?.accessToken;
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
+          }
+          handler.next(options);
+        },
+      ),
+    );
+  }
 
   final Dio _dio;
 
@@ -30,6 +48,8 @@ class StripeRemoteDataSource {
     PaymentRequest request, {
     required String idempotencyKey,
   }) async {
+    // Note: cashierId / locationId / tenantId are NOT sent — the backend
+    // derives them from the verified JWT to prevent client spoofing.
     final response = await _dio.post<Map<String, dynamic>>(
       '/payments/intent',
       options: Options(headers: {'Idempotency-Key': idempotencyKey}),
@@ -38,8 +58,6 @@ class StripeRemoteDataSource {
         'amountMinor': request.amount.amountMinor,
         'currency': request.amount.currency.toLowerCase(),
         'tipMinor': request.tip?.amountMinor ?? 0,
-        'cashierId': request.cashierId,
-        'locationId': request.locationId,
         if (request.customerId != null) 'customerId': request.customerId,
         'metadata': request.metadata,
       },

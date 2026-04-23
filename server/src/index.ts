@@ -4,6 +4,7 @@ import Stripe from 'stripe';
 import { paymentsRouter } from './routes/payments.js';
 import { webhooksRouter } from './routes/webhooks.js';
 import { getEnv } from './middleware/env.js';
+import { requireCashier } from './middleware/auth.js';
 
 const env = getEnv();
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
@@ -36,7 +37,7 @@ app.get('/healthz', (_req, res) => {
   res.json({ ok: true });
 });
 
-app.use('/payments', paymentsRouter(stripe));
+app.use('/payments', requireCashier, paymentsRouter(stripe));
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   // Final-resort error handler. Real logging belongs in a structured logger.

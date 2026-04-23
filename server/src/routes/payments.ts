@@ -8,8 +8,6 @@ interface CreateIntentBody {
   amountMinor: number;
   currency: string;
   tipMinor?: number;
-  cashierId: string;
-  locationId: string;
   customerId?: string;
   metadata?: Record<string, string>;
 }
@@ -19,6 +17,14 @@ export function paymentsRouter(stripe: Stripe): Router {
 
   router.post('/intent', async (req, res, next) => {
     try {
+      const cashier = req.cashier;
+      if (!cashier?.tenantId || !cashier.locationId) {
+        // Cashier exists but isn't fully provisioned (no tenant/location in
+        // app_metadata). Run bootstrap_cashier first.
+        res.status(403).json({ error: 'cashier_not_provisioned' });
+        return;
+      }
+
       const body = req.body as CreateIntentBody;
       const idempotencyKey = req.header('Idempotency-Key');
       if (!idempotencyKey) {
@@ -31,13 +37,12 @@ export function paymentsRouter(stripe: Stripe): Router {
         {
           amount: total,
           currency: body.currency.toLowerCase(),
-          // Allowed methods are enforced by the publishable key + dashboard
-          // settings; the SDK picks the right one based on what's configured.
           automatic_payment_methods: { enabled: true },
           metadata: {
             order_id: body.orderId,
-            cashier_id: body.cashierId,
-            location_id: body.locationId,
+            cashier_id: cashier.id,
+            tenant_id: cashier.tenantId,
+            location_id: cashier.locationId,
             tip_minor: String(body.tipMinor ?? 0),
             ...(body.metadata ?? {}),
           },
@@ -45,12 +50,13 @@ export function paymentsRouter(stripe: Stripe): Router {
         { idempotencyKey },
       );
 
-      // Optimistic transaction row. The webhook will upsert the terminal
-      // status — clients should poll GET /payments/:id, not trust this row.
+      // Optimistic transaction row. The webhook is the source of truth —
+      // clients should poll GET /payments/:id, not trust this row.
       await transactions.insert({
+        tenantId: cashier.tenantId,
+        locationId: cashier.locationId,
+        cashierId: cashier.id,
         orderId: body.orderId,
-        locationId: body.locationId,
-        cashierId: body.cashierId,
         provider: 'stripe',
         providerPaymentId: intent.id,
         amountMinor: body.amountMinor,
@@ -76,6 +82,12 @@ export function paymentsRouter(stripe: Stripe): Router {
     try {
       const row = await transactions.findByProviderId('stripe', req.params.id);
       if (!row) {
+        res.status(404).json({ error: 'not_found' });
+        return;
+      }
+      // Tenant scope: cashiers can only read transactions in their own tenant.
+      // (Service role hits don't carry a cashier; permit those.)
+      if (req.cashier && req.cashier.tenantId && row.tenantId !== req.cashier.tenantId) {
         res.status(404).json({ error: 'not_found' });
         return;
       }
@@ -106,6 +118,14 @@ export function paymentsRouter(stripe: Stripe): Router {
         amountMinor?: number;
         reason?: string;
       };
+      // Tenant scope: only allow refunding transactions in the caller's tenant.
+      if (req.cashier?.tenantId) {
+        const row = await transactions.findByProviderId('stripe', paymentIntentId);
+        if (!row || row.tenantId !== req.cashier.tenantId) {
+          res.status(404).json({ error: 'not_found' });
+          return;
+        }
+      }
       const refund = await stripe.refunds.create(
         {
           payment_intent: paymentIntentId,

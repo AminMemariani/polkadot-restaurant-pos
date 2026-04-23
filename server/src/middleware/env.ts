@@ -5,6 +5,9 @@ export interface Env {
   PORT: number;
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
+  SUPABASE_URL: string;
+  SUPABASE_SERVICE_ROLE_KEY: string;
+  SUPABASE_JWT_SECRET: string;
   ALLOWED_ORIGINS: string[];
 }
 
@@ -28,6 +31,9 @@ export function getEnv(): Env {
     PORT: Number(process.env.PORT ?? 8080),
     STRIPE_SECRET_KEY: required('STRIPE_SECRET_KEY'),
     STRIPE_WEBHOOK_SECRET: required('STRIPE_WEBHOOK_SECRET'),
+    SUPABASE_URL: required('SUPABASE_URL'),
+    SUPABASE_SERVICE_ROLE_KEY: required('SUPABASE_SERVICE_ROLE_KEY'),
+    SUPABASE_JWT_SECRET: required('SUPABASE_JWT_SECRET'),
     ALLOWED_ORIGINS: (process.env.ALLOWED_ORIGINS ?? '')
       .split(',')
       .map((s) => s.trim())

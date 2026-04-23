@@ -3,15 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/config/app_config.dart';
 import 'core/constants/app_theme.dart';
 import 'core/di/providers.dart';
 import 'core/router/app_router.dart';
 import 'core/l10n/app_localizations.dart';
+import 'features/auth/presentation/widgets/auth_gate.dart';
 import 'shared/services/theme_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Supabase init. When unconfigured the app falls back to anonymous mode —
+  // payment flows that require a JWT will fail at the backend, but the app
+  // still launches and blockchain/cash work as before.
+  if (AppConfig.isSupabaseConfigured) {
+    await Supabase.initialize(
+      url: AppConfig.supabaseUrl,
+      anonKey: AppConfig.supabaseAnonKey,
+    );
+  }
 
   // Stripe SDK init. Skipped silently when no key is provisioned so the app
   // still boots — Stripe processors will report unavailable in that state.
@@ -57,6 +69,9 @@ class RestaurantPosApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: themeService.themeMode,
             routerConfig: router,
+            // AuthGate wraps every routed page; when Supabase is configured
+            // and no session exists, it shows SignInPage instead.
+            builder: (context, child) => AuthGate(child: child ?? const SizedBox.shrink()),
             localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
